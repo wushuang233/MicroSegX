@@ -1,0 +1,6 @@
+policies:
+  - name: Update microsegx dependency
+    config:
+      - "updatecli.bump-microsegx.d"
+    values:
+      - values.yaml

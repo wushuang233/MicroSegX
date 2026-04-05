@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NeuVectorFormlyModule } from '@common/neuvector-formly/neuvector-formly.module';
+import { MicroSegXFormlyModule } from '@common/microsegx-formly/microsegx-formly.module';
 import { ObserveModule } from '@common/directives/observe/observe.module';
 import { ExportFormComponent } from './export-form.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -20,7 +20,7 @@ import { ExportOptionsModule } from '@components/export-options/export-options.m
     ReactiveFormsModule,
     FormsModule,
     TranslateModule,
-    NeuVectorFormlyModule,
+    MicroSegXFormlyModule,
     ImportFileModule,
     ObserveModule,
     MatCheckboxModule,

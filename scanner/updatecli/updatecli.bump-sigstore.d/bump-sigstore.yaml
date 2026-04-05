@@ -16,7 +16,7 @@ scms:
         type: "chore"
         title: "Update sigstore-interface to latest commit"
         hidecredit: true
-        footers: "Signed-off-by: neuvector bot <neuvector-bot@users.noreply.github.com>"
+        footers: "Signed-off-by: microsegx bot <microsegx-bot@users.noreply.github.com>"
 
 sources:
   sigstoreLatestCommit:
@@ -25,7 +25,7 @@ sources:
     spec:
       command: |
         set -eu
-        git ls-remote https://github.com/neuvector/sigstore-interface.git main | awk 'NR==1 {print $1}'
+        git ls-remote https://github.com/microsegx/sigstore-interface.git main | awk 'NR==1 {print $1}'
 
 targets:
   updateSigstoreVersion:

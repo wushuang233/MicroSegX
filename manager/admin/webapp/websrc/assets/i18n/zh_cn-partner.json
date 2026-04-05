@@ -28,8 +28,8 @@
     },
     "admissionControl": {
       "msg": {
-        "CLUSTER_ROLE_NOT_CONFIG": "没有正确配置准入控制所需的 neuvector-binding-admission \"cluster role\" 和 \"cluster role binding\"。",
-        "WEBHOOK_NOT_CONFIG": "没有正确配置准入控制所需的 neuvector-svc-admission-webhook 服务。",
+        "CLUSTER_ROLE_NOT_CONFIG": "没有正确配置准入控制所需的 microsegx-binding-admission \"cluster role\" 和 \"cluster role binding\"。",
+        "WEBHOOK_NOT_CONFIG": "没有正确配置准入控制所需的 microsegx-svc-admission-webhook 服务。",
         "NO_UPD_PROMISSION": "默认服务账户没有服务资源的更新权限。"
       }
     },

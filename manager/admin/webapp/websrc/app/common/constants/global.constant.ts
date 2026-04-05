@@ -26,7 +26,7 @@ export class GlobalConstant {
   public static NETWORK_RULES_NEW_ID_SEED = 1000000;
   public static NETWORK_RULES_PORTS_DISPLAY_LEN = 40;
   public static EXTERNAL = 'external';
-  public static PROXY_VALUE = 'neuvector-service-webui:8443/proxy';
+  public static PROXY_VALUE = 'microsegx-service-webui:8443/proxy';
   public static NO_CAHCE = 'no-cache';
   public static KUBE = 'kubernetes';
   public static OPENSHIFT = 'Kubernetes-OpenShift';

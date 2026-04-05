@@ -38,7 +38,7 @@ To customize the page banner, follow these steps:
 - Save the encoded content to the environment variables `CUSTOM_PAGE_FOOTER_COLOR` and `CUSTOM_PAGE_FOOTER_CONTENT`.
 
 
-The environment variables (`CUSTOM_LOGIN_LOGO`, `CUSTOM_EULA_POLICY`, `CUSTOM_PAGE_HEADER_COLOR`, `CUSTOM_PAGE_HEADER_CONTENT`, `CUSTOM_PAGE_FOOTER_COLOR`, `CUSTOM_PAGE_FOOTER_CONTENT`) can be defined in the `values.yaml` file in the [helm chart](https://github.com/neuvector/neuvector-helm/blob/master/charts/core/values.yaml). The corresponding section in the `values.yaml` file where these variables can be defined is "manager.env.envs".
+The environment variables (`CUSTOM_LOGIN_LOGO`, `CUSTOM_EULA_POLICY`, `CUSTOM_PAGE_HEADER_COLOR`, `CUSTOM_PAGE_HEADER_CONTENT`, `CUSTOM_PAGE_FOOTER_COLOR`, `CUSTOM_PAGE_FOOTER_CONTENT`) can be defined in the `values.yaml` file in the [helm chart](https://github.com/microsegx/microsegx-helm/blob/master/charts/core/values.yaml). The corresponding section in the `values.yaml` file where these variables can be defined is "manager.env.envs".
 
 ## 4. Example to customize the UI pages using helm chart
 
@@ -46,15 +46,15 @@ The environment variables (`CUSTOM_LOGIN_LOGO`, `CUSTOM_EULA_POLICY`, `CUSTOM_PA
 
 Before customizing the UI component, ensure that you have the following:
 
-- NeuVector Helm chart repository: [https://github.com/neuvector/neuvector-helm](https://github.com/neuvector/neuvector-helm)
-- NeuVector installed on your Kubernetes cluster
+- MicroSegX Helm chart repository: [https://github.com/microsegx/microsegx-helm](https://github.com/microsegx/microsegx-helm)
+- MicroSegX installed on your Kubernetes cluster
 
 ### Steps
 
 Follow these steps to customize the UI component:
 
-1. Locate the NeuVector Helm chart repository in your local environment: [https://github.com/neuvector/neuvector-helm](https://github.com/neuvector/neuvector-helm).
-2. Navigate to the `neuvector-helm/charts/core` directory.
+1. Locate the MicroSegX Helm chart repository in your local environment: [https://github.com/microsegx/microsegx-helm](https://github.com/microsegx/microsegx-helm).
+2. Navigate to the `microsegx-helm/charts/core` directory.
 3. Edit the `manager.env.envs` in the `values.yaml` to add the environment variables.
    - `CUSTOM_PAGE_HEADER_COLOR`: Set the banner color to DarkOrange (#ff8c00).
    - `CUSTOM_PAGE_HEADER_CONTENT`: Specify the header text using a plain HTML or text, for example "```You are accessing a &nbsp;<b> U.S. Government (USG) Information System (IS) </b> &nbsp;  that is provided for USG-authorized use only.```", remember to based64 encode it.
@@ -82,10 +82,10 @@ manager:
 
 ```
 
-4. Run the following command in the `neuvector-helm/charts/core` to upgrade the NeuVector Helm chart:
+4. Run the following command in the `microsegx-helm/charts/core` to upgrade the MicroSegX Helm chart:
 
 ```bash
-helm upgrade neuvector -n neuvector ./
+helm upgrade microsegx -n microsegx ./
 ```
 
 This will apply the customization changes to the UI pages.
@@ -95,7 +95,7 @@ This will apply the customization changes to the UI pages.
 To verify that the environment variables have been successfully set, you can run the following command:
 
 ```bash
-kubectl get deployment -n neuvector neuvector-manager-pod -o yaml
+kubectl get deployment -n microsegx microsegx-manager-pod -o yaml
 ```
 
 Check the `spec.template.spec.containers.env` section to ensure that the desired environment variables are present.
@@ -107,7 +107,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: neuvector-manager-pod
+      app: microsegx-manager-pod
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -117,13 +117,13 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        app: neuvector-manager-pod
-        release: neuvector
+        app: microsegx-manager-pod
+        release: microsegx
     spec:
       containers:
       - env:
         - name: CTRL_SERVER_IP
-          value: neuvector-svc-controller.neuvector
+          value: microsegx-svc-controller.microsegx
         - name: CUSTOM_PAGE_HEADER_COLOR
           value: '#ff8c00'
         - name: CUSTOM_PAGE_HEADER_CONTENT

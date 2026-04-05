@@ -3,8 +3,8 @@ package cvetools
 import (
 	"testing"
 
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/common"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/common"
 )
 
 type versionTestCase struct {

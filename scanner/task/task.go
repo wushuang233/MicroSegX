@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
+	"github.com/microsegx/microsegx/share"
 )
 
 // global control data

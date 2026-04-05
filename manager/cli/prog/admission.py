@@ -669,7 +669,7 @@ def set_admission(data):
 @click.option("--mode", required=False, type=click.Choice(['monitor', 'protect']), help="Admission control mode")
 # @click.option("--default_action", required=False, type=click.Choice(['allow', 'deny']), help="Default action for the request if no rule matches")
 @click.option("--client_mode", required=False,
-              help="The client mode that Kube-apiserver uses when sending requests to Neuvector admission control webhook server")
+              help="The client mode that Kube-apiserver uses when sending requests to MicroSegX admission control webhook server")
 @click.pass_obj
 def set_admission_state(data, disable, mode, client_mode):
     """Configure admission control state."""
@@ -842,7 +842,7 @@ def request_admission_test(data):
     data.client.request("debug/admission", "test", None, {})
     click.echo("")
     click.echo(
-        "NeuVector admission control webhook server receives the request sent from Kube-apiserver for testing successfully.")
+        "MicroSegX admission control webhook server receives the request sent from Kube-apiserver for testing successfully.")
     click.echo("")
 
 

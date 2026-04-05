@@ -11,7 +11,7 @@ import {
   UsernameField,
 } from '../constants/constants';
 import { cloneDeep } from 'lodash';
-import { FormlyValidators } from '@common/neuvector-formly/neuvector-formly.module';
+import { FormlyValidators } from '@common/microsegx-formly/microsegx-formly.module';
 
 const GithubContainerRegistryField = cloneDeep(RegistryField);
 GithubContainerRegistryField.templateOptions.hint =

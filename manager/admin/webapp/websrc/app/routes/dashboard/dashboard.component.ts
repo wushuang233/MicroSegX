@@ -12,6 +12,8 @@ import { SystemSummaryDetails, InternalSystemInfo } from '@common/types';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { AssetsHttpService } from '@common/api/assets-http.service';
+import { MicrosegxHttpService } from '@common/api/microsegx-http.service';
+import { MicrosegxOverview } from '@common/types';
 import { ReportByNamespaceModalComponent } from './report-by-namespace-modal/report-by-namespace-modal.component';
 import { isAuthorized } from '@common/utils/common.utils';
 import { SummaryService } from '@services/summary.service';
@@ -34,6 +36,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   reportDomain: string = '';
   reportInfo: any;
   isShowingScore: boolean = false;
+  microsegxOverview: MicrosegxOverview | null = null;
 
   securityEvents: any;
   details: any;
@@ -88,14 +91,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get cveDbVersion(): string {
     return this.summaryInfo?.cvedb_version || '-';
   }
+  get microsegxOpenPorts(): number {
+    return this.microsegxOverview?.portExposure?.openPorts || 0;
+  }
+  get microsegxManagedServices(): number {
+    return this.microsegxOverview?.portExposure?.managedServices || 0;
+  }
+  get microsegxExposedTargets(): number {
+    return this.microsegxOverview?.portExposure?.exposedTargets || 0;
+  }
+  get microsegxAliveRouters(): number {
+    return this.microsegxOverview?.ziti?.aliveRouters || 0;
+  }
+  get microsegxZitiServices(): number {
+    return this.microsegxOverview?.ziti?.services || 0;
+  }
+  get microsegxZitiIdentities(): number {
+    return this.microsegxOverview?.ziti?.identities || 0;
+  }
+  get microsegxControllerUrl(): string {
+    return this.microsegxOverview?.ziti?.defaultControllerUrl || '-';
+  }
+  get microsegxFabricAvailable(): boolean {
+    return Boolean(this.microsegxOverview?.ziti?.available);
+  }
   get leadRiskContainer(): any {
-    return this.details?.highPriorityVulnerabilities?.containers?.top5Containers?.[0];
+    return this.details?.highPriorityVulnerabilities?.containers
+      ?.top5Containers?.[0];
   }
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private dashboardService: DashboardService,
     private assetsHttpService: AssetsHttpService,
+    private microsegxHttpService: MicrosegxHttpService,
     private summaryService: SummaryService,
     private dialog: MatDialog
   ) {}
@@ -121,6 +150,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.dashboardService.refreshEvent$.subscribe(refresh => {
       if (refresh) this.getBasicData(true);
     });
+    this.loadMicrosegxOverview();
 
     if (!GlobalVariable.hasInitializedSummary) {
       this.getSummary();
@@ -221,7 +251,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.summaryService.refreshSummary();
   };
 
+  private loadMicrosegxOverview = () => {
+    this.microsegxHttpService.getOverview().subscribe({
+      next: overview => {
+        this.microsegxOverview = overview;
+      },
+      error: () => {
+        this.microsegxOverview = null;
+      },
+    });
+  };
+
   private sumSeries(series: any[]): number {
-    return (series || []).reduce((total, point) => total + (+point?.[1] || 0), 0);
+    return (series || []).reduce(
+      (total, point) => total + (+point?.[1] || 0),
+      0
+    );
   }
 }

@@ -14,7 +14,7 @@ export enum SystemAlertSeverity {
 export interface SystemAlertSummary {
   acceptable_alerts: { [name: string]: SystemAlerts };
   accepted_alerts: string[] | null;
-  neuvector_upgrade_info: UpgradeInfo;
+  microsegx_upgrade_info: UpgradeInfo;
 }
 
 export interface SystemAlerts {

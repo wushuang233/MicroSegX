@@ -1,0 +1,54 @@
+name: Update microsegx dependency
+
+scms:
+  scanner:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      directory: "/tmp/scanner"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "scanner"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "chore"
+        title: "Update microsegx dependency to main"
+        hidecredit: true
+        footers: "Signed-off-by: microsegx bot <microsegx-bot@users.noreply.github.com>"
+
+targets:
+  updateDependency:
+    name: Update microsegx dependency to main
+    scmid: scanner
+    kind: shell
+    spec:
+      command: |
+        go get github.com/microsegx/microsegx@main
+        go mod tidy
+        go mod vendor
+      changedif:
+        kind: file/checksum
+        spec:
+          files:
+            - go.mod
+            - go.sum
+            - vendor/modules.txt
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: scanner
+    spec:
+      title: 'chore: update microsegx to main ({{ now | date "2006-01-02" }})'
+      description: |
+        This PR updates microsegx dependency to the latest main branch.
+
+        Changes:
+        - Updated github.com/microsegx/microsegx to main branch
+        - Ran go mod tidy
+        - Ran go mod vendor
+      labels:
+        - dependencies
+      automerge: false

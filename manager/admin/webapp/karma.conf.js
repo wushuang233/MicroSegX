@@ -20,7 +20,7 @@ module.exports = function (config) {
       suppressAll: true
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/neuvector'),
+      dir: require('path').join(__dirname, './coverage/microsegx'),
       subdir: '.',
       reporters: [
         { type: 'html' },

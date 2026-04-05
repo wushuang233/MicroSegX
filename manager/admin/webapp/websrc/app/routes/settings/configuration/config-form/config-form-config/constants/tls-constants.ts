@@ -3,7 +3,7 @@ import {
   CardSeverity,
   FormlyComponents,
   FormlyValidators,
-} from '@common/neuvector-formly/neuvector-formly.module';
+} from '@common/microsegx-formly/microsegx-formly.module';
 import {
   CertificateDeserializer,
   CertificateManifest,

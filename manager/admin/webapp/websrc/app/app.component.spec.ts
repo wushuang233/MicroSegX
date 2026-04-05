@@ -10,7 +10,7 @@ import { NvCommonModule } from './common/nvCommon.module';
 import { RoutesModule } from './routes/routes.module';
 import { APP_BASE_HREF } from '@angular/common';
 
-describe('App: NeuVector', () => {
+describe('App: MicroSegX', () => {
   beforeEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 

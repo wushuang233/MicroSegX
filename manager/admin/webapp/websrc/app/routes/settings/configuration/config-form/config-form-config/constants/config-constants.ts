@@ -1,5 +1,5 @@
 import { FormControl } from '@angular/forms';
-import { FormlyComponents } from '@common/neuvector-formly/neuvector-formly.module';
+import { FormlyComponents } from '@common/microsegx-formly/microsegx-formly.module';
 
 export const ServiceModeTypes = [
   { value: 'Discover', viewValue: 'topbar.mode.LEARNING' },

@@ -15,12 +15,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/cluster"
-	"github.com/neuvector/neuvector/share/httpclient"
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/scanner/common"
-	"github.com/neuvector/scanner/cvetools"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/cluster"
+	"github.com/microsegx/microsegx/share/httpclient"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/scanner/common"
+	"github.com/microsegx/scanner/cvetools"
 )
 
 const (

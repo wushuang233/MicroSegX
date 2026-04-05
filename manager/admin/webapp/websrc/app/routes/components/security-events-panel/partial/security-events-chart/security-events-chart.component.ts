@@ -120,7 +120,9 @@ export class SecurityEventsChartComponent implements OnInit {
           },
           title: {
             display: true,
-            text: this.translate.instant('customUi.header.routes.securityEvents'),
+            text: this.translate.instant(
+              'customUi.header.routes.securityEvents'
+            ),
           },
         },
       },

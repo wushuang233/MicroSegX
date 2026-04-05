@@ -15,7 +15,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSelectModule } from '@angular/material/select';
-import { NeuVectorFormlyModule } from '@common/neuvector-formly/neuvector-formly.module';
+import { MicroSegXFormlyModule } from '@common/microsegx-formly/microsegx-formly.module';
 import { ObserveModule } from '@common/directives/observe/observe.module';
 import { LoadingButtonModule } from '@components/ui/loading-button/loading-button.module';
 import { LoadingTemplateModule } from '@components/ui/loading-template/loading-template.module';
@@ -63,7 +63,7 @@ const routes: Routes = [
     MatSelectModule,
     MatDividerModule,
     MatCheckboxModule,
-    NeuVectorFormlyModule,
+    MicroSegXFormlyModule,
     LoadingButtonModule,
     LoadingTemplateModule,
     ImportFileModule,

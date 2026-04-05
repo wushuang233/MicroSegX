@@ -42,10 +42,7 @@ export class PreviewModeService {
     GlobalVariable.isRemote = false;
     GlobalVariable.gravatar = false;
 
-    this.localStorage.set(
-      GlobalConstant.LOCAL_STORAGE_TOKEN,
-      previewUser
-    );
+    this.localStorage.set(GlobalConstant.LOCAL_STORAGE_TOKEN, previewUser);
     if (this.localStorage.has(GlobalConstant.LOCAL_STORAGE_TIMEOUT)) {
       this.localStorage.remove(GlobalConstant.LOCAL_STORAGE_TIMEOUT);
     }

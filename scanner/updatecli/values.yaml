@@ -2,6 +2,6 @@ github:
   owner: "UPDATECLI_GITHUB_OWNER"
   token: "UPDATECLI_GITHUB_TOKEN"
   branch: "main"
-  author: "neuvector bot"
+  author: "microsegx bot"
   user: "UPDATECLI_GITHUB_OWNER"
-  email: "neuvector-bot@users.noreply.github.com"
+  email: "microsegx-bot@users.noreply.github.com"

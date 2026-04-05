@@ -71,7 +71,7 @@
 
 .dashboard-hero-shell__metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -185,6 +185,28 @@
   color: var(--saas-text-secondary);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.dashboard-rail-card--microsegx {
+  background:
+    linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, rgba(255, 255, 255, 0.96) 62%);
+}
+
+.dashboard-rail-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.dashboard-inline-link {
+  min-height: 34px;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(22, 119, 255, 0.08);
+  color: var(--saas-primary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .dashboard-hero-shell__print-button {

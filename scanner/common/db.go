@@ -17,11 +17,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/utils"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/utils"
 )
 
-const CveDBExpandPath = "/tmp/neuvector/db/"
+const CveDBExpandPath = "/tmp/microsegx/db/"
 
 type CveDB struct {
 	ExpandPath      string

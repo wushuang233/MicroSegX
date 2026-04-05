@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/neuvector/neuvector/share"
+	"github.com/microsegx/microsegx/share"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -62,7 +62,7 @@ func createConfFile(imgDigest string) (path string, file *os.File, err error) {
 	var confPath string
 	i := 0
 	for {
-		possiblePath := fmt.Sprintf("/tmp/neuvector/sigstore_interface_config_%s_%d.json", imgDigest, i)
+		possiblePath := fmt.Sprintf("/tmp/microsegx/sigstore_interface_config_%s_%d.json", imgDigest, i)
 		_, err := os.Stat(possiblePath)
 		if os.IsNotExist(err) {
 			confPath = possiblePath

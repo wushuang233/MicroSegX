@@ -24,3 +24,4 @@ export * from './federated-configuration/FederatedConfiguration';
 export * from './signatures/signature';
 export * from './admission/admission';
 export * from './notifications/alerts';
+export * from './microsegx/microsegx';

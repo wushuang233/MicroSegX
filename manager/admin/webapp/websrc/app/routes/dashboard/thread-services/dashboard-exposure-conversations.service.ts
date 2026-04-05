@@ -37,7 +37,7 @@ export class DashboardExposureConversationsService {
           token: GlobalVariable.user?.token.token,
           isGlobalUser: isGlobalUser,
           isSUSESSO: GlobalVariable.isSUSESSO ? GlobalVariable.isSUSESSO : '',
-          neuvectorProxy: GlobalConstant.PROXY_VALUE,
+          microsegxProxy: GlobalConstant.PROXY_VALUE,
         })
       );
       this.worker.onmessage = message => {

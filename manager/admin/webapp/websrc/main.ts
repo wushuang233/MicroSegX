@@ -1,9 +1,9 @@
 /*!
  *
- * NeuVector
+ * MicroSegX
  *
  * Version: 5.0.0
- * Author: SUSE NeuVector
+ * Author: SUSE MicroSegX
  *
  */
 

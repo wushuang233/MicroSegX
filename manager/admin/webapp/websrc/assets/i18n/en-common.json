@@ -248,7 +248,7 @@
       "TITLE_GET_BOOTSTRAP_PASSWORD": "Get Bootstrap Password",
       "CONTENT_GET_BOOTSTRAP_PASSWORD": "The command to retrieve the bootstrap password from Kubernetes Secret.",
       "TITLE_RBAC_ERROR": "RBAC Configuration Errors",
-      "CONTENT_RBAC_ERROR": "Kubernetes RBAC role/rolebinding neuvector-binding-secret misconfigured, blocking the platform from accessing the password from K8s Secret."
+      "CONTENT_RBAC_ERROR": "Kubernetes RBAC role/rolebinding microsegx-binding-secret misconfigured, blocking the platform from accessing the password from K8s Secret."
     }
   },
   "dashboard": {
@@ -483,7 +483,7 @@
         "CLUSTERROLEBINDING_ALERTS": "Cluster Role Binding",
         "ROLEBINDING_ALERTS": "Role Binding",
         "ROLE_ALERTS": "Role",
-        "NEUVECTOR_CRD_ALERTS": "Neuvector CRD",
+        "MICROSEGX_CRD_ALERTS": "MicroSegX CRD",
         "CERTIFICATE_ALERTS": "TLS Self-Signed Certificate",
         "OTHER_ALERTS": "Others"
       }
@@ -894,6 +894,9 @@
       "NETWORK_TRAFFIC": "Network Traffic",
       "SETTING": "Settings",
       "SUPPORT": "Get Support",
+      "MICROSEGX": "MicroSegX",
+      "PORT_EXPOSURE": "Port Exposure",
+      "ZITI_FABRIC": "Ziti Fabric",
       "PROFILE": "Profile",
       "USERS": "Users, API Keys & Roles",
       "CONSOLE": "Console",
@@ -2730,9 +2733,9 @@
       "ENABLE_CONFIRM_DEFAULT": "Enabling this default rule will allow deployment in {{namespace}} namespace",
       "PROTECT_CONFIRM": "Will you switch to 'Protect Mode'?",
       "UNSUPPORTED": "Unsupported operation because it is not Kubernetes platform.",
-      "CONFIG_K8S_FAIL": "Failed to configure Admission Control on Kubernetes system. Please make sure the \"cluster role\" and \"cluster role binding\" for neuvector:default are configured correctly.",
-      "CLUSTER_ROLE_NOT_CONFIG": "The neuvector-binding-admission clusterrole/clusterrolebinding required for Neuvector Admission Control is not configured correctly.",
-      "WEBHOOK_NOT_CONFIG": "The neuvector-svc-admission-webhook service required for Neuvector Admission Control is not configured correctly.",
+      "CONFIG_K8S_FAIL": "Failed to configure Admission Control on Kubernetes system. Please make sure the \"cluster role\" and \"cluster role binding\" for microsegx:default are configured correctly.",
+      "CLUSTER_ROLE_NOT_CONFIG": "The microsegx-binding-admission clusterrole/clusterrolebinding required for MicroSegX Admission Control is not configured correctly.",
+      "WEBHOOK_NOT_CONFIG": "The microsegx-svc-admission-webhook service required for MicroSegX Admission Control is not configured correctly.",
       "NO_UPD_PROMISSION": "The default service account doesn't have UPDATE permission for service resource.",
       "ERR_SRV2WEBHOOK": "Failed to receive a request from Kube-apiserver. Please try different client mode",
       "TEST_K8S_OK": "Kubernetes system connection is normal.",
@@ -3420,7 +3423,7 @@
     "ADMIN_HINT": "Add LDAP/AD groups mapped to platform admin",
     "READER_HINT": "Add LDAP/AD groups mapped to platform reader",
     "CI_HINT": "Add LDAP/AD groups mapped to platform CI integration",
-    "BASE_DN_HINT": "Root node in LDAP/AD from which to search users and groups. e.g. dc=neuvector, dc=com",
+    "BASE_DN_HINT": "Root node in LDAP/AD from which to search users and groups. e.g. dc=microsegx, dc=com",
     "BASE_DN_MESSAGE": "Please enter a valid base DN.",
     "GROUP_DN_HINT": "If set, groups will be searched for only under this DN instead of the Base DN.",
     "HOST_REQUIRED": "Host is required.",
@@ -3691,6 +3694,103 @@
           "three": {
             "title": "Upgrade the cluster",
             "desc": "Update your image tags through Helm or your existing manifests and roll the new version into Kubernetes."
+          }
+        }
+      }
+    },
+    "microsegx": {
+      "shared": {
+        "workspace": "MicroSegX workspace",
+        "embedded": "Embedded workspace",
+        "openNewTab": "Open in new tab"
+      },
+      "dashboard": {
+        "openPorts": "Open ports",
+        "fabricTitle": "Ziti fabric",
+        "fabricMeta": "Routers / services",
+        "fabricHint": "Configure the default controller credentials in port-audit to surface live fabric counts.",
+        "notConfigured": "Not configured",
+        "openPortExposure": "Open Port Exposure",
+        "openFabric": "Open Ziti Fabric"
+      },
+      "portExposure": {
+        "title": "Port Exposure",
+        "subtitle": "Operate service exposure, node listeners, and open ports from the same MicroSegX workspace.",
+        "gotoZiti": "Go to Ziti Fabric",
+        "heroTitle": "See what is exposed before it turns into drift.",
+        "heroCopy": "This page keeps the original port-audit controls alive, but packages them inside the manager shell so exposure decisions and fabric delivery stay in one place.",
+        "guideTitle": "How to use this workspace",
+        "guideCopy": "Start from the cards to understand your current exposure footprint, then work in the embedded page to open or close service ports.",
+        "sideTitle": "At-a-glance context",
+        "sideCopy": "These numbers stay aligned with the live port-audit service and help you understand what changes will affect the Ziti delivery path.",
+        "sideFabric": "Fabric linkage",
+        "workspaceTitle": "Live port exposure workspace",
+        "workspaceCopy": "All toggles, scans, and service exposure changes still execute against the live port-audit backend.",
+        "cards": {
+          "managedServices": "Managed services",
+          "managedServicesDesc": "Services currently under MicroSegX service-control management.",
+          "openPorts": "Open ports",
+          "openPortsDesc": "Ports currently published through node-level exposure workflows.",
+          "exposedTargets": "Exposed targets",
+          "exposedTargetsDesc": "Discovered exposure endpoints across services, pods, and node listeners.",
+          "trafficTargets": "Observed traffic",
+          "resourceCount": "Resource groups",
+          "nodes": "Nodes in scope",
+          "nodesDesc": "Cluster nodes currently represented in the exposure inventory.",
+          "generatedAt": "Last report"
+        },
+        "guide": {
+          "one": {
+            "title": "Review the summary first",
+            "desc": "Use the top cards to confirm how many services and ports are currently published."
+          },
+          "two": {
+            "title": "Operate from the embedded panel",
+            "desc": "The workspace below still performs the real open, close, and rescan actions for service exposure."
+          },
+          "three": {
+            "title": "Follow through to Ziti",
+            "desc": "Once a service is intentionally exposed, continue into Ziti Fabric to govern who can reach it."
+          }
+        }
+      },
+      "ziti": {
+        "title": "Ziti Fabric",
+        "subtitle": "Create identities, services, routers, and policies inside the same MicroSegX control surface.",
+        "gotoPortExposure": "Go to Port Exposure",
+        "heroTitle": "Move from exposed service to governed connectivity.",
+        "heroCopy": "Port exposure tells you what is reachable. Ziti Fabric lets you define who should reach it, through which routers, with which identities and policies.",
+        "guideTitle": "How this fabric page fits",
+        "guideCopy": "Use the live Ziti workspace below for create, edit, delete, enrollment, and router deployment workflows.",
+        "sideTitle": "Controller context",
+        "sideCopy": "The summary cards reflect the same OpenZiti controller that powers the embedded workspace.",
+        "sidePortExposure": "Port exposure linkage",
+        "workspaceTitle": "Live Ziti management workspace",
+        "workspaceCopy": "Identity, service, config, policy, router deployment, and JWT flows still execute through the live Ziti management API.",
+        "cards": {
+          "controller": "Controller",
+          "credentials": "Default credentials",
+          "routers": "Online routers",
+          "routersDesc": "Routers currently online and visible to the controller.",
+          "services": "Services",
+          "servicesDesc": "Ziti services currently managed by the controller.",
+          "identities": "Identities",
+          "identitiesDesc": "Client and host identities available for dial/bind flows.",
+          "configs": "Configs",
+          "configsDesc": "Intercept, host, and related configs available in the fabric."
+        },
+        "guide": {
+          "one": {
+            "title": "Start with the service model",
+            "desc": "Create configs and services that map the Kubernetes target you want to publish or consume."
+          },
+          "two": {
+            "title": "Assign identities and policy",
+            "desc": "Use service policies and router policies to define who may dial, bind, or reach specific routers."
+          },
+          "three": {
+            "title": "Deploy routers where needed",
+            "desc": "The embedded workspace still supports real K8s router deployment, re-enrollment, and cleanup."
           }
         }
       }

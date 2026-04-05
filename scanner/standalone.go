@@ -17,17 +17,17 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/controller/api"
-	"github.com/neuvector/neuvector/share"
-	scanUtils "github.com/neuvector/neuvector/share/scan"
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/cvetools"
+	"github.com/microsegx/microsegx/controller/api"
+	"github.com/microsegx/microsegx/share"
+	scanUtils "github.com/microsegx/microsegx/share/scan"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/cvetools"
 )
 
 const (
-	// The user must mount volume to /var/neuvector and the result will be written to the mounted folder
-	scanOutputDir     = "/var/neuvector"
+	// The user must mount volume to /var/microsegx and the result will be written to the mounted folder
+	scanOutputDir     = "/var/microsegx"
 	scanOutputFile    = "scan_result.json"
 	apiCallTimeout    = time.Duration(30 * time.Second)
 	errEmptyResultMsg = "scan failed: empty result"

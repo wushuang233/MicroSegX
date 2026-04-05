@@ -17,7 +17,15 @@ COPY build.sbt .scalafix.conf .scalafmt.conf /src/
 
 WORKDIR /src
 
-RUN zypper refresh && \
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy=
+
+RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
+    zypper refresh && \
     zypper install -y wget curl zip git awk nodejs22 npm22 && \
     npm install -g npm@10.9.2 && \
     hash -r
@@ -26,9 +34,9 @@ ARG VERSION
 
 ARG CS_VERSION=v2.1.18
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    curl -fL https://github.com/coursier/coursier/releases/download/${CS_VERSION}/cs-x86_64-pc-${TARGETOS}.gz | gzip -d > cs; \
+    curl --proxy "" -fL https://github.com/coursier/coursier/releases/download/${CS_VERSION}/cs-x86_64-pc-${TARGETOS}.gz | gzip -d > cs; \
   elif [ "$TARGETARCH" = "arm64" ]; then \
-    curl -fL https://github.com/VirtusLab/coursier-m1/releases/download/${CS_VERSION}/cs-aarch64-pc-${TARGETOS}.gz | gzip -d > cs; \
+    curl --proxy "" -fL https://github.com/VirtusLab/coursier-m1/releases/download/${CS_VERSION}/cs-aarch64-pc-${TARGETOS}.gz | gzip -d > cs; \
   else \
     echo "Unsupported architecture: $ARCH"; \
     exit 1; \
@@ -37,7 +45,11 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     export PATH="$PATH:/root/.local/share/coursier/bin" && \
     ./cs install scala:3.3.5 sbt:1.10.2 --install-dir /usr/local/bin
 
-RUN npm install -g @angular/cli@20 && \
+RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
+    npm config delete proxy || true && \
+    npm config delete https-proxy || true && \
+    npm config delete noproxy || true && \
+    npm install -g @angular/cli@20 && \
     npm install -g npm-force-resolutions
 
 RUN sed -i -e 's#interim.*xxxx#'"$VERSION"'#g' ./common/src/main/resources/application.conf
@@ -49,8 +61,8 @@ RUN if [ "$ARCH" = "amd64" ]; then \
   rpm --import https://download.opensuse.org/repositories/M17N/15.7/repodata/repomd.xml.key && \
   zypper --non-interactive refresh && \
   zypper install -y liberation-fonts && \
-  wget https://dl.google.com/${OS}/direct/google-chrome-stable_current_${ARCH}.rpm && \
-  wget https://dl.google.com/${OS}/${OS}_signing_key.pub && \
+  wget --no-proxy https://dl.google.com/${OS}/direct/google-chrome-stable_current_${ARCH}.rpm && \
+  wget --no-proxy https://dl.google.com/${OS}/${OS}_signing_key.pub && \
   rpm --import linux_signing_key.pub && \
   zypper install -y google-chrome-stable_current_x86_64.rpm; \
 fi
@@ -62,7 +74,15 @@ FROM registry.suse.com/bci/bci-base:15.7 AS base
 COPY --from=builder /src/package/requirements.txt /chroot/requirements.txt
 COPY --from=micro / /chroot/
 
-RUN zypper refresh && zypper --installroot /chroot -n in --no-recommends \
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy=
+
+RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
+    zypper refresh && zypper --installroot /chroot -n in --no-recommends \
     python313 python313-pip iproute2 lsof procps grep awk && \
     cp /etc/resolv.conf /chroot/etc/resolv.conf && \
     chroot /chroot /usr/bin/python3.13 -m pip install --upgrade setuptools && \
@@ -76,7 +96,9 @@ RUN ln -sf /usr/bin/python3.13 /chroot/usr/bin/python3 && \
     ln -sf /usr/bin/pip3.13 /chroot/usr/bin/pip
 
 # Install requirements and clean up
-RUN chroot /chroot /bin/sh -c "pip install --no-cache-dir -r /requirements.txt && \
+RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
+    chroot /chroot /bin/sh -c "unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
+    pip install --no-cache-dir -r /requirements.txt && \
     rm -rf /root/.cache /requirements.txt"
 
 # Remove unnecessary binaries to reduce image size
@@ -106,16 +128,16 @@ ENV JAVA_HOME=/usr/lib64/jvm/java-17-openjdk-17 \
 
 LABEL "name"="manager" \
       "vendor"="SUSE Security" \
-      "neuvector.image"="neuvector/manager" \
-      "neuvector.role"="manager" \
-      "neuvector.rev"="${COMMIT}" \
+      "microsegx.image"="microsegx/manager" \
+      "microsegx.role"="manager" \
+      "microsegx.rev"="${COMMIT}" \
       "io.artifacthub.package.logo-url"=https://avatars2.githubusercontent.com/u/19367275 \
-      "io.artifacthub.package.readme-url"="https://raw.githubusercontent.com/neuvector/manager/${VERSION}/README.md" \
+      "io.artifacthub.package.readme-url"="https://raw.githubusercontent.com/microsegx/manager/${VERSION}/README.md" \
       "org.opencontainers.image.description"="SUSE Security Manager" \
       "org.opencontainers.image.title"="SUSE Security Manager" \
-      "org.opencontainers.image.source"="https://github.com/neuvector/manager/" \
+      "org.opencontainers.image.source"="https://github.com/microsegx/manager/" \
       "org.opencontainers.image.version"="${VERSION}" \
-      "org.opensuse.reference"="neuvector/manager:${VERSION}"
+      "org.opensuse.reference"="microsegx/manager:${VERSION}"
 
 ARG user=manager
 RUN echo "$user:x:1000:1000::/nonexistent:/bin/bash" >> /etc/passwd && \

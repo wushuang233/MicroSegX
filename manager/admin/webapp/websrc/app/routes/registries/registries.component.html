@@ -25,7 +25,9 @@
     <ng-container *ngIf="registries.summarys.length; else noRegistriesTemplate">
       <app-adjustable-div [minHeightOne]="163" [minHeightTwo]="140">
         <ng-container *appContainerOne="let height">
-          <mat-card [ngStyle]="{ height: height + 'px' }" class="page-card pt-0">
+          <mat-card
+            [ngStyle]="{ height: height + 'px' }"
+            class="page-card pt-0">
             <app-registries-table
               [gridHeight]="height - 150"
               [linkedRegistry]="linkedRegistry"
@@ -34,7 +36,9 @@
           </mat-card>
         </ng-container>
         <ng-container *appContainerTwo="let height">
-          <mat-card [ngStyle]="{ height: height + 'px' }" class="page-card pt-0">
+          <mat-card
+            [ngStyle]="{ height: height + 'px' }"
+            class="page-card pt-0">
             <app-registry-details
               [linkedImage]="linkedImage"
               [linkedTag]="linkedTag"

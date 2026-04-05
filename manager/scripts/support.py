@@ -308,7 +308,7 @@ def support(client, jointID, enforcers, output):
     return 0
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='NeuVector Support Script.')
+    parser = argparse.ArgumentParser(description='MicroSegX Support Script.')
     parser.add_argument('-s', '--server', help='controller IP address.')
     parser.add_argument('-p', '--port', type=int, help='controller port.')
     parser.add_argument('-t', '--token', help='login token.')

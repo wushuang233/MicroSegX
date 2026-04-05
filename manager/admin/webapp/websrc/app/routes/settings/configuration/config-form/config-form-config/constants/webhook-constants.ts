@@ -3,7 +3,7 @@ import { MapConstant } from '@common/constants/map.constant';
 import {
   FormlyComponents,
   FormlyValidators,
-} from '@common/neuvector-formly/neuvector-formly.module';
+} from '@common/microsegx-formly/microsegx-formly.module';
 
 export const OtherWebhookType = 'OTHER';
 export const WebhookTypes = [

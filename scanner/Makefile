@@ -13,13 +13,13 @@ STAGE_DIR = stage
 
 copy_scan:
 	mkdir -p ${STAGE_DIR}/usr/local/bin/
-	mkdir -p ${STAGE_DIR}/etc/neuvector/db
+	mkdir -p ${STAGE_DIR}/etc/microsegx/db
 	#
 	cp scanner/monitor/monitor ${STAGE_DIR}/usr/local/bin/
 	cp scanner/scanner ${STAGE_DIR}/usr/local/bin/
 	cp scanner/task/scannerTask ${STAGE_DIR}/usr/local/bin/
 	cp sigstore-interface/sigstore-interface ${STAGE_DIR}/usr/local/bin/sigstore-interface
-	cp scanner/data/cvedb.regular ${STAGE_DIR}/etc/neuvector/db/cvedb
+	cp scanner/data/cvedb.regular ${STAGE_DIR}/etc/microsegx/db/cvedb
 
 stage_init:
 	rm -rf ${STAGE_DIR}; mkdir -p ${STAGE_DIR}
@@ -27,17 +27,17 @@ stage_init:
 stage_scan: stage_init copy_scan
 
 scanner_image: stage_scan
-	docker pull neuvector/scanner_base:${BASE_IMAGE_TAG}
-	docker build --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} -t neuvector/scanner -f scanner/build/Dockerfile.scanner .
+	docker pull microsegx/scanner_base:${BASE_IMAGE_TAG}
+	docker build --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} -t microsegx/scanner -f scanner/build/Dockerfile.scanner .
 
 binary:
 	@echo "Making $@ ..."
-	@docker pull neuvector/build_fleet:${BUILD_IMAGE_TAG}
-	@docker run --rm -ia STDOUT --name build -e VULN_VER=$(VULN_VER) --net=none -v $(CURDIR):/go/src/github.com/neuvector/scanner -w /go/src/github.com/neuvector/scanner --entrypoint ./make_bin.sh neuvector/build_fleet:${BUILD_IMAGE_TAG}
+	@docker pull microsegx/build_fleet:${BUILD_IMAGE_TAG}
+	@docker run --rm -ia STDOUT --name build -e VULN_VER=$(VULN_VER) --net=none -v $(CURDIR):/go/src/github.com/microsegx/scanner -w /go/src/github.com/microsegx/scanner --entrypoint ./make_bin.sh microsegx/build_fleet:${BUILD_IMAGE_TAG}
 
 RUNNER := docker
 IMAGE_BUILDER := $(RUNNER) buildx
-MACHINE := neuvector
+MACHINE := microsegx
 BUILDX_ARGS ?= --sbom=true --attest type=provenance,mode=max
 DEFAULT_PLATFORMS := linux/amd64,linux/arm64,linux/x390s,linux/riscv64
 STAGE_DIR=stage
@@ -78,7 +78,7 @@ ifeq ($(TAG),)
 endif
 
 TARGET_PLATFORMS ?= linux/amd64,linux/arm64
-REPO ?= neuvector
+REPO ?= microsegx
 IMAGE = $(REPO)/scanner:$(TAG)
 BUILD_ACTION = --load
 
@@ -102,17 +102,17 @@ STAGE_DIR = stage
 
 gen_license:
 	mkdir -p ${STAGE_DIR}/licenses
-	cd vendor && ../genlic.sh > ../${STAGE_DIR}/licenses/neuvector-license.txt
+	cd vendor && ../genlic.sh > ../${STAGE_DIR}/licenses/microsegx-license.txt
 
 copy_scan_slsa:
 	mkdir -p ${STAGE_DIR}/usr/local/bin/
-	mkdir -p ${STAGE_DIR}/etc/neuvector/db
+	mkdir -p ${STAGE_DIR}/etc/microsegx/db
 	#
 	cp monitor/monitor ${STAGE_DIR}/usr/local/bin/
 	cp scanner ${STAGE_DIR}/usr/local/bin/
 	cp task/scannerTask ${STAGE_DIR}/usr/local/bin/
 	cp sigstore-interface/sigstore-interface ${STAGE_DIR}/usr/local/bin/sigstore-interface
-	cp data/cvedb.regular ${STAGE_DIR}/etc/neuvector/db/cvedb
+	cp data/cvedb.regular ${STAGE_DIR}/etc/microsegx/db/cvedb
 
 buildx-machine:
 	docker buildx ls

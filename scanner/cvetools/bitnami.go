@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share/scan"
+	"github.com/microsegx/microsegx/share/scan"
 )
 
 type bitnamiComponent struct {

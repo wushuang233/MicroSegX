@@ -1,10 +1,10 @@
 package cvetools
 
 import (
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/common"
-	"github.com/neuvector/scanner/detectors"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/common"
+	"github.com/microsegx/scanner/detectors"
 )
 
 /* removd by golint

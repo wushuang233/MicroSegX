@@ -33,8 +33,8 @@
 
 对应源码位置：
 
-- [neuvector/package/Dockerfile.controller](d:/vscode/nv/neuvector/package/Dockerfile.controller)
-- [neuvector/package/Dockerfile.enforcer](d:/vscode/nv/neuvector/package/Dockerfile.enforcer)
+- [microsegx/package/Dockerfile.controller](d:/vscode/nv/microsegx/package/Dockerfile.controller)
+- [microsegx/package/Dockerfile.enforcer](d:/vscode/nv/microsegx/package/Dockerfile.enforcer)
 - [manager/package/Dockerfile](d:/vscode/nv/manager/package/Dockerfile)
 - [scanner/package/Dockerfile](d:/vscode/nv/scanner/package/Dockerfile)
 
@@ -250,9 +250,9 @@ bash deploy-core.sh full-release.env
 
 这不是我的约定，而是 chart 本身的设计。相关模板在：
 
-- [manager-deployment.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/manager-deployment.yaml)
-- [enforcer-daemonset.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/enforcer-daemonset.yaml)
-- [controller-deployment.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/controller-deployment.yaml)
+- [manager-deployment.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/manager-deployment.yaml)
+- [enforcer-daemonset.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/enforcer-daemonset.yaml)
+- [controller-deployment.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/controller-deployment.yaml)
 
 所以你后续只改了 UI，也最好仍然给这三个镜像出同一个 `CORE_TAG`。
 
@@ -260,7 +260,7 @@ bash deploy-core.sh full-release.env
 
 `scanner` 不是走全局 `tag`，而是走 `cve.scanner.image.tag`。模板在：
 
-- [scanner-deployment.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/scanner-deployment.yaml)
+- [scanner-deployment.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/scanner-deployment.yaml)
 
 所以脚本里我把它单独拆成了 `SCANNER_TAG`。
 
@@ -268,7 +268,7 @@ bash deploy-core.sh full-release.env
 
 即使你没有改 `updater` 源码，正式部署时也最好把它一起镜像化到你的私有仓库，否则线上还是会依赖外部仓库。模板在：
 
-- [updater-cronjob.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/updater-cronjob.yaml)
+- [updater-cronjob.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/updater-cronjob.yaml)
 
 这套脚本也考虑了两种情况：
 
@@ -281,7 +281,7 @@ bash deploy-core.sh full-release.env
 
 它不是普通 Deployment，而是 `DaemonSet`，而且默认需要特权能力、主机 PID 和宿主机挂载。模板在：
 
-- [enforcer-daemonset.yaml](d:/vscode/nv/neuvector-helm/charts/core/templates/enforcer-daemonset.yaml)
+- [enforcer-daemonset.yaml](d:/vscode/nv/microsegx-helm/charts/core/templates/enforcer-daemonset.yaml)
 
 所以如果你的集群有很严格的 Pod Security 或安全策略，需要提前确认允许它运行。
 
@@ -293,11 +293,11 @@ bash deploy-core.sh full-release.env
 
 这样做是为了避免重复下发 CRD 定义。CRD chart 位置在：
 
-- [neuvector-helm/charts/crd](d:/vscode/nv/neuvector-helm/charts/crd)
+- [microsegx-helm/charts/crd](d:/vscode/nv/microsegx-helm/charts/crd)
 
 核心 chart 位置在：
 
-- [neuvector-helm/charts/core](d:/vscode/nv/neuvector-helm/charts/core)
+- [microsegx-helm/charts/core](d:/vscode/nv/microsegx-helm/charts/core)
 
 ## 9. 你后续二开之后怎么重复发版
 

@@ -1,0 +1,5 @@
+manager:
+  env:
+    envs:
+      - name: MICROSEGX_PORT_AUDIT_BASE_URL
+        value: http://k8s-port-audit.port-audit.svc.cluster.local:8080

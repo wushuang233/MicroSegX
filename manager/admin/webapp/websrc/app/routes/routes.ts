@@ -38,6 +38,30 @@ export const routes: Routes = [
           import('./dashboard/dashboard.module').then(m => m.DashboardModule),
       },
       {
+        path: 'microsegx',
+        children: [
+          {
+            path: '',
+            redirectTo: 'port-exposure',
+            pathMatch: 'full',
+          },
+          {
+            path: 'port-exposure',
+            loadChildren: () =>
+              import('./microsegx-port-exposure/microsegx-port-exposure.module').then(
+                m => m.MicrosegxPortExposureModule
+              ),
+          },
+          {
+            path: 'ziti',
+            loadChildren: () =>
+              import('./microsegx-ziti/microsegx-ziti.module').then(
+                m => m.MicrosegxZitiModule
+              ),
+          },
+        ],
+      },
+      {
         path: 'graph',
         loadChildren: () =>
           import('./network-activities/network-activities.module').then(

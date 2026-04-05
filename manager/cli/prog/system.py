@@ -67,7 +67,7 @@ def usage(data):
             click.echo("")
         else:
             click.echo("Anonymous telemetry status")
-            column_map = (("current_version", "Current NeuVector Version"),
+            column_map = (("current_version", "Current MicroSegX Version"),
                           ("telemetry_url", "Telemetry Server URL"),
                           ("telemetry_freq", "Telemetry Data Post Frequency"))
 
@@ -233,7 +233,7 @@ def showLocalSystemConfig(data, scope):
     column_map += (("ibmsa_ep", "Integrate with IBM Security Advisor"),
                    ("ibmsa_ep_enabled", "       Enabled"),
                    ("ibmsa_ep_start", "       Setup done"),
-                   ("ibmsa_ep_dashboard_url", "       NeuVector Dashboard URL"),
+                   ("ibmsa_ep_dashboard_url", "       MicroSegX Dashboard URL"),
                    ("ibmsa_ep_connected_at", "       Connection creation time"),)
 
     if conf["syslog_ip_proto"] == 66:
@@ -707,7 +707,7 @@ def set_system_partner(data):
 @set_system_partner.group("ibmsa", invoke_without_command=True)
 @click.option("--disable/--enable", default=None, required=False,
               help="Enable/disable IBM Security Advisor integration")
-@click.option("--dashboard", default=None, required=False, help="NeuVector dashboard URL")
+@click.option("--dashboard", default=None, required=False, help="MicroSegX dashboard URL")
 @click.pass_obj
 def set_system_ibmsa(data, disable, dashboard):
     """Set IBM Security Advisor integration settings"""
@@ -1831,7 +1831,7 @@ def import_compliance_profile(data, filename):
 @request_export.command()
 @click.option("-e", "--enforcer", default="", help="enforcer to collect log from, default is all")
 @click.option("-t", "--tail", default=0, help="number of lines to show from the end of debug logs ")
-@click.option("-f", "--filename", default="/var/neuvector/nv_debug",
+@click.option("-f", "--filename", default="/var/microsegx/nv_debug",
               type=click.Path(dir_okay=False, writable=True, resolve_path=True), \
               help="location to store the ouput")
 @click.pass_obj

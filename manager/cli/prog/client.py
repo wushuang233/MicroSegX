@@ -139,7 +139,7 @@ class RestClient(object):
 
     def _request(self, method, urlLocal, body=None, files=None, decode_req=True, decode_resp=True):
         global RemoteCluster
-        url = urlLocal  # ex: "https://neuvector-svc-controller.neuvector:10443/v1/auth"
+        url = urlLocal  # ex: "https://microsegx-svc-controller.microsegx:10443/v1/auth"
         if urlLocal.find(self.url) == 0:
             uri = urlLocal[len(self.url):]  # ex: "/v1/auth"
             if RemoteCluster["id"] != "":
@@ -535,7 +535,7 @@ class RestClient(object):
             raise Unauthorized()
 
         url = "%s/v1/%s" % (
-        self.url, path)  # ex: "https://neuvector-svc-controller.neuvector:10443/v1/assess/admission/rule"
+        self.url, path)  # ex: "https://microsegx-svc-controller.microsegx:10443/v1/assess/admission/rule"
         urlLocal = url
         global RemoteCluster
         if urlLocal.find(self.url) == 0:
@@ -578,7 +578,7 @@ class RestClient(object):
         if not self._token():
             raise Unauthorized()
 
-        url = "%s/v1/%s" % (self.url, path) # ex: "https://neuvector-svc-controller.neuvector:10443/v1/file/group/config"
+        url = "%s/v1/%s" % (self.url, path) # ex: "https://microsegx-svc-controller.microsegx:10443/v1/file/group/config"
         urlLocal = url
         global RemoteCluster
         if urlLocal.find(self.url) == 0:

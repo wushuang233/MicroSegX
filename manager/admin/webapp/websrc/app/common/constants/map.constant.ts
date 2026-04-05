@@ -318,7 +318,7 @@ export class MapConstant {
     OPENID: 'OpenID Connect',
     SAML: 'SAML',
     LDAP: 'LDAP/AD',
-    NEUVECTOR: '面向多云环境的主动微隔离系统',
+    MICROSEGX: '面向多云环境的主动微隔离系统',
     RANCHER: 'Rancher',
   };
 

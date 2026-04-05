@@ -10,6 +10,23 @@ const NETWORK_ACTIVITY = {
   link: '/graph',
   icon: 'neural_network',
 };
+const MICROSEGX = {
+  text: 'MicroSegX',
+  translate: 'sidebar.nav.MICROSEGX',
+  icon: 'shield_with_house',
+  submenu: [
+    {
+      text: 'Port Exposure',
+      translate: 'sidebar.nav.PORT_EXPOSURE',
+      link: '/microsegx/port-exposure',
+    },
+    {
+      text: 'Ziti Fabric',
+      translate: 'sidebar.nav.ZITI_FABRIC',
+      link: '/microsegx/ziti',
+    },
+  ],
+};
 const ASSETS = {
   text: 'Assets',
   translate: 'sidebar.nav.RESOURCE',
@@ -155,6 +172,7 @@ const SUPPORT = {
 export const menu = [
   DASHBOARD,
   NETWORK_ACTIVITY,
+  MICROSEGX,
   ASSETS,
   POLICY,
   SECURITY_RISKS,

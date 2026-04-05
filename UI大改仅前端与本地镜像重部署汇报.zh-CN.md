@@ -8,7 +8,7 @@
 
 结论先说在前面：
 
-- 如果只是大改 UI，主战场在 `manager` 仓，不在 `neuvector` 仓。
+- 如果只是大改 UI，主战场在 `manager` 仓，不在 `microsegx` 仓。
 - 只改前端并不等于只重打前端静态资源，最终还是要重打整个 `manager` 镜像。
 - 重新部署到 K8s 时，最稳妥的入口仍然是 Helm Chart。
 - 我已经在 `nv/ops/ui-only/` 下补了一套脚本，用来做“只改 UI 时的镜像重打、同步、导入和 Helm 升级”。
@@ -47,7 +47,7 @@
 | `manager/admin/src/main/scala/com/neu/api/` | manager 服务端 API 层 |
 | `manager/admin/src/main/scala/com/neu/service/` | manager 服务端业务逻辑 |
 | `manager/admin/src/main/scala/com/neu/client/` | manager 到 controller 的接口适配 |
-| `neuvector/controller/` | controller 后端 |
+| `microsegx/controller/` | controller 后端 |
 | `scanner/` | 扫描器逻辑 |
 
 也就是说，如果你后续的大改 UI 只是“换皮、重做交互、重排布局”，那我们应该尽量把改动压在：

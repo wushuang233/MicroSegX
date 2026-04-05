@@ -1,5 +1,5 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { FormlyComponents } from '@common/neuvector-formly/neuvector-formly.module';
+import { FormlyComponents } from '@common/microsegx-formly/microsegx-formly.module';
 import { WebhookTableField } from './constants';
 
 export const FederatedConfigFormConfig: FormlyFieldConfig[] = [

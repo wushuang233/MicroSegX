@@ -3,10 +3,10 @@ package cvetools
 import (
 	"testing"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/common"
-	"github.com/neuvector/scanner/detectors"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/common"
+	"github.com/microsegx/scanner/detectors"
 	"github.com/stretchr/testify/assert"
 )
 

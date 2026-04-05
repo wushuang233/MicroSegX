@@ -11,9 +11,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/scan"
-	"github.com/neuvector/neuvector/share/utils"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/scan"
+	"github.com/microsegx/microsegx/share/utils"
 )
 
 type SecretPermLogs struct {

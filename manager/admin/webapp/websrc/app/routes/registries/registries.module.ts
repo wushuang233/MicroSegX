@@ -11,7 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatInputModule } from '@angular/material/input';
 import { RegistriesService } from '@services/registries.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NeuVectorFormlyModule } from '@common/neuvector-formly/neuvector-formly.module';
+import { MicroSegXFormlyModule } from '@common/microsegx-formly/microsegx-formly.module';
 import { AddRegistryDialogComponent } from './registries-table/add-registry-dialog/add-registry-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
@@ -83,7 +83,7 @@ const routes: Routes = [{ path: '', component: RegistriesComponent }];
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
-    NeuVectorFormlyModule,
+    MicroSegXFormlyModule,
     AgGridAngular,
     TranslateModule,
     MatDialogModule,

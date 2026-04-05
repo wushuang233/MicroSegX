@@ -6,7 +6,7 @@ import sys
 from prog.main import main
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='NeuVector command line.')
+    parser = argparse.ArgumentParser(description='MicroSegX command line.')
     parser.add_argument('-d', '--debug', action="store_true", help='enable debug.')
     parser.add_argument('-s', '--server', help='controller IP address.')
     parser.add_argument('-p', '--port', type=int, help='controller port.')

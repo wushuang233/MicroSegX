@@ -23,20 +23,20 @@ stage_init:
 stage_mgr: stage_init copy_mgr
 
 pull_base:
-	docker pull neuvector/manager_base:${BASE_IMAGE_TAG}
+	docker pull microsegx/manager_base:${BASE_IMAGE_TAG}
 
 manager_image: pull_base stage_mgr
-	docker build --build-arg NV_TAG=$(NV_TAG) --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} --no-cache=true -t neuvector/manager -f manager/Dockerfile.manager .
+	docker build --build-arg NV_TAG=$(NV_TAG) --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} --no-cache=true -t microsegx/manager -f manager/Dockerfile.manager .
 
 jar:
 	@echo "Pulling images ..."
-	docker pull neuvector/build_manager:${BUILD_IMAGE_TAG}
+	docker pull microsegx/build_manager:${BUILD_IMAGE_TAG}
 	@echo "Making $@ ..."
-	docker run --rm -ia STDOUT --name build -v prebuild_manager:/prebuild/manager -v $(CURDIR):/manager -w /manager --entrypoint ./make_jar.sh neuvector/build_manager:${BUILD_IMAGE_TAG}
+	docker run --rm -ia STDOUT --name build -v prebuild_manager:/prebuild/manager -v $(CURDIR):/manager -w /manager --entrypoint ./make_jar.sh microsegx/build_manager:${BUILD_IMAGE_TAG}
 
 RUNNER := docker
 IMAGE_BUILDER := $(RUNNER) buildx
-MACHINE := neuvector
+MACHINE := microsegx
 BUILDX_ARGS ?= --sbom=true --attest type=provenance,mode=max
 DEFAULT_PLATFORMS := linux/amd64,linux/arm64,linux/x390s,linux/riscv64
 
@@ -73,7 +73,7 @@ endif
 
 TARGET_PLATFORMS ?= linux/amd64,linux/arm64
 STAGE_DIR=stage
-REPO ?= neuvector
+REPO ?= microsegx
 IMAGE = $(REPO)/manager:$(TAG)
 BUILD_ACTION = --load
 

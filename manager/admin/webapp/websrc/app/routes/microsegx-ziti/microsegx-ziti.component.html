@@ -1,0 +1,156 @@
+<div class="page-shell microsegx-page">
+  <div class="page-header">
+    <div class="page-header__copy">
+      <h1>{{ 'customUi.microsegx.ziti.title' | translate }}</h1>
+      <p>{{ 'customUi.microsegx.ziti.subtitle' | translate }}</p>
+    </div>
+    <div class="page-header__actions">
+      <a
+        mat-flat-button
+        color="primary"
+        class="page-action-button"
+        [routerLink]="['/microsegx/port-exposure']">
+        {{ 'customUi.microsegx.ziti.gotoPortExposure' | translate }}
+      </a>
+      <button mat-stroked-button class="page-action-button" (click)="refresh()">
+        {{ 'general.REFRESH' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <section class="microsegx-hero microsegx-hero--ziti">
+    <div class="microsegx-hero__copy">
+      <div class="microsegx-hero__eyebrow">
+        {{ 'customUi.microsegx.shared.workspace' | translate }}
+      </div>
+      <h2>{{ 'customUi.microsegx.ziti.heroTitle' | translate }}</h2>
+      <p>{{ 'customUi.microsegx.ziti.heroCopy' | translate }}</p>
+      <div class="microsegx-hero__badges">
+        <span class="microsegx-chip">
+          {{ 'customUi.microsegx.ziti.cards.controller' | translate }}
+          {{ overview?.ziti?.defaultControllerUrl || '-' }}
+        </span>
+        <span class="microsegx-chip">
+          {{ 'customUi.microsegx.ziti.cards.routers' | translate }}
+          {{ overview?.ziti?.aliveRouters || 0 }}
+        </span>
+      </div>
+    </div>
+
+    <div class="microsegx-summary-grid">
+      <mat-card class="page-card microsegx-summary-card">
+        <span>{{ 'customUi.microsegx.ziti.cards.routers' | translate }}</span>
+        <strong>{{ overview?.ziti?.aliveRouters || 0 }}</strong>
+        <p>{{ 'customUi.microsegx.ziti.cards.routersDesc' | translate }}</p>
+      </mat-card>
+      <mat-card class="page-card microsegx-summary-card">
+        <span>{{ 'customUi.microsegx.ziti.cards.services' | translate }}</span>
+        <strong>{{ overview?.ziti?.services || 0 }}</strong>
+        <p>{{ 'customUi.microsegx.ziti.cards.servicesDesc' | translate }}</p>
+      </mat-card>
+      <mat-card class="page-card microsegx-summary-card">
+        <span>{{
+          'customUi.microsegx.ziti.cards.identities' | translate
+        }}</span>
+        <strong>{{ overview?.ziti?.identities || 0 }}</strong>
+        <p>{{ 'customUi.microsegx.ziti.cards.identitiesDesc' | translate }}</p>
+      </mat-card>
+      <mat-card class="page-card microsegx-summary-card">
+        <span>{{ 'customUi.microsegx.ziti.cards.configs' | translate }}</span>
+        <strong>{{ overview?.ziti?.configs || 0 }}</strong>
+        <p>{{ 'customUi.microsegx.ziti.cards.configsDesc' | translate }}</p>
+      </mat-card>
+    </div>
+  </section>
+
+  <div *ngIf="error" class="microsegx-error">
+    {{ error }}
+  </div>
+
+  <div class="microsegx-layout-grid">
+    <mat-card class="page-card microsegx-guide-card">
+      <div class="microsegx-guide-card__header">
+        <h3>{{ 'customUi.microsegx.ziti.guideTitle' | translate }}</h3>
+        <p>{{ 'customUi.microsegx.ziti.guideCopy' | translate }}</p>
+      </div>
+      <div class="microsegx-guide-list">
+        <div class="microsegx-guide-item">
+          <span>01</span>
+          <strong>{{
+            'customUi.microsegx.ziti.guide.one.title' | translate
+          }}</strong>
+          <p>{{ 'customUi.microsegx.ziti.guide.one.desc' | translate }}</p>
+        </div>
+        <div class="microsegx-guide-item">
+          <span>02</span>
+          <strong>{{
+            'customUi.microsegx.ziti.guide.two.title' | translate
+          }}</strong>
+          <p>{{ 'customUi.microsegx.ziti.guide.two.desc' | translate }}</p>
+        </div>
+        <div class="microsegx-guide-item">
+          <span>03</span>
+          <strong>{{
+            'customUi.microsegx.ziti.guide.three.title' | translate
+          }}</strong>
+          <p>{{ 'customUi.microsegx.ziti.guide.three.desc' | translate }}</p>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="page-card microsegx-guide-card microsegx-guide-card--side">
+      <div class="microsegx-guide-card__header">
+        <h3>{{ 'customUi.microsegx.ziti.sideTitle' | translate }}</h3>
+        <p>{{ 'customUi.microsegx.ziti.sideCopy' | translate }}</p>
+      </div>
+      <dl class="microsegx-fact-list">
+        <div>
+          <dt>{{ 'customUi.microsegx.ziti.cards.controller' | translate }}</dt>
+          <dd>{{ overview?.ziti?.defaultControllerUrl || '-' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'customUi.microsegx.ziti.cards.credentials' | translate }}</dt>
+          <dd>
+            {{
+              overview?.ziti?.defaultCredentialsConfigured
+                ? ('policy.status.ENABLED' | translate)
+                : ('policy.status.DISABLED' | translate)
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'customUi.microsegx.ziti.sidePortExposure' | translate }}</dt>
+          <dd>
+            {{ overview?.portExposure?.managedServices || 0 }} /
+            {{ overview?.portExposure?.openPorts || 0 }}
+          </dd>
+        </div>
+      </dl>
+    </mat-card>
+  </div>
+
+  <section class="microsegx-workspace-shell">
+    <div class="microsegx-workspace-shell__head">
+      <div>
+        <div class="microsegx-hero__eyebrow">
+          {{ 'customUi.microsegx.shared.embedded' | translate }}
+        </div>
+        <h3>{{ 'customUi.microsegx.ziti.workspaceTitle' | translate }}</h3>
+        <p>{{ 'customUi.microsegx.ziti.workspaceCopy' | translate }}</p>
+      </div>
+      <a
+        mat-stroked-button
+        class="page-action-button"
+        href="/microsegx/ui/ziti/"
+        target="_blank"
+        rel="noreferrer">
+        {{ 'customUi.microsegx.shared.openNewTab' | translate }}
+      </a>
+    </div>
+    <div
+      class="microsegx-iframe-shell microsegx-iframe-shell--tall"
+      [class.is-loading]="loading">
+      <iframe [src]="workspaceUrl" title="MicroSegX Ziti Workspace"></iframe>
+    </div>
+  </section>
+</div>

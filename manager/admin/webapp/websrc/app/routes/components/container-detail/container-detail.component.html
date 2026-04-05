@@ -1,6 +1,8 @@
 <section class="fact-grid">
   <article class="fact-card">
-    <span class="fact-card__label">{{ 'controllers.detail.ID' | translate }}</span>
+    <span class="fact-card__label">{{
+      'controllers.detail.ID' | translate
+    }}</span>
     <strong class="fact-card__value">{{ container.brief.id }}</strong>
   </article>
 
@@ -8,7 +10,9 @@
     <span class="fact-card__label">
       {{ 'network.gridHeader.SERVICE' | translate }}
     </span>
-    <strong class="fact-card__value">{{ container.brief.service || '-' }}</strong>
+    <strong class="fact-card__value">{{
+      container.brief.service || '-'
+    }}</strong>
   </article>
 
   <article class="fact-card" *ngIf="container.rt_attributes.service_account">
@@ -30,10 +34,15 @@
   </article>
 
   <article class="fact-card fact-card--wide">
-    <span class="fact-card__label">{{ 'containers.detail.IMAGE' | translate }}</span>
+    <span class="fact-card__label">{{
+      'containers.detail.IMAGE' | translate
+    }}</span>
     <strong class="fact-card__value fact-card__value--wrap">
-      <ng-container *ngIf="container.brief.image_reg_scanned; else unscannedImage">
-        <a class="fact-card__link" (click)="redirectToRegistry(container.brief.image_id)">
+      <ng-container
+        *ngIf="container.brief.image_reg_scanned; else unscannedImage">
+        <a
+          class="fact-card__link"
+          (click)="redirectToRegistry(container.brief.image_id)">
           {{ container.brief.image }}
         </a>
       </ng-container>
@@ -52,9 +61,7 @@
     </strong>
   </article>
 
-  <article
-    class="fact-card"
-    *ngIf="container.security.scan_summary.base_os">
+  <article class="fact-card" *ngIf="container.security.scan_summary.base_os">
     <span class="fact-card__label">
       {{ 'containers.detail.BASE_OS' | translate }}
     </span>
@@ -76,7 +83,9 @@
     <span class="fact-card__label">
       {{ 'containers.detail.ENFORCER' | translate }}
     </span>
-    <strong class="fact-card__value">{{ container.enforcer_name || '-' }}</strong>
+    <strong class="fact-card__value">{{
+      container.enforcer_name || '-'
+    }}</strong>
   </article>
 
   <article class="fact-card" *ngIf="container.brief.state === 'exit'">
@@ -110,9 +119,7 @@
           class="detail-list-row__nested">
           <ng-container *ngIf="validateIP(net)">
             <div>IP: {{ net.ip }}/{{ net.ip_prefix }}</div>
-            <div>
-              {{ 'general.GATEWAY' | translate }}:{{ net.gateway }}
-            </div>
+            <div>{{ 'general.GATEWAY' | translate }}:{{ net.gateway }}</div>
           </ng-container>
         </div>
       </div>

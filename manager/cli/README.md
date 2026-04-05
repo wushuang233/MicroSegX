@@ -1,9 +1,9 @@
-# Neuvector CLI
+# MicroSegX CLI
 
-CLI tool used to control the Neuvector manager.
+CLI tool used to control the MicroSegX manager.
 
 ### Source Code
-https://github.com/neuvector/manager
+https://github.com/microsegx/manager
 
 # How to use
 ## Install requirements
@@ -29,7 +29,7 @@ You can start up the CLI using `python cli`. Optional flag is `-d` to enable deb
 ```
 ┌─(~/Projects/nv/manager/cli)
 └─(15:53:20 on main)──> python cli
-Welcome to the NeuVector command line. Type help or ? to list commands.
+Welcome to the MicroSegX command line. Type help or ? to list commands.
 
 #127.0.0.1>
 ```

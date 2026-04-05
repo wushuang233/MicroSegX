@@ -1,4 +1,4 @@
-# NeuVector 三仓完整架构与二次开发打包部署说明
+# MicroSegX 三仓完整架构与二次开发打包部署说明
 
 本文基于当前本地工作区整理，时间点为 2026-04-04。目标不是解释每个参数，而是帮我们后续二改时快速回答 4 个问题：
 
@@ -13,18 +13,18 @@
 
 ```text
 nv/
-├─ neuvector/        # controller + enforcer + 共享库 + upgrader
+├─ microsegx/        # controller + enforcer + 共享库 + upgrader
 ├─ manager/          # 管理界面 UI + manager 服务端
 ├─ scanner/          # 漏洞扫描器
-└─ neuvector-helm/   # 官方 Helm Chart
+└─ microsegx-helm/   # 官方 Helm Chart
 ```
 
 可以把它理解成 4 个层次：
 
-1. `neuvector/` 是核心控制面和节点执行面。
+1. `microsegx/` 是核心控制面和节点执行面。
 2. `manager/` 是管理后台和页面入口。
 3. `scanner/` 是漏洞扫描能力。
-4. `neuvector-helm/` 是把这些组件落到 K8s 的部署层。
+4. `microsegx-helm/` 是把这些组件落到 K8s 的部署层。
 
 后续二改时最重要的判断原则只有一句话：
 
@@ -32,7 +32,7 @@ nv/
 
 ## 2. 完整架构怎么理解
 
-从运行关系上看，NeuVector 不是一个“前后端单仓项目”，而是一组协同工作的组件。
+从运行关系上看，MicroSegX 不是一个“前后端单仓项目”，而是一组协同工作的组件。
 
 ```text
 浏览器
@@ -65,7 +65,7 @@ Upgrader 负责内部证书轮换与升级辅助
 
 ## 3. 各仓库分别负责什么
 
-### 3.1 `neuvector/`
+### 3.1 `microsegx/`
 
 这个仓库不是完整产品的全部源码，它主要承载：
 
@@ -96,7 +96,7 @@ Upgrader 负责内部证书轮换与升级辅助
 - 检测器和扫描工具链
 - 独立扫描/任务模式
 
-### 3.4 `neuvector-helm/`
+### 3.4 `microsegx-helm/`
 
 这个仓库不是业务源码仓，而是部署仓。后续把你们自己的镜像部署到 K8s，最推荐的入口就是它，而不是手写一堆零散 YAML。
 
@@ -110,7 +110,7 @@ Upgrader 负责内部证书轮换与升级辅助
 
 这一节是后面二改时最有用的部分。
 
-### 4.1 `neuvector/` 里的关键目录
+### 4.1 `microsegx/` 里的关键目录
 
 | 位置 | 作用 |
 | --- | --- |
@@ -122,7 +122,7 @@ Upgrader 负责内部证书轮换与升级辅助
 | `controller/resource/` | K8s 资源相关逻辑 |
 | `controller/scan/` | 扫描编排相关 |
 | `controller/rpc/` | 和其他组件的 RPC/gRPC 协同 |
-| `controller/nvk8sapi/` | NeuVector 自定义 K8s API / CRD 相关 |
+| `controller/nvk8sapi/` | MicroSegX 自定义 K8s API / CRD 相关 |
 | `controller/opa/` | OPA 相关逻辑 |
 | `agent/` | enforcer 主体代码 |
 | `agent/probe/` | 进程、网络、系统观察相关 |
@@ -185,7 +185,7 @@ Upgrader 负责内部证书轮换与升级辅助
 - 改 scanner 与 controller/enforcer 的协作，看 `scanner.go`、`server.go`
 - 改扫描任务模式，看 `task/`
 
-### 4.4 `neuvector-helm/` 里的关键目录
+### 4.4 `microsegx-helm/` 里的关键目录
 
 | 位置 | 作用 |
 | --- | --- |
@@ -211,7 +211,7 @@ Upgrader 负责内部证书轮换与升级辅助
 
 - 页面在 `manager/admin/webapp/websrc/`
 - 页面背后的服务适配在 `manager/admin/src/main/scala/com/neu/`
-- 真正的系统数据和策略能力在 `neuvector/controller/`
+- 真正的系统数据和策略能力在 `microsegx/controller/`
 
 ### 5.2 策略与配置下发
 
@@ -277,21 +277,21 @@ Upgrader 负责内部证书轮换与升级辅助
 | --- | --- |
 | 页面布局、表格、交互、前端路由 | `manager/admin/webapp/websrc/` |
 | manager 服务端接口、登录流程、中间转发 | `manager/admin/src/main/scala/com/neu/` |
-| controller API、权限、策略、K8s 资源同步、扫描编排 | `neuvector/controller/` |
-| 节点侧行为、运行时防护、进程/文件/网络采集 | `neuvector/agent/` 和 `neuvector/dp/` |
+| controller API、权限、策略、K8s 资源同步、扫描编排 | `microsegx/controller/` |
+| 节点侧行为、运行时防护、进程/文件/网络采集 | `microsegx/agent/` 和 `microsegx/dp/` |
 | 扫描引擎、漏洞识别、scanner 服务能力 | `scanner/` |
-| 部署副本数、Ingress、镜像地址、运行时 socket、K8s 适配参数 | `neuvector-helm/` |
-| 共享结构、共享 RPC 类型、公共工具 | `neuvector/share/`，并同步评估 controller / enforcer / scanner 是否都要重打 |
+| 部署副本数、Ingress、镜像地址、运行时 socket、K8s 适配参数 | `microsegx-helm/` |
+| 共享结构、共享 RPC 类型、公共工具 | `microsegx/share/`，并同步评估 controller / enforcer / scanner 是否都要重打 |
 
 这里有一个后续很容易踩坑的点：
 
 - `manager` 和 `controller` 主要是接口契约耦合
-- `scanner` 对 `neuvector` 不只是“接口耦合”，它在 `go.mod` 里直接依赖 `github.com/neuvector/neuvector`
+- `scanner` 对 `microsegx` 不只是“接口耦合”，它在 `go.mod` 里直接依赖 `github.com/microsegx/microsegx`
 
 这意味着：
 
-- 如果你改的是 `neuvector/share/` 或 controller/scanner 共用的 Go 类型，scanner 不能只改源码不处理依赖版本
-- 更稳妥的方式是把你修改后的 `neuvector` 提交到自己的 fork/tag，再让 `scanner` 指向你自己的版本
+- 如果你改的是 `microsegx/share/` 或 controller/scanner 共用的 Go 类型，scanner 不能只改源码不处理依赖版本
+- 更稳妥的方式是把你修改后的 `microsegx` 提交到自己的 fork/tag，再让 `scanner` 指向你自己的版本
 
 ## 7. 改完代码以后，应该重打哪些镜像
 
@@ -299,12 +299,12 @@ Upgrader 负责内部证书轮换与升级辅助
 
 | 你改了什么 | 需要重打的镜像 |
 | --- | --- |
-| `neuvector/controller/*` | `controller` |
-| `neuvector/agent/*` 或 `neuvector/dp/*` | `enforcer` |
-| `neuvector/share/*` | 至少重打 `controller` 和 `enforcer`，必要时连 `scanner` 一起重打 |
+| `microsegx/controller/*` | `controller` |
+| `microsegx/agent/*` 或 `microsegx/dp/*` | `enforcer` |
+| `microsegx/share/*` | 至少重打 `controller` 和 `enforcer`，必要时连 `scanner` 一起重打 |
 | `manager/admin/webapp/*` 或 `manager/admin/src/*` | `manager` |
 | `scanner/*` | `scanner` |
-| `neuvector-helm/*` | 不需要重打镜像，只需要重新 Helm 升级 |
+| `microsegx-helm/*` | 不需要重打镜像，只需要重新 Helm 升级 |
 
 更接近实际的建议是：
 
@@ -320,7 +320,7 @@ Upgrader 负责内部证书轮换与升级辅助
 
 ### 8.1 `controller` 镜像
 
-来自 `neuvector/package/Dockerfile.controller`，构建时会把这些东西打进去：
+来自 `microsegx/package/Dockerfile.controller`，构建时会把这些东西打进去：
 
 - `controller`
 - `monitor`
@@ -331,7 +331,7 @@ Upgrader 负责内部证书轮换与升级辅助
 
 ### 8.2 `enforcer` 镜像
 
-来自 `neuvector/package/Dockerfile.enforcer`，构建时会把这些东西打进去：
+来自 `microsegx/package/Dockerfile.enforcer`，构建时会把这些东西打进去：
 
 - `agent`
 - `dp`
@@ -425,7 +425,7 @@ TAG=5.5.0-myteam.1
 
 ### 10.1 构建 `controller` 和 `enforcer`
 
-在 Linux 环境进入 `neuvector/`：
+在 Linux 环境进入 `microsegx/`：
 
 ```bash
 make build-controller-image REPO=$REPO TAG=$TAG
@@ -471,9 +471,9 @@ make push-image REPO=$REPO TAG=$TAG
 
 这是后续二开里最值得提前写清楚的一点。
 
-`scanner/go.mod` 直接依赖 `github.com/neuvector/neuvector`。这意味着如果你改了：
+`scanner/go.mod` 直接依赖 `github.com/microsegx/microsegx`。这意味着如果你改了：
 
-- `neuvector/share/`
+- `microsegx/share/`
 - controller 和 scanner 共用的类型
 - controller / scanner 通信协议相关代码
 
@@ -481,7 +481,7 @@ make push-image REPO=$REPO TAG=$TAG
 
 更稳妥的做法有两种：
 
-1. 正式做法：把修改后的 `neuvector` 提交到你自己的 fork，并给出明确 tag 或 commit，再让 `scanner` 更新依赖到这个版本。
+1. 正式做法：把修改后的 `microsegx` 提交到你自己的 fork，并给出明确 tag 或 commit，再让 `scanner` 更新依赖到这个版本。
 2. 临时做法：为了本地联调，临时做本地 replace，但最终仍建议回到 fork/tag 的正式方式。
 
 如果只是改 manager 或 controller 的 REST 展示层，而没有碰 scanner 依赖的共享 Go 包，就不用额外处理 scanner 依赖。
@@ -490,7 +490,7 @@ make push-image REPO=$REPO TAG=$TAG
 
 最推荐的方式是：
 
-- 用 `neuvector-helm/charts/core`
+- 用 `microsegx-helm/charts/core`
 - 用你自己的 `values` 文件覆盖镜像地址和少量部署参数
 - 用 `helm upgrade --install` 做统一部署和升级
 
@@ -554,8 +554,8 @@ containerd:
 如果你的集群启用了 Pod Security Admission，建议给命名空间打上 privileged 标签，因为 enforcer 这类组件需要较高权限。
 
 ```bash
-kubectl create namespace neuvector
-kubectl label namespace neuvector pod-security.kubernetes.io/enforce=privileged --overwrite
+kubectl create namespace microsegx
+kubectl label namespace microsegx pod-security.kubernetes.io/enforce=privileged --overwrite
 ```
 
 ### 14.2 准备镜像拉取密钥
@@ -564,7 +564,7 @@ kubectl label namespace neuvector pod-security.kubernetes.io/enforce=privileged 
 
 ```bash
 kubectl create secret docker-registry regsecret \
-  -n neuvector \
+  -n microsegx \
   --docker-server=registry.example.com \
   --docker-username=<username> \
   --docker-password=<password>
@@ -575,8 +575,8 @@ kubectl create secret docker-registry regsecret \
 在 `nv/` 目录附近执行最方便：
 
 ```bash
-helm upgrade --install neuvector ./neuvector-helm/charts/core \
-  -n neuvector \
+helm upgrade --install microsegx ./microsegx-helm/charts/core \
+  -n microsegx \
   -f ./values.mycluster.yaml
 ```
 
@@ -637,15 +637,15 @@ helm upgrade --install neuvector ./neuvector-helm/charts/core \
 
 最后把最重要的坑单独列出来，后面真的会省很多时间。
 
-### 18.1 不要把 `neuvector/` 当成完整前后端单仓
+### 18.1 不要把 `microsegx/` 当成完整前后端单仓
 
-真正的前端页面在 `manager/`，不在 `neuvector/`。
+真正的前端页面在 `manager/`，不在 `microsegx/`。
 
 ### 18.2 manager 不是纯前端
 
 manager 既有 Angular 页面，也有 Scala 服务端，所以页面改动最后还是要重打整个 manager 镜像。
 
-### 18.3 scanner 和 neuvector 有真实代码依赖
+### 18.3 scanner 和 microsegx 有真实代码依赖
 
 如果改到了共享 Go 包，scanner 依赖要同步处理。
 

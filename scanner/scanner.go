@@ -14,17 +14,17 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/controller/api"
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/cluster"
-	"github.com/neuvector/neuvector/share/container"
-	"github.com/neuvector/neuvector/share/global"
-	"github.com/neuvector/neuvector/share/healthz"
-	"github.com/neuvector/neuvector/share/httpclient"
-	"github.com/neuvector/neuvector/share/migration"
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/common"
+	"github.com/microsegx/microsegx/controller/api"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/cluster"
+	"github.com/microsegx/microsegx/share/container"
+	"github.com/microsegx/microsegx/share/global"
+	"github.com/microsegx/microsegx/share/healthz"
+	"github.com/microsegx/microsegx/share/httpclient"
+	"github.com/microsegx/microsegx/share/migration"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/common"
 )
 
 func usage() {

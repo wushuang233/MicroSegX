@@ -25,8 +25,8 @@ jobs:
         secrets: |
           secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | RANCHER_DOCKER_USERNAME ;
           secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | RANCHER_DOCKER_PASSWORD ;
-          secret/data/github/repo/${{ github.repository }}/dockerhub/neuvector/credentials username | DOCKER_USERNAME ;
-          secret/data/github/repo/${{ github.repository }}/dockerhub/neuvector/credentials password | DOCKER_PASSWORD ;
+          secret/data/github/repo/${{ github.repository }}/dockerhub/microsegx/credentials username | DOCKER_USERNAME ;
+          secret/data/github/repo/${{ github.repository }}/dockerhub/microsegx/credentials password | DOCKER_PASSWORD ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials registry | PRIME_REGISTRY ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials username | PRIME_REGISTRY_USERNAME ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials password | PRIME_REGISTRY_PASSWORD
@@ -37,7 +37,7 @@ jobs:
     - name: Download vulnerability database
       run: |
         wget https://${{ secrets.VULNDB_SERVER }}/${TAG}/cvedb.regular -O data/cvedb.regular
-    - name: Publish neuvector manifest
+    - name: Publish microsegx manifest
       uses: rancher/ecm-distro-tools/actions/publish-image@10ab39987d39be83da6a252c1c3b540e496e0287 # v0.66.0
       with:
         push-to-public: true
@@ -47,15 +47,15 @@ jobs:
         platforms: linux/amd64,linux/arm64
 
         public-registry: docker.io
-        public-repo: neuvector
+        public-repo: microsegx
         public-username: ${{ env.DOCKER_USERNAME }}
         public-password: ${{ env.DOCKER_PASSWORD }}
     - name: Publish rancher manifest
       uses: rancher/ecm-distro-tools/actions/publish-image@10ab39987d39be83da6a252c1c3b540e496e0287 # v0.66.0
       env:
-        IMAGE_PREFIX: neuvector-
+        IMAGE_PREFIX: microsegx-
       with:
-        image: neuvector-scanner
+        image: microsegx-scanner
         tag: ${{ env.TAG }}
         platforms: linux/amd64,linux/arm64
 
@@ -86,8 +86,8 @@ jobs:
         secrets: |
           secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | RANCHER_DOCKER_USERNAME ;
           secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | RANCHER_DOCKER_PASSWORD ;
-          secret/data/github/repo/${{ github.repository }}/dockerhub/neuvector/credentials username | DOCKER_USERNAME ;
-          secret/data/github/repo/${{ github.repository }}/dockerhub/neuvector/credentials password | DOCKER_PASSWORD ;
+          secret/data/github/repo/${{ github.repository }}/dockerhub/microsegx/credentials username | DOCKER_USERNAME ;
+          secret/data/github/repo/${{ github.repository }}/dockerhub/microsegx/credentials password | DOCKER_PASSWORD ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials registry | PRIME_REGISTRY ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials username | PRIME_REGISTRY_USERNAME ;
           secret/data/github/repo/${{ github.repository }}/rancher-prime-registry/credentials password | PRIME_REGISTRY_PASSWORD
@@ -108,7 +108,7 @@ jobs:
         registry: docker.io
         username: ${{ env.DOCKER_USERNAME }}
         password: ${{ env.DOCKER_PASSWORD }}
-    - name: Tag v6 scanner to neuvector
+    - name: Tag v6 scanner to microsegx
       if: env.UPDATE_MUTABLE_TAG == 'True'
       run: |
         docker buildx imagetools create --tag docker.io/${{ github.repository_owner }}/scanner:6 docker.io/${{ github.repository_owner }}/scanner:${TAG}
@@ -122,7 +122,7 @@ jobs:
     - name: Tag v6 scanner to prime
       if: env.UPDATE_MUTABLE_TAG == 'True'
       run: |
-        docker buildx imagetools create --tag ${PRIME_REGISTRY}/rancher/neuvector-scanner:6 ${PRIME_REGISTRY}/rancher/neuvector-scanner:${TAG}
+        docker buildx imagetools create --tag ${PRIME_REGISTRY}/rancher/microsegx-scanner:6 ${PRIME_REGISTRY}/rancher/microsegx-scanner:${TAG}
     - name: Login to registry
       if: env.UPDATE_MUTABLE_TAG == 'True'
       uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
@@ -133,4 +133,4 @@ jobs:
     - name: Tag v6 scanner to rancher
       if: env.UPDATE_MUTABLE_TAG == 'True'
       run: |
-        docker buildx imagetools create --tag docker.io/rancher/neuvector-scanner:6 docker.io/rancher/neuvector-scanner:${TAG}
+        docker buildx imagetools create --tag docker.io/rancher/microsegx-scanner:6 docker.io/rancher/microsegx-scanner:${TAG}

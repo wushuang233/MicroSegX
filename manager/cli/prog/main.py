@@ -52,7 +52,7 @@ Example:  --criteria "cveHighCount:>=:5"
 
 
 class InteractiveCLI(cmd2.Cmd, object):
-    intro = 'Welcome to the NeuVector command line. Type help or ? to list commands.\n'
+    intro = 'Welcome to the MicroSegX command line. Type help or ? to list commands.\n'
 
     def __init__(self, ctx):
         self.ctx = ctx

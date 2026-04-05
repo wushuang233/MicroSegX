@@ -82,12 +82,16 @@
     </div>
 
     <mat-card class="page-card">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <div
+        class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div class="d-flex align-items-center flex-wrap gap-2">
           <label for="viewMenu" class="font-weight-normal mb-0 pe-2">
             {{ 'scan.report.view.TITLE' | translate }}:
           </label>
-          <button id="viewMenu" [matMenuTriggerFor]="viewMenu" mat-stroked-button>
+          <button
+            id="viewMenu"
+            [matMenuTriggerFor]="viewMenu"
+            mat-stroked-button>
             {{ 'scan.report.view.' + selectedView.toUpperCase() | translate }}
             <i class="eos-icons">arrow_drop_down</i>
           </button>

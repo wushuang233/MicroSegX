@@ -1,7 +1,7 @@
 import {
   FormlyComponents,
   FormlyValidators,
-} from '@common/neuvector-formly/neuvector-formly.module';
+} from '@common/microsegx-formly/microsegx-formly.module';
 
 const min = 60;
 const hour = min * 60;

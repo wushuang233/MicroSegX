@@ -4,6 +4,10 @@ set -e
 STAGE_DIR=stage
 
 export CHROME_BIN=/usr/bin/google-chrome
+unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+npm config delete proxy >/dev/null 2>&1 || true
+npm config delete https-proxy >/dev/null 2>&1 || true
+npm config delete noproxy >/dev/null 2>&1 || true
 
 rm -rf admin/target
 pushd admin/webapp

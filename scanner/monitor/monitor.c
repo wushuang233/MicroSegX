@@ -140,7 +140,7 @@ static pid_t fork_exec(int i)
         args[0] = g_procs[i].path;
         a = 1;
         args[a ++] = "-d";
-        args[a ++] = "/etc/neuvector/db/";
+        args[a ++] = "/etc/microsegx/db/";
 
         if (g_debug == 1) {
             args[a ++] = "-x";

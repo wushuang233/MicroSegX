@@ -110,7 +110,7 @@ export class ActionButtonsComponent implements ICellRendererAngularComp {
         criteriaValueStr.includes('kube')
       ) {
         namespace = 'system';
-      } else if (criteriaValueStr.includes('neuvector')) {
+      } else if (criteriaValueStr.includes('microsegx')) {
         namespace = '面向多云环境的主动微隔离系统';
       }
       let message = selectedRule.disable

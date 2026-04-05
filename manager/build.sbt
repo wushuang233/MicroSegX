@@ -6,7 +6,7 @@ import sbt.*
 
 ThisBuild / version                  := "1.0"
 ThisBuild / scalaVersion             := "3.3.5"
-ThisBuild / organization             := "com.neuvector"
+ThisBuild / organization             := "com.microsegx"
 ThisBuild / scalafmtOnCompile        := true
 ThisBuild / semanticdbEnabled        := true
 ThisBuild / Test / fork              := true
@@ -15,8 +15,8 @@ ThisBuild / semanticdbVersion        := scalafixSemanticdb.revision
 
 lazy val promptSettings = Seq(
   description :=
-    """NeuVector Security Center""".stripMargin,
-  homepage    := Some(url("https://github.com/neuvector/manager")),
+    """MicroSegX Security Center""".stripMargin,
+  homepage    := Some(url("https://github.com/microsegx/microsegx")),
   promptTheme := ScalapenosTheme
 )
 

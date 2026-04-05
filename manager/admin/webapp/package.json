@@ -1,8 +1,8 @@
 {
-  "name": "neuvector",
+  "name": "microsegx",
   "version": "5.0.0",
-  "description": "NeuVector - Full Life-cycle Container Security",
-  "author": "SUSE NeuVector",
+  "description": "MicroSegX - Full Life-cycle Container Security",
+  "author": "SUSE MicroSegX",
   "license": "Apache License",
   "private": true,
   "engines": {

@@ -1,0 +1,24 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Werror",
+      "-fstrict-aliasing",
+      "-Wstrict-aliasing",
+      "-g",
+      "-I./",
+      "-I./",
+      "-O3",
+      "-include",
+      "./../base.h",
+      "-c",
+      "-o",
+      ".objs/monitor.o",
+      "monitor.c"
+    ],
+    "directory": "/home/microsegx/go/src/github.com/microsegx/microsegx/monitor",
+    "file": "/home/microsegx/go/src/github.com/microsegx/microsegx/monitor/monitor.c",
+    "output": "/home/microsegx/go/src/github.com/microsegx/microsegx/monitor/.objs/monitor.o"
+  }
+]

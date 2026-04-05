@@ -108,7 +108,8 @@ export class ContainersComponent implements OnInit, OnDestroy {
     return this.activeContainer?.security?.scan_summary?.medium || 0;
   }
   get activeApplications(): string {
-    const applications = this.activeContainer?.rt_attributes?.applications || [];
+    const applications =
+      this.activeContainer?.rt_attributes?.applications || [];
     return applications.length ? applications.join(' · ') : '-';
   }
   get activePortsCount(): number {

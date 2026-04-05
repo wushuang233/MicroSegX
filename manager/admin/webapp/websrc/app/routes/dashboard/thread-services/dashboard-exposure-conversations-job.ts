@@ -6,8 +6,8 @@ export const dashboardExposureConversationsJob = () => {
     let baseUrl = event.target!.origin;
     let inputObj = JSON.parse(event.data);
     if (inputObj.isSUSESSO) {
-      baseUrl = `${inputObj.currUrl.split(inputObj.neuvectorProxy)[0]}${
-        inputObj.neuvectorProxy
+      baseUrl = `${inputObj.currUrl.split(inputObj.microsegxProxy)[0]}${
+        inputObj.microsegxProxy
       }`;
     }
     let apiUrl = `${baseUrl}/${PathConstant.CONVERSATION_HISTORY_URL}`;

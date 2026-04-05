@@ -1,4 +1,4 @@
-import { FormlyComponents } from '@common/neuvector-formly/neuvector-formly.module';
+import { FormlyComponents } from '@common/microsegx-formly/microsegx-formly.module';
 
 export const IBMSAToggleField = {
   key: 'ibmsa.ibmsa_ep_enabled',

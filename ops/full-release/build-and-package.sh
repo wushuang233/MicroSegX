@@ -20,7 +20,7 @@ source "${ENV_FILE}"
 : "${SCANNER_TAG:?SCANNER_TAG is required}"
 
 if [[ "${DEPLOY_MODE}" == "local" ]]; then
-  REGISTRY=${REGISTRY:-${LOCAL_IMAGE_REGISTRY:-local.neuvector}}
+  REGISTRY=${REGISTRY:-${LOCAL_IMAGE_REGISTRY:-local.microsegx}}
 else
   : "${REGISTRY:?REGISTRY is required}"
 fi
@@ -32,10 +32,10 @@ IMAGES_FILE="${BUNDLE_DIR}/image-list.txt"
 METADATA_FILE="${BUNDLE_DIR}/build-metadata.txt"
 IMAGE_TAR="${ARTIFACT_DIR}/images-${CORE_TAG}.tar.gz"
 
-NEUVECTOR_DIR="${NV_ROOT}/neuvector"
+MICROSEGX_DIR="${NV_ROOT}/microsegx"
 MANAGER_DIR="${NV_ROOT}/manager"
 SCANNER_DIR="${NV_ROOT}/scanner"
-HELM_DIR="${NV_ROOT}/neuvector-helm"
+HELM_DIR="${NV_ROOT}/microsegx-helm"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -117,22 +117,23 @@ cp "${SCRIPT_DIR}/deploy-core.sh" "${BUNDLE_DIR}/deploy-core.sh"
 cp "${SCRIPT_DIR}/load-and-push.sh" "${BUNDLE_DIR}/load-and-push.sh"
 cp "${SCRIPT_DIR}/load-local-images.sh" "${BUNDLE_DIR}/load-local-images.sh"
 cp "${SCRIPT_DIR}/full-release.env.example" "${BUNDLE_DIR}/full-release.env.example"
+cp "${ENV_FILE}" "${BUNDLE_DIR}/full-release.env"
 
-build_local_image controller "${NEUVECTOR_DIR}" "${NEUVECTOR_DIR}/package/Dockerfile.controller" "${CORE_TAG}"
-build_local_image enforcer "${NEUVECTOR_DIR}" "${NEUVECTOR_DIR}/package/Dockerfile.enforcer" "${CORE_TAG}"
+build_local_image controller "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.controller" "${CORE_TAG}"
+build_local_image enforcer "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.enforcer" "${CORE_TAG}"
 build_local_image manager "${MANAGER_DIR}" "${MANAGER_DIR}/package/Dockerfile" "${CORE_TAG}"
 build_local_image scanner "${SCANNER_DIR}" "${SCANNER_DIR}/package/Dockerfile" "${SCANNER_TAG}"
 
 if [[ "${MIRROR_UPDATER:-true}" == "true" ]]; then
-  mirror_upstream_image "${UPSTREAM_UPDATER_IMAGE:-neuvector/updater:0.0.9}" updater "${UPDATER_TAG:-0.0.9}"
+  mirror_upstream_image "${UPSTREAM_UPDATER_IMAGE:-microsegx/updater:0.0.9}" updater "${UPDATER_TAG:-0.0.9}"
 fi
 
 if [[ "${MIRROR_REGISTRY_ADAPTER:-false}" == "true" ]]; then
-  mirror_upstream_image "${UPSTREAM_REGISTRY_ADAPTER_IMAGE:-neuvector/registry-adapter:0.2.4}" registry-adapter "${REGISTRY_ADAPTER_TAG:-0.2.4}"
+  mirror_upstream_image "${UPSTREAM_REGISTRY_ADAPTER_IMAGE:-microsegx/registry-adapter:0.2.4}" registry-adapter "${REGISTRY_ADAPTER_TAG:-0.2.4}"
 fi
 
 if [[ "${MIRROR_COMPLIANCE_CONFIG:-false}" == "true" ]]; then
-  mirror_upstream_image "${UPSTREAM_COMPLIANCE_CONFIG_IMAGE:-neuvector/compliance-config:1.0.11}" compliance-config "${COMPLIANCE_CONFIG_TAG:-1.0.11}"
+  mirror_upstream_image "${UPSTREAM_COMPLIANCE_CONFIG_IMAGE:-microsegx/compliance-config:1.0.11}" compliance-config "${COMPLIANCE_CONFIG_TAG:-1.0.11}"
 fi
 
 echo "==> Exporting images to ${IMAGE_TAR}"
@@ -141,8 +142,8 @@ docker save $(tr '\n' ' ' <"${IMAGES_FILE}") | gzip >"${IMAGE_TAR}"
 sha256sum "${IMAGE_TAR}" >"${IMAGE_TAR}.sha256"
 
 {
-  echo "release_name=${RELEASE_NAME:-neuvector}"
-  echo "namespace=${NAMESPACE:-neuvector}"
+  echo "release_name=${RELEASE_NAME:-microsegx}"
+  echo "namespace=${NAMESPACE:-microsegx}"
   echo "registry=${REGISTRY}"
   echo "image_namespace=${IMAGE_NAMESPACE}"
   echo "core_tag=${CORE_TAG}"

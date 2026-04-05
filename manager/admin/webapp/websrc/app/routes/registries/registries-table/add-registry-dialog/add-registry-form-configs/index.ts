@@ -14,7 +14,7 @@ import { SonatypeNexusConfig } from './configs/sonatype-nexus.config';
 import { GoogleContainerRegistryConfig } from './configs/google-container-registry.config';
 import { IBMCloudContainerRegistryConfig } from './configs/ibm-cloud-container-registry.config';
 import { JFROgArtifactoryConfig } from './configs/jfrog-artifactory.config';
-import { FormlyComponents } from '@common/neuvector-formly/neuvector-formly.module';
+import { FormlyComponents } from '@common/microsegx-formly/microsegx-formly.module';
 import { OpenShiftRegistryConfig } from './configs/openshift-registry.config';
 
 export const AddRegistryFieldConfig: FormlyFieldConfig[] = [

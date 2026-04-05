@@ -1,0 +1,223 @@
+:host {
+  display: block;
+}
+
+.microsegx-page {
+  padding-bottom: 24px;
+}
+
+.microsegx-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.95fr);
+  gap: 24px;
+  padding: 28px;
+  border-radius: 28px;
+  box-shadow: var(--saas-card-shadow);
+}
+
+.microsegx-hero--ziti {
+  background:
+    radial-gradient(circle at top right, rgba(8, 66, 152, 0.16), transparent 36%),
+    linear-gradient(145deg, #ffffff 0%, #f4f9ff 100%);
+}
+
+.microsegx-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.microsegx-hero__eyebrow {
+  color: var(--saas-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.microsegx-hero h2,
+.microsegx-workspace-shell__head h3,
+.microsegx-guide-card h3 {
+  margin: 0;
+  color: var(--saas-text);
+  font-family: Poppins, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.microsegx-hero p,
+.microsegx-guide-card p,
+.microsegx-workspace-shell__head p {
+  margin: 0;
+  color: var(--saas-text-secondary);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.microsegx-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.microsegx-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(22, 119, 255, 0.08);
+  color: #4e6783;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.microsegx-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.microsegx-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 150px;
+}
+
+.microsegx-summary-card span,
+.microsegx-fact-list dt {
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.microsegx-summary-card strong,
+.microsegx-fact-list dd {
+  margin: 0;
+  color: var(--saas-text);
+  font-family: Poppins, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.microsegx-layout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: 24px;
+}
+
+.microsegx-guide-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.microsegx-guide-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.microsegx-guide-item {
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(22, 119, 255, 0.08);
+}
+
+.microsegx-guide-item span {
+  display: inline-flex;
+  margin-bottom: 12px;
+  color: #1677ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.microsegx-guide-item strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--saas-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.microsegx-guide-item p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.microsegx-fact-list {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+}
+
+.microsegx-fact-list div {
+  padding: 16px;
+  border-radius: 16px;
+  background: #f8fbff;
+  border: 1px solid rgba(22, 119, 255, 0.08);
+}
+
+.microsegx-workspace-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.microsegx-workspace-shell__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.microsegx-iframe-shell {
+  overflow: hidden;
+  border-radius: 22px;
+  background: #edf4ff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--saas-card-shadow);
+}
+
+.microsegx-iframe-shell iframe {
+  width: 100%;
+  min-height: 1780px;
+  border: 0;
+  background: transparent;
+}
+
+.microsegx-iframe-shell--tall iframe {
+  min-height: 2300px;
+}
+
+.microsegx-iframe-shell.is-loading {
+  opacity: 0.7;
+}
+
+.microsegx-error {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--saas-danger-bg);
+  color: var(--saas-danger);
+}
+
+@media screen and (max-width: 1365px) {
+  .microsegx-hero,
+  .microsegx-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .microsegx-guide-list,
+  .microsegx-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

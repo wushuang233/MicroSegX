@@ -258,7 +258,10 @@ export const PREVIEW_DASHBOARD_NOTIFICATIONS = {
           { source_workload_name: 'frontend' },
           { source_workload_name: 'frontend' },
         ],
-        [{ source_workload_name: 'checkout' }, { source_workload_name: 'checkout' }],
+        [
+          { source_workload_name: 'checkout' },
+          { source_workload_name: 'checkout' },
+        ],
         [{ source_workload_name: 'inventory' }],
       ],
       destination: [
@@ -431,7 +434,8 @@ export const PREVIEW_SECURITY_EVENTS_RAW = [
         level: 'Critical',
         cluster_name: 'preview-local',
         action: 'alert',
-        message: 'Unexpected shell activity detected inside protected container.',
+        message:
+          'Unexpected shell activity detected inside protected container.',
         group: 'nv.frontend',
         proc_name: 'bash',
         proc_path: '/usr/bin/bash',
@@ -1155,13 +1159,37 @@ export const PREVIEW_ALL_SCANNED_IMAGES_SUMMARY_RESPONSE = {
       platform: 1,
     },
     top_images: [
-      { index: 0, display_name: 'checkout:v2.4.1', high: 7, medium: 11, low: 2 },
-      { index: 1, display_name: 'inventory:v1.8.3', high: 5, medium: 8, low: 3 },
+      {
+        index: 0,
+        display_name: 'checkout:v2.4.1',
+        high: 7,
+        medium: 11,
+        low: 2,
+      },
+      {
+        index: 1,
+        display_name: 'inventory:v1.8.3',
+        high: 5,
+        medium: 8,
+        low: 3,
+      },
       { index: 2, display_name: 'frontend:v2.1.0', high: 4, medium: 9, low: 4 },
     ],
     top_nodes: [
-      { index: 0, display_name: 'aks-nodepool-01', high: 9, medium: 17, low: 4 },
-      { index: 1, display_name: 'aks-nodepool-02', high: 7, medium: 11, low: 5 },
+      {
+        index: 0,
+        display_name: 'aks-nodepool-01',
+        high: 9,
+        medium: 17,
+        low: 4,
+      },
+      {
+        index: 1,
+        display_name: 'aks-nodepool-02',
+        high: 7,
+        medium: 11,
+        low: 5,
+      },
     ],
   },
 };
@@ -1200,7 +1228,13 @@ export const PREVIEW_VUL_QUERY_DATA = {
     top_images: [
       { index: 0, display_name: 'checkout:v2.4.1', high: 1, medium: 1, low: 0 },
       { index: 1, display_name: 'frontend:v2.1.0', high: 1, medium: 0, low: 1 },
-      { index: 2, display_name: 'inventory:v1.8.3', high: 0, medium: 0, low: 1 },
+      {
+        index: 2,
+        display_name: 'inventory:v1.8.3',
+        high: 0,
+        medium: 0,
+        low: 1,
+      },
     ],
     top_nodes: [
       { index: 0, display_name: 'aks-nodepool-01', high: 1, medium: 1, low: 1 },

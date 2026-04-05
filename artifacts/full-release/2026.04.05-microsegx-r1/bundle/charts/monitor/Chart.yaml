@@ -1,0 +1,11 @@
+name: monitor
+apiVersion: v1
+version: 2.8.12
+appVersion: 1.0.11
+description: Helm chart for MicroSegX monitor services
+home: https://microsegx.com
+icon: https://avatars2.githubusercontent.com/u/19367275?s=200&v=4
+maintainers:
+  - name: becitsthere
+    email: support@microsegx.com
+engine: gotpl

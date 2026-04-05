@@ -42,17 +42,23 @@
         <div class="showcase-grid">
           <div class="showcase-card">
             <span>01</span>
-            <strong>{{ 'customUi.login.hero.cards.visibility.title' | translate }}</strong>
+            <strong>{{
+              'customUi.login.hero.cards.visibility.title' | translate
+            }}</strong>
             <p>{{ 'customUi.login.hero.cards.visibility.desc' | translate }}</p>
           </div>
           <div class="showcase-card">
             <span>02</span>
-            <strong>{{ 'customUi.login.hero.cards.policy.title' | translate }}</strong>
+            <strong>{{
+              'customUi.login.hero.cards.policy.title' | translate
+            }}</strong>
             <p>{{ 'customUi.login.hero.cards.policy.desc' | translate }}</p>
           </div>
           <div class="showcase-card">
             <span>03</span>
-            <strong>{{ 'customUi.login.hero.cards.operations.title' | translate }}</strong>
+            <strong>{{
+              'customUi.login.hero.cards.operations.title' | translate
+            }}</strong>
             <p>{{ 'customUi.login.hero.cards.operations.desc' | translate }}</p>
           </div>
         </div>
@@ -62,14 +68,16 @@
         <div class="login-panel-shell">
           <div class="login-panel-header">
             <ng-container *ngIf="customLoginLogo; else nvLogo">
-              <div class="custom-login-logo" [innerHTML]="customLoginLogo"></div>
+              <div
+                class="custom-login-logo"
+                [innerHTML]="customLoginLogo"></div>
             </ng-container>
             <ng-template #nvLogo>
               <div
                 class="login-brand"
                 [ngClass]="{
                   'openID-saml-eula':
-                    !isEulaAccepted && servers && servers.length === 2
+                    !isEulaAccepted && servers && servers.length === 2,
                 }">
                 <div class="login-brand-mark">MC</div>
                 <div class="login-brand-copy">
@@ -98,7 +106,7 @@
               'login-panel-eula': !isEulaAccepted,
               'login-panel-openid-saml': servers && servers.length === 2,
               'login-panel-openid-saml-eula':
-                !isEulaAccepted && servers && servers.length === 2
+                !isEulaAccepted && servers && servers.length === 2,
             }"
             *ngIf="!isFromSSO">
             <div class="login-panel-inner">
@@ -180,8 +188,12 @@
                 <div
                   class="login-actions"
                   *ngIf="
-                    (!servers || servers.length === 0) ||
-                    (servers && servers.length === 1 && !samlEnabled && !oidcEnabled)
+                    !servers ||
+                    servers.length === 0 ||
+                    (servers &&
+                      servers.length === 1 &&
+                      !samlEnabled &&
+                      !oidcEnabled)
                   ">
                   <button
                     class="login-btn login-btn-primary login-btn-full"
@@ -195,7 +207,9 @@
                 <div
                   class="login-actions login-actions-inline"
                   *ngIf="
-                    servers && servers.length === 1 && (samlEnabled || oidcEnabled)
+                    servers &&
+                    servers.length === 1 &&
+                    (samlEnabled || oidcEnabled)
                   ">
                   <button
                     class="login-btn login-btn-primary"
@@ -286,12 +300,24 @@
                   <h3>{{ 'customUi.login.preview.title' | translate }}</h3>
                   <p>{{ 'customUi.login.preview.desc' | translate }}</p>
                   <div class="preview-entry__chips">
-                    <span>{{ 'customUi.login.preview.pages.dashboard' | translate }}</span>
-                    <span>{{ 'customUi.login.preview.pages.workloads' | translate }}</span>
-                    <span>{{ 'customUi.login.preview.pages.registries' | translate }}</span>
-                    <span>{{ 'customUi.login.preview.pages.vulnerabilities' | translate }}</span>
-                    <span>{{ 'customUi.login.preview.pages.events' | translate }}</span>
-                    <span>{{ 'customUi.login.preview.pages.support' | translate }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.dashboard' | translate
+                    }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.workloads' | translate
+                    }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.registries' | translate
+                    }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.vulnerabilities' | translate
+                    }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.events' | translate
+                    }}</span>
+                    <span>{{
+                      'customUi.login.preview.pages.support' | translate
+                    }}</span>
                   </div>
                 </div>
                 <button

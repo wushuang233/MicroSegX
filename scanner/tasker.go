@@ -16,9 +16,9 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/scanner/common"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/scanner/common"
 )
 
 const reqTemplate = "/tmp/%s_i.json"

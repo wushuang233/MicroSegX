@@ -16,15 +16,15 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/httptrace"
-	"github.com/neuvector/neuvector/share/scan"
-	"github.com/neuvector/neuvector/share/scan/registry"
-	"github.com/neuvector/neuvector/share/scan/secrets"
-	"github.com/neuvector/neuvector/share/system"
-	"github.com/neuvector/neuvector/share/utils"
-	"github.com/neuvector/scanner/common"
-	"github.com/neuvector/scanner/detectors"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/httptrace"
+	"github.com/microsegx/microsegx/share/scan"
+	"github.com/microsegx/microsegx/share/scan/registry"
+	"github.com/microsegx/microsegx/share/scan/secrets"
+	"github.com/microsegx/microsegx/share/system"
+	"github.com/microsegx/microsegx/share/utils"
+	"github.com/microsegx/scanner/common"
+	"github.com/microsegx/scanner/detectors"
 )
 
 const (
@@ -140,7 +140,7 @@ type layerScanFiles struct {
 
 func (cv *ScanTools) ScanImageData(data *share.ScanData) (*share.ScanResult, error) {
 	result := &share.ScanResult{
-		Provider:        share.ScanProvider_Neuvector,
+		Provider:        share.ScanProvider_Microsegx,
 		Version:         cv.CveDBVersion,
 		CVEDBCreateTime: cv.CveDBCreateTime,
 		Secrets:         &share.ScanSecretResult{},
@@ -227,7 +227,7 @@ func (cv *ScanTools) ScanAppPackage(req *share.ScanAppRequest, namespace string)
 	vulList := getVulItemList(appvuls, common.DBAppName)
 
 	result := &share.ScanResult{
-		Provider:        share.ScanProvider_Neuvector,
+		Provider:        share.ScanProvider_Microsegx,
 		Version:         cv.CveDBVersion,
 		CVEDBCreateTime: cv.CveDBCreateTime,
 		Error:           share.ScanErrorCode_ScanErrNone,
@@ -255,7 +255,7 @@ func (cv *ScanTools) writeModuleFile(apps []scan.AppPackage) {
 // ScanImage helps the Image scanning
 func (cv *ScanTools) ScanImage(ctx context.Context, req *share.ScanImageRequest, imgPath string) (*share.ScanResult, error) {
 	result := &share.ScanResult{
-		Provider:           share.ScanProvider_Neuvector,
+		Provider:           share.ScanProvider_Microsegx,
 		Version:            cv.CveDBVersion,
 		CVEDBCreateTime:    cv.CveDBCreateTime,
 		Error:              share.ScanErrorCode_ScanErrNone,
@@ -778,7 +778,7 @@ func (cv *ScanTools) ScanImage(ctx context.Context, req *share.ScanImageRequest,
 // ScanAwsLambda helps the AWS Lambda scanning
 func (cv *ScanTools) ScanAwsLambda(req *share.ScanAwsLambdaRequest, imgPath string) (*share.ScanResult, error) {
 	result := &share.ScanResult{
-		Provider:        share.ScanProvider_Neuvector,
+		Provider:        share.ScanProvider_Microsegx,
 		Version:         cv.CveDBVersion,
 		CVEDBCreateTime: cv.CveDBCreateTime,
 	}

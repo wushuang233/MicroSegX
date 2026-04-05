@@ -1,25 +1,25 @@
-# NeuVector
+# MicroSegX
 
-NeuVector vulnerability scanner for the SUSE NeuVector Container Security Platform.
+MicroSegX vulnerability scanner for the SUSE MicroSegX Container Security Platform.
 
 The scanner has multiple working modes.
 
-The scanner runs with the NeuVector controller to provide registry scan and runtime scan functions. Please see the [document](https://open-docs.neuvector.com) and the [helm chart](https://github.com/neuvector/neuvector-helm) of how to deploy scanners in this mode.
+The scanner runs with the MicroSegX controller to provide registry scan and runtime scan functions. Please see the [document](https://open-docs.microsegx.com) and the [helm chart](https://github.com/microsegx/microsegx-helm) of how to deploy scanners in this mode.
 
 The scanner runs in standalone mode, print the scan results to the screen and save it to the file at the same time. Run the scanner in the standalone mode with the following command.
 
 ```
-docker run --rm  neuvector/scanner -i ubuntu:18.04
+docker run --rm  microsegx/scanner -i ubuntu:18.04
 ```
 
 The scanner can also be used in the CI/CD pipeline though various of plugins.
 
-Note: Deploying from the Rancher Manager 2.6.5+ NeuVector chart pulls from the rancher-mirrored repo and deploys into the cattle-neuvector-system namespace.
+Note: Deploying from the Rancher Manager 2.6.5+ MicroSegX chart pulls from the rancher-mirrored repo and deploys into the cattle-microsegx-system namespace.
 
 # Bugs & Issues
-Please submit bugs and issues to [neuvector/neuvector](//github.com/neuvector/neuvector/issues) with a title starting with `[SCAN] `.
+Please submit bugs and issues to [microsegx/microsegx](//github.com/microsegx/microsegx/issues) with a title starting with `[SCAN] `.
 
-Or just [click here](//github.com/neuvector/neuvector/issues/new?title=%5BSCAN%5D%20) to create a new issue.
+Or just [click here](//github.com/microsegx/microsegx/issues/new?title=%5BSCAN%5D%20) to create a new issue.
 
 # License
 

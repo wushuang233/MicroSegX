@@ -106,7 +106,7 @@ $nv-mobile-width: 480px;
 }
 
 .text-action {
-  color: $neuvector-grey-900;
+  color: $microsegx-grey-900;
 }
 
 .text-H {
@@ -120,7 +120,7 @@ $nv-mobile-width: 480px;
 }
 
 /* ========================================================================
-    Neuvector dialog
+    MicroSegX dialog
   ========================================================================== */
 .nv-dialog {
   .dialog-header {
@@ -146,7 +146,7 @@ $nv-mobile-width: 480px;
 }
 
 /* ========================================================================
-    Neuvector labels
+    MicroSegX labels
   ========================================================================== */
 .type-label {
   @media print {
@@ -192,7 +192,7 @@ $nv-mobile-width: 480px;
 
   &.fed-rule {
     border: 1px solid #000;
-    background-color: $neuvector-grey-900;
+    background-color: $microsegx-grey-900;
     color: #fff;
   }
 
@@ -233,7 +233,7 @@ $nv-mobile-width: 480px;
     color: #fff;
   }
   &.incident {
-    background-color: $neuvector-grey-500;
+    background-color: $microsegx-grey-500;
     color: #fff;
   }
   &.event {
@@ -249,7 +249,7 @@ $nv-mobile-width: 480px;
     color: #fff;
   }
   &.benchmark {
-    background-color: $neuvector-mid-green-500;
+    background-color: $microsegx-mid-green-500;
     color: #fff;
   }
   &.info {
@@ -309,7 +309,7 @@ hr.fancy {
     .rule-actions-collapse {
       display: none;
     }
-    background-color: $neuvector-light-green-50;
+    background-color: $microsegx-light-green-50;
   }
 }
 
@@ -401,13 +401,13 @@ hr.fancy {
 }
 
 .disabled-action {
-  background-color: $neuvector-grey-400 !important;
+  background-color: $microsegx-grey-400 !important;
   -webkit-print-color-adjust: exact;
 }
 
 .disabled-action-2 {
-  color: $neuvector-grey-500 !important;
-  border: 1px solid $neuvector-grey-400;
+  color: $microsegx-grey-500 !important;
+  border: 1px solid $microsegx-grey-400;
   -webkit-print-color-adjust: exact;
 }
 
@@ -496,21 +496,21 @@ hr.fancy {
 
 .fed-rule {
   border: 1px solid #000;
-  background-color: $neuvector-grey-900;
+  background-color: $microsegx-grey-900;
   color: #fff;
 }
 
 .disabled-rule {
-  border: 1px solid $neuvector-grey-400 !important;
-  background-color: $neuvector-grey-100 !important;
+  border: 1px solid $microsegx-grey-400 !important;
+  background-color: $microsegx-grey-100 !important;
   color: #becfd5 !important;
 }
 
 .disabled-rule-print {
-  border: 1px solid $neuvector-grey-600 !important;
-  background-color: $neuvector-grey-100 !important;
+  border: 1px solid $microsegx-grey-600 !important;
+  background-color: $microsegx-grey-100 !important;
   -webkit-print-color-adjust: exact;
-  color: $neuvector-grey-600 !important;
+  color: $microsegx-grey-600 !important;
 }
 
 .removed-rule {
@@ -536,7 +536,7 @@ hr.fancy {
   border-style: ridge;
   box-sizing: border-box;
   padding: 5px;
-  background-color: $neuvector-light-green-50;
+  background-color: $microsegx-light-green-50;
 }
 
 .full-width-flag {
@@ -609,7 +609,7 @@ hr.fancy {
 .report-summary {
   page-break-after: always;
   .summary-title {
-    color: $neuvector-dark-green-800;
+    color: $microsegx-dark-green-800;
     font-size: 30px;
     font-weight: bolder;
     margin: 10px 0;
@@ -624,11 +624,11 @@ hr.fancy {
     margin-right: 0;
   }
   .statistic-row:nth-child(even) {
-    background: $neuvector-dark-green-200;
+    background: $microsegx-dark-green-200;
     -webkit-print-color-adjust: exact;
   }
   .statistic-row:nth-child(odd) {
-    background: $neuvector-dark-green-100;
+    background: $microsegx-dark-green-100;
     -webkit-print-color-adjust: exact;
   }
   .statistic-cell {
@@ -638,7 +638,7 @@ hr.fancy {
 }
 
 .print-table {
-  border: 1px solid $neuvector-grey-400;
+  border: 1px solid $microsegx-grey-400;
   display: table;
   width: 980px;
   page-break-after: auto;
@@ -646,13 +646,13 @@ hr.fancy {
 }
 
 .print-header {
-  background-color: $neuvector-grey-100;
+  background-color: $microsegx-grey-100;
   -webkit-print-color-adjust: exact;
 }
 
 .print-header,
 .print-row {
-  border-bottom: 1px solid $neuvector-grey-400;
+  border-bottom: 1px solid $microsegx-grey-400;
   font-size: 10px;
   page-break-inside: avoid;
   page-break-after: auto;
@@ -670,27 +670,27 @@ hr.fancy {
 }
 
 .print-cell:not(:last-child) {
-  border-right: 1px dashed $neuvector-grey-400;
+  border-right: 1px dashed $microsegx-grey-400;
 }
 
 hr.solid {
   width: 100%;
   height: 1px;
-  border-top: solid 1px $neuvector-grey-200;
+  border-top: solid 1px $microsegx-grey-200;
 }
 
 .disabled-row {
-  color: $neuvector-grey-500 !important;
+  color: $microsegx-grey-500 !important;
 }
 
 .disabled-row-print {
-  color: $neuvector-grey-500 !important;
-  background-color: $neuvector-grey-50 !important;
+  color: $microsegx-grey-500 !important;
+  background-color: $microsegx-grey-50 !important;
   -webkit-print-color-adjust: exact;
 }
 
 .critical-row {
-  background-color: $neuvector-grey-200 !important;
+  background-color: $microsegx-grey-200 !important;
 }
 
 .discover {
@@ -776,14 +776,14 @@ ngx-gauge.score > .gauge > .value {
     float: left;
     height: 16px;
     width: 50px;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
     line-height: 16px;
   }
   td:first-child {
-    border-right: $neuvector-grey-900 1px solid;
+    border-right: $microsegx-grey-900 1px solid;
   }
   td:last-child {
-    border-left: $neuvector-grey-900 1px solid;
+    border-left: $microsegx-grey-900 1px solid;
   }
 }
 .dashboard-summary-value {
@@ -791,7 +791,7 @@ ngx-gauge.score > .gauge > .value {
   & > td {
     float: left;
     height: 16px;
-    background-color: $neuvector-grey-900;
+    background-color: $microsegx-grey-900;
     -webkit-print-color-adjust: exact;
     color: #fff;
     width: 50px;
@@ -819,7 +819,7 @@ ngx-gauge.score > .gauge > .value {
 .risk-section-titles {
   .title {
     font-size: 13px;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
     @media screen and (max-width: $nv-desktop-width) {
       font-size: 12px;
     }
@@ -840,7 +840,7 @@ ngx-gauge.score > .gauge > .value {
     }
     line-height: 1.43;
     text-align: center;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
     height: 10px;
   }
 }
@@ -852,9 +852,9 @@ ngx-gauge.score > .gauge > .value {
   //  height: calc(35px + 3vw);
   //}
   &.divider {
-    border-right: $neuvector-grey-200 1px solid;
+    border-right: $microsegx-grey-200 1px solid;
     @media only screen and (max-width: 767px) {
-      border-bottom: $neuvector-grey-200 1px solid;
+      border-bottom: $microsegx-grey-200 1px solid;
       border-right: none;
       padding-bottom: 0;
     }
@@ -877,7 +877,7 @@ ngx-gauge.score > .gauge > .value {
       }
     }
     text-align: left;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
 
     // Move down the indicators
     .carousel-indicators {
@@ -888,7 +888,7 @@ ngx-gauge.score > .gauge > .value {
     .carousel-indicators li {
       width: 6px;
       height: 6px;
-      border: 2px solid $neuvector-grey-800;
+      border: 2px solid $microsegx-grey-800;
       border-radius: 6px;
       margin-left: 6px;
       margin-right: 6px;
@@ -898,7 +898,7 @@ ngx-gauge.score > .gauge > .value {
     .carousel-indicators .active {
       width: 6px;
       height: 6px;
-      background-color: $neuvector-grey-800;
+      background-color: $microsegx-grey-800;
     }
 
     .instruction-content-wrap {
@@ -955,7 +955,7 @@ ngx-gauge.score > .gauge > .value {
     }
     line-height: 1.85;
     text-align: left;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
     td,
     th {
       padding: 0px 4px !important;
@@ -967,7 +967,7 @@ ngx-gauge.score > .gauge > .value {
     font-size: 12px;
     line-height: 1.85;
     text-align: left;
-    color: $neuvector-grey-900;
+    color: $microsegx-grey-900;
     @media only screen and (max-width: 500px) {
       font-size: calc(8px + 0.5vw);
     }
@@ -982,7 +982,7 @@ ngx-gauge.score > .gauge > .value {
       font-size: calc(4.5px + 0.5vw);
       line-height: 1.85;
       text-align: left;
-      color: $neuvector-grey-900;
+      color: $microsegx-grey-900;
       @media only screen and (max-width: 500px) {
         font-size: calc(8px + 0.5vw);
       }
@@ -993,7 +993,7 @@ ngx-gauge.score > .gauge > .value {
       font-weight: bold;
       line-height: 1.85;
       text-align: right;
-      color: $neuvector-grey-900;
+      color: $microsegx-grey-900;
       @media only screen and (max-width: 500px) {
         font-size: calc(8px + 0.5vw);
       }
@@ -1004,7 +1004,7 @@ ngx-gauge.score > .gauge > .value {
       font-weight: bold;
       line-height: 1.85;
       text-align: right;
-      color: $neuvector-grey-900;
+      color: $microsegx-grey-900;
       @media only screen and (max-width: 500px) {
         font-size: calc(8px + 0.5vw);
       }
@@ -1015,7 +1015,7 @@ ngx-gauge.score > .gauge > .value {
 .secure-rank-wrap {
   height: 90px;
   width: 10px;
-  border: $neuvector-grey-200 solid 1px;
+  border: $microsegx-grey-200 solid 1px;
   margin: 10px auto;
   position: relative;
   .secure-rank {
@@ -1036,7 +1036,7 @@ ngx-gauge.score > .gauge > .value {
     width: 100%;
     position: absolute;
     top: 0;
-    background-color: $neuvector-grey-100;
+    background-color: $microsegx-grey-100;
     z-index: 998;
   }
 }
@@ -1088,7 +1088,7 @@ ngx-gauge.score > .gauge > .value {
   padding: 10px;
   animation: 0.4s zoomInUp ease;
   border-radius: 5px;
-  box-shadow: 0 0 10px 0 $neuvector-grey-200;
+  box-shadow: 0 0 10px 0 $microsegx-grey-200;
 }
 
 .g6-component-contextmenu {
@@ -1125,7 +1125,7 @@ ngx-gauge.score > .gauge > .value {
 
 .label-idle {
   color: #fff;
-  background-color: $neuvector-grey-500;
+  background-color: $microsegx-grey-500;
   border-radius: 4px;
   font-size: 0.8em;
   line-height: 1.5;
@@ -1251,11 +1251,11 @@ ngx-avatar.userIcon img.avatar-content {
 }
 
 .label-primary {
-  background-color: $neuvector-mid-green-700;
+  background-color: $microsegx-mid-green-700;
 }
 
 .label-muted {
-  background-color: $neuvector-grey-700;
+  background-color: $microsegx-grey-700;
 }
 
 .label-pink {
@@ -1275,13 +1275,13 @@ ngx-avatar.userIcon img.avatar-content {
 
 .sso-auth-progress {
   .mat-progress-bar-buffer {
-    background-color: $neuvector-dark-green-100 !important;
+    background-color: $microsegx-dark-green-100 !important;
   }
   .mat-progress-bar-primary::after {
-    background-color: $neuvector-dark-green-400 !important;
+    background-color: $microsegx-dark-green-400 !important;
   }
   .mat-progress-bar-secondary::after {
-    background-color: $neuvector-dark-green-400 !important;
+    background-color: $microsegx-dark-green-400 !important;
   }
 }
 
@@ -1420,10 +1420,10 @@ ngx-avatar.userIcon img.avatar-content {
 }
 
 .nv-help {
-  color: $neuvector-grey-50;
+  color: $microsegx-grey-50;
   opacity: 0.54;
   &:hover {
-    color: $neuvector-mid-green-200;
+    color: $microsegx-mid-green-200;
   }
   font-size: 24px;
   padding: 5px 0 0 0;
@@ -1438,7 +1438,7 @@ ngx-avatar.userIcon img.avatar-content {
 }
 
 .btn-sec-event {
-  background-color: $neuvector-dark-green-400 !important;
+  background-color: $microsegx-dark-green-400 !important;
   color: #fff !important;
   font-size: 10px !important;
   line-height: 12px !important;
@@ -1450,7 +1450,7 @@ ngx-avatar.userIcon img.avatar-content {
   width: 500px;
   padding: 15px;
   max-width: none !important;
-  background-color: $neuvector-mid-green-50 !important;
+  background-color: $microsegx-mid-green-50 !important;
 }
 
 .docURLBase a:hover {

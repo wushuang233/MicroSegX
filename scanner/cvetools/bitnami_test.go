@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/neuvector/neuvector/share/scan"
+	"github.com/microsegx/microsegx/share/scan"
 	"github.com/stretchr/testify/require"
 )
 

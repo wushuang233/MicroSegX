@@ -21,10 +21,15 @@
 
       <div class="dashboard-hero-shell__chips">
         <span class="dashboard-hero-shell__chip">
-          {{ summaryInfo && summaryInfo.platform ? summaryInfo.platform : 'Kubernetes' }}
+          {{
+            summaryInfo && summaryInfo.platform
+              ? summaryInfo.platform
+              : 'Kubernetes'
+          }}
         </span>
         <span class="dashboard-hero-shell__chip">
-          {{ 'dashboard.heading.CVE_DB_VERSION' | translate }} {{ cveDbVersion }}
+          {{ 'dashboard.heading.CVE_DB_VERSION' | translate }}
+          {{ cveDbVersion }}
         </span>
         <span class="dashboard-hero-shell__chip">
           {{ 'scan.AUTO' | translate }}
@@ -53,6 +58,12 @@
           <span>{{ 'enum.QUARANTINED' | translate }}</span>
           <strong>{{ quarantinedContainersCount }}</strong>
         </article>
+        <article class="dashboard-metric-card">
+          <span>{{
+            'customUi.microsegx.dashboard.openPorts' | translate
+          }}</span>
+          <strong>{{ microsegxOpenPorts }}</strong>
+        </article>
       </div>
     </div>
 
@@ -71,7 +82,9 @@
 
       <div class="dashboard-rail-grid">
         <article class="dashboard-rail-card">
-          <span>{{ 'dashboard.body.panel_title.TOP_SEC_EVENTS' | translate }}</span>
+          <span>{{
+            'dashboard.body.panel_title.TOP_SEC_EVENTS' | translate
+          }}</span>
           <strong>{{ criticalEventsTotal }}</strong>
           <small>{{ 'enum.CRITICAL' | translate }}</small>
         </article>
@@ -83,15 +96,56 @@
         <article class="dashboard-rail-card">
           <span>{{ 'dashboard.body.panel_title.EXPOSURES' | translate }}</span>
           <strong>{{ ingressExposureCount + egressExposureCount }}</strong>
-          <small>Ingress {{ ingressExposureCount }} / Egress {{ egressExposureCount }}</small>
+          <small
+            >Ingress {{ ingressExposureCount }} / Egress
+            {{ egressExposureCount }}</small
+          >
         </article>
         <article class="dashboard-rail-card dashboard-rail-card--wide">
-          <span>{{ 'dashboard.body.panel_title.TOP_VULNERABILITY' | translate }}</span>
+          <span>{{
+            'dashboard.body.panel_title.TOP_VULNERABILITY' | translate
+          }}</span>
           <strong>{{ leadRiskContainer?.display_name || '-' }}</strong>
           <small>
             H {{ leadRiskContainer?.high4Dashboard || 0 }} / M
             {{ leadRiskContainer?.medium4Dashboard || 0 }}
           </small>
+        </article>
+        <article
+          class="dashboard-rail-card dashboard-rail-card--wide dashboard-rail-card--microsegx">
+          <span>{{
+            'customUi.microsegx.dashboard.fabricTitle' | translate
+          }}</span>
+          <strong>
+            {{
+              microsegxFabricAvailable
+                ? microsegxAliveRouters + ' / ' + microsegxZitiServices
+                : ('customUi.microsegx.dashboard.notConfigured' | translate)
+            }}
+          </strong>
+          <small>
+            {{
+              microsegxFabricAvailable
+                ? ('customUi.microsegx.dashboard.fabricMeta' | translate) +
+                  ' · ' +
+                  microsegxControllerUrl
+                : ('customUi.microsegx.dashboard.fabricHint' | translate)
+            }}
+          </small>
+          <div class="dashboard-rail-card__actions">
+            <a
+              mat-button
+              class="dashboard-inline-link"
+              [routerLink]="['/microsegx/port-exposure']">
+              {{ 'customUi.microsegx.dashboard.openPortExposure' | translate }}
+            </a>
+            <a
+              mat-button
+              class="dashboard-inline-link"
+              [routerLink]="['/microsegx/ziti']">
+              {{ 'customUi.microsegx.dashboard.openFabric' | translate }}
+            </a>
+          </div>
         </article>
       </div>
 

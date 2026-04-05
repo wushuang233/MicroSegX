@@ -18,12 +18,12 @@ import (
 	goDigest "github.com/opencontainers/go-digest"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/neuvector/neuvector/share"
-	"github.com/neuvector/neuvector/share/container"
-	"github.com/neuvector/neuvector/share/scan"
-	"github.com/neuvector/neuvector/share/scan/registry"
-	"github.com/neuvector/neuvector/share/scan/secrets"
-	"github.com/neuvector/neuvector/share/utils"
+	"github.com/microsegx/microsegx/share"
+	"github.com/microsegx/microsegx/share/container"
+	"github.com/microsegx/microsegx/share/scan"
+	"github.com/microsegx/microsegx/share/scan/registry"
+	"github.com/microsegx/microsegx/share/scan/secrets"
+	"github.com/microsegx/microsegx/share/utils"
 	"github.com/quay/clair/v2/pkg/tarutil"
 )
 

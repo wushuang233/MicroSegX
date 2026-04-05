@@ -3,7 +3,7 @@ package common
 import (
 	"strings"
 
-	"github.com/neuvector/neuvector/share/utils"
+	"github.com/microsegx/microsegx/share/utils"
 	log "github.com/sirupsen/logrus"
 )
 

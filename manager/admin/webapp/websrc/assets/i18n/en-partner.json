@@ -28,8 +28,8 @@
     },
     "admissionControl": {
       "msg": {
-        "CLUSTER_ROLE_NOT_CONFIG": "The neuvector-binding-admission clusterrole/clusterrolebinding required for admission control is not configured correctly.",
-        "WEBHOOK_NOT_CONFIG": "The neuvector-svc-admission-webhook service required for admission control is not configured correctly.",
+        "CLUSTER_ROLE_NOT_CONFIG": "The microsegx-binding-admission clusterrole/clusterrolebinding required for admission control is not configured correctly.",
+        "WEBHOOK_NOT_CONFIG": "The microsegx-svc-admission-webhook service required for admission control is not configured correctly.",
         "NO_UPD_PROMISSION": "The default service account doesn't have UPDATE permission for service resource."
       }
     },
@@ -49,7 +49,7 @@
       "ADMIN_HINT": "Add LDAP/AD groups mapped to platform admin",
       "READER_HINT": "Add LDAP/AD groups mapped to platform reader",
       "CI_HINT": "Add LDAP/AD groups mapped to platform CI integration",
-      "BASE_DN_HINT": "Root node in LDAP/AD from which to search users and groups. e.g. dc=neuvector, dc=com"
+      "BASE_DN_HINT": "Root node in LDAP/AD from which to search users and groups. e.g. dc=microsegx, dc=com"
     },
     "okta": {
       "ADMIN_HINT": "Add SAML groups mapped to platform admin",

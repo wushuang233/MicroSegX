@@ -1,0 +1,44 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Werror",
+      "-o",
+      "nstools",
+      "nstools.c"
+    ],
+    "directory": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools",
+    "file": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nstools.c",
+    "output": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nstools"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Werror",
+      "-o",
+      "nstools",
+      "nsrun.c"
+    ],
+    "directory": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools",
+    "file": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nsrun.c",
+    "output": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nstools"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Werror",
+      "-o",
+      "nstools",
+      "nsget.c"
+    ],
+    "directory": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools",
+    "file": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nsget.c",
+    "output": "/home/microsegx/go/src/github.com/microsegx/microsegx/tools/nstools/nstools"
+  }
+]

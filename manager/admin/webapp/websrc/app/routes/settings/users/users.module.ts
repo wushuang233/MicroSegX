@@ -13,7 +13,7 @@ import { SettingsService } from '@services/settings.service';
 import { RolesGridModule } from '@components/roles-grid/roles-grid.module';
 import { PasswordProfileComponent } from './password-profile/password-profile.component';
 import { LoadingButtonModule } from '@components/ui/loading-button/loading-button.module';
-import { NeuVectorFormlyModule } from '@common/neuvector-formly/neuvector-formly.module';
+import { MicroSegXFormlyModule } from '@common/microsegx-formly/microsegx-formly.module';
 import { ApikeysGridModule } from '@components/apikeys-grid/apikeys-grid.module';
 
 const routes: Routes = [
@@ -36,7 +36,7 @@ const routes: Routes = [
     UsersGridModule,
     RolesGridModule,
     ApikeysGridModule,
-    NeuVectorFormlyModule,
+    MicroSegXFormlyModule,
   ],
   providers: [SettingsService],
 })

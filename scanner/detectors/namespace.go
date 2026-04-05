@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/neuvector/scanner/common"
+	"github.com/microsegx/scanner/common"
 )
 
 // DetectNamespace finds the OS of the layer by using every registered NamespaceDetector.

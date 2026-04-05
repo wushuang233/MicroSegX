@@ -1,4 +1,4 @@
-* @neuvector/nv-ui
-cli/ @neuvector/backend
-package/requirements.txt @neuvector/backend
-.github/ @neuvector/backend 
+* @microsegx/nv-ui
+cli/ @microsegx/backend
+package/requirements.txt @microsegx/backend
+.github/ @microsegx/backend 
