@@ -1,0 +1,18 @@
+<ng-container *ngIf="!params.data.reserved">
+  <button
+    mat-icon-button
+    matTooltip="{{ 'role.REMOVE' | translate }}"
+    matTooltipPosition="above"
+    style="transform: scale(0.8)"
+    (click)="delete()">
+    <i class="eos-icons text-action">delete</i>
+  </button>
+  <button
+    mat-icon-button
+    matTooltip="{{ 'role.EDIT' | translate }}"
+    matTooltipPosition="above"
+    style="transform: scale(0.8)"
+    (click)="edit()">
+    <i class="eos-icons text-action">edit</i>
+  </button>
+</ng-container>

@@ -1,0 +1,58 @@
+<div id="groupInfo" class="infoBox topLeftFloat" cdkDrag>
+  <div
+    cdkDragHandle
+    id="groupInfoHeader"
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 mat-dialog-title>
+      <img
+        src="assets/img/icons/graph/cluster.svg"
+        aria-label="Group icon"
+        style="width: 24px; height: 24px"
+        alt="groupIcon" />
+      {{ group.name }}
+    </h4>
+
+    <button
+      id="closeGroupInfo"
+      (click)="popupState.leave()"
+      aria-label="Close icon button"
+      class="d-flex align-items-center justify-content-center"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+
+  <hr class="fancy mx-0 my-0" />
+  <mat-tab-group
+    animationDuration="0ms"
+    (selectedTabChange)="activateTab($event)">
+    <mat-tab label="{{ 'group.gridHeader.MEMBERS' | translate }}">
+      <app-members
+        *ngIf="activeTabIndex === 0"
+        [source]="navSource"
+        [members]="group.members"
+        [kind]="group.kind"
+        [resizableHeight]="height">
+      </app-members>
+    </mat-tab>
+
+    <mat-tab label="{{ 'service.POLICY_RULES' | translate }}">
+      <app-network-rules
+        *ngIf="activeTabIndex === 1"
+        [useQuickFilterService]="true"
+        [source]="navSource"
+        [groupName]="group.name"
+        [resizableHeight]="height">
+      </app-network-rules>
+    </mat-tab>
+    <mat-tab label="{{ 'group.RESPONSE_RULES' | translate }}">
+      <app-response-rules
+        *ngIf="activeTabIndex === 2"
+        [useQuickFilterService]="true"
+        [source]="navSource"
+        [groupName]="group.name"
+        [resizableHeight]="height">
+      </app-response-rules>
+    </mat-tab>
+  </mat-tab-group>
+</div>

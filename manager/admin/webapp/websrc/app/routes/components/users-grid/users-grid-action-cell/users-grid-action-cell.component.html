@@ -1,0 +1,55 @@
+<ng-container
+  *ngIf="
+    params.isWriteUserAuthorized &&
+      !isRemote &&
+      !params.data.server.toLowerCase().includes('rancher');
+    else viewTemplate
+  ">
+  <button
+    mat-icon-button
+    style="line-height: 24px; margin-top: -8px"
+    [style.visibility]="
+      params.data.blocked_for_failed_login ? 'visible' : 'hidden'
+    "
+    matTooltip="{{ 'user.tooltips.UNLOCK' | translate }}"
+    matTooltipPosition="above"
+    (click)="unlock()">
+    <i class="eos-icons text-action">lock_open</i>
+  </button>
+  <button
+    mat-icon-button
+    style="line-height: 24px; margin-top: -8px"
+    [style.visibility]="params.data.password_resettable ? 'visible' : 'hidden'"
+    matTooltip="{{ 'user.tooltips.RESET_PASSWORD' | translate }}"
+    matTooltipPosition="above"
+    (click)="reset()">
+    <i class="eos-icons text-action">auto_fix_high</i>
+  </button>
+  <button
+    mat-icon-button
+    style="line-height: 24px; margin-top: -8px"
+    matTooltip="{{ 'user.tooltips.EDIT' | translate }}"
+    matTooltipPosition="above"
+    (click)="edit()">
+    <i class="eos-icons text-action">edit</i>
+  </button>
+  <button
+    mat-icon-button
+    style="line-height: 24px; margin-top: -8px"
+    [style.visibility]="params.data.fullname !== 'admin' ? 'visible' : 'hidden'"
+    matTooltip="{{ 'user.tooltips.REMOVE' | translate }}"
+    matTooltipPosition="above"
+    (click)="delete()">
+    <i class="eos-icons text-action">delete</i>
+  </button>
+</ng-container>
+<ng-template #viewTemplate>
+  <button
+    mat-icon-button
+    style="line-height: 24px; margin-top: -8px"
+    matTooltip="{{ 'user.tooltips.VIEW' | translate }}"
+    matTooltipPosition="above"
+    (click)="view()">
+    <i class="eos-icons text-action">feed</i>
+  </button>
+</ng-template>

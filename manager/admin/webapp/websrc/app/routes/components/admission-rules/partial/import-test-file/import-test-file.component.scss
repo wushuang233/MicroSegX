@@ -1,0 +1,27 @@
+.file-selection {
+  height: 30px;
+}
+.btn-upload,
+.btn-remove-file {
+  background-color: transparent;
+  color: #141823;
+}
+.file-table {
+  width: 700px;
+}
+.nv-file-over {
+  border: dotted 3px red;
+} /* Default class applied to drop zones on over */
+.another-file-over-class {
+  border: dotted 3px green;
+}
+.hidden-file {
+  visibility: hidden;
+  position: absolute;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+}

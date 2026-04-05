@@ -1,0 +1,326 @@
+<div class="login">
+  <ng-container *ngIf="hasCustomHeader; else nvHeader">
+    <div class="customHeader">
+      <app-custom-header></app-custom-header>
+    </div>
+  </ng-container>
+  <ng-template #nvHeader>
+    <div class="login-header"></div>
+  </ng-template>
+
+  <div class="login-body">
+    <div class="login-shell">
+      <div class="login-shell__toolbar">
+        <div class="login-shell__toolbar-copy">
+          <span class="login-shell__eyebrow">
+            {{ 'customUi.login.workspace' | translate }}
+          </span>
+          <span class="login-shell__toolbar-title">
+            {{ app.name }}
+          </span>
+        </div>
+        <div class="login-shell__language">
+          <button
+            type="button"
+            *ngFor="let language of languageOptions"
+            class="login-language-button"
+            [class.active]="currentLanguage === language.code"
+            (click)="setLanguage(language.code)">
+            {{ language.text }}
+          </button>
+        </div>
+      </div>
+
+      <section class="login-showcase">
+        <span class="showcase-badge">
+          {{ 'customUi.login.hero.badge' | translate }}
+        </span>
+        <h1>{{ 'customUi.login.hero.title' | translate }}</h1>
+        <p class="showcase-copy">
+          {{ 'customUi.login.hero.subtitle' | translate }}
+        </p>
+        <div class="showcase-grid">
+          <div class="showcase-card">
+            <span>01</span>
+            <strong>{{ 'customUi.login.hero.cards.visibility.title' | translate }}</strong>
+            <p>{{ 'customUi.login.hero.cards.visibility.desc' | translate }}</p>
+          </div>
+          <div class="showcase-card">
+            <span>02</span>
+            <strong>{{ 'customUi.login.hero.cards.policy.title' | translate }}</strong>
+            <p>{{ 'customUi.login.hero.cards.policy.desc' | translate }}</p>
+          </div>
+          <div class="showcase-card">
+            <span>03</span>
+            <strong>{{ 'customUi.login.hero.cards.operations.title' | translate }}</strong>
+            <p>{{ 'customUi.login.hero.cards.operations.desc' | translate }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="login-panel-wrap">
+        <div class="login-panel-shell">
+          <div class="login-panel-header">
+            <ng-container *ngIf="customLoginLogo; else nvLogo">
+              <div class="custom-login-logo" [innerHTML]="customLoginLogo"></div>
+            </ng-container>
+            <ng-template #nvLogo>
+              <div
+                class="login-brand"
+                [ngClass]="{
+                  'openID-saml-eula':
+                    !isEulaAccepted && servers && servers.length === 2
+                }">
+                <div class="login-brand-mark">MC</div>
+                <div class="login-brand-copy">
+                  <div class="login-brand-title">{{ app.name }}</div>
+                  <div class="login-brand-subtitle">{{ app.description }}</div>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div id="loadingBar" class="login-loading">
+            <mat-progress-bar
+              *ngIf="(inProgress || isFromSSO) && !authMsg"
+              class="sso-auth-progress"
+              mode="indeterminate"></mat-progress-bar>
+            <div
+              class="text-danger text-center clearfix"
+              *ngIf="authMsg && isFromSSO">
+              {{ authMsg }}
+            </div>
+          </div>
+
+          <div
+            class="login-panel"
+            [ngClass]="{
+              'login-panel-eula': !isEulaAccepted,
+              'login-panel-openid-saml': servers && servers.length === 2,
+              'login-panel-openid-saml-eula':
+                !isEulaAccepted && servers && servers.length === 2
+            }"
+            *ngIf="!isFromSSO">
+            <div class="login-panel-inner">
+              <div class="login-title-block">
+                <p class="login-eyebrow">
+                  {{ 'customUi.login.form.eyebrow' | translate }}
+                </p>
+                <p
+                  class="text-center login-title mt-0"
+                  translate="{{ 'login.SIGN_IN_LEGACY' }}"></p>
+                <p class="login-subtitle">
+                  {{ 'customUi.login.form.subtitle' | translate }}
+                </p>
+              </div>
+
+              <form
+                class="form-validate mb-lg login-form"
+                [formGroup]="loginForm"
+                novalidate=""
+                role="form">
+                <div class="form-group has-feedback">
+                  <label>{{ 'login.USERNAME' | translate }}</label>
+                  <input
+                    autocomplete="off"
+                    autofocus
+                    class="form-control login-input"
+                    id="Email1"
+                    name="account_email"
+                    [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+                    [placeholder]="'login.USER' | translate"
+                    formControlName="username"
+                    required
+                    type="text" />
+                  <span
+                    class="fa fa-user form-control-feedback text-muted login-icon"></span>
+                  <span
+                    class="text-danger login-error"
+                    *ngIf="
+                      loginForm.controls['username'].hasError('required') &&
+                      loginForm.controls['username'].dirty
+                    "
+                    >{{ 'login.USER_REQUIRED' | translate }}</span
+                  >
+                </div>
+
+                <div class="form-group has-feedback">
+                  <label>{{ 'login.PASSWORD' | translate }}</label>
+                  <input
+                    class="form-control login-input"
+                    id="password1"
+                    ng-trim="false"
+                    [placeholder]="'login.PASSWORD' | translate"
+                    [type]="showPassword ? 'text' : 'password'"
+                    name="account_password"
+                    formControlName="password"
+                    required />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    *ngIf="loginForm.controls['password'].value"
+                    (click)="showPassword = !showPassword"
+                    [attr.aria-label]="
+                      showPassword ? 'Hide password' : 'Show password'
+                    ">
+                    <i class="eos-icons">
+                      {{ showPassword ? 'visibility_off' : 'visibility' }}
+                    </i>
+                  </button>
+                  <span
+                    class="text-danger login-error"
+                    *ngIf="
+                      loginForm.controls['password'].hasError('required') &&
+                      loginForm.controls['password'].dirty
+                    "
+                    >{{ 'login.PASSWORD_REQUIRED' | translate }}</span
+                  >
+                </div>
+
+                <div
+                  class="login-actions"
+                  *ngIf="
+                    (!servers || servers.length === 0) ||
+                    (servers && servers.length === 1 && !samlEnabled && !oidcEnabled)
+                  ">
+                  <button
+                    class="login-btn login-btn-primary login-btn-full"
+                    (click)="submitForm($event, loginForm.value, '')"
+                    [disabled]="!validEula || loginForm.invalid"
+                    type="submit">
+                    {{ 'login.LOGIN' | translate }}
+                  </button>
+                </div>
+
+                <div
+                  class="login-actions login-actions-inline"
+                  *ngIf="
+                    servers && servers.length === 1 && (samlEnabled || oidcEnabled)
+                  ">
+                  <button
+                    class="login-btn login-btn-primary"
+                    (click)="submitForm($event, loginForm.value, '')"
+                    [disabled]="!validEula || loginForm.invalid"
+                    type="submit">
+                    {{ 'login.LOGIN' | translate }}
+                  </button>
+                  <div class="login-or" translate="{{ 'login.OR' }}"></div>
+                  <button
+                    class="login-btn login-btn-secondary"
+                    (click)="submitForm($event, loginForm.value, 'okta')"
+                    *ngIf="samlEnabled"
+                    [disabled]="!validEula">
+                    {{ 'login.OKTA_LOGIN' | translate }}
+                  </button>
+                  <button
+                    class="login-btn login-btn-secondary"
+                    (click)="submitForm($event, loginForm.value, 'oidc')"
+                    *ngIf="oidcEnabled"
+                    [disabled]="!validEula">
+                    {{ 'login.OIDC_LOGIN' | translate }}
+                  </button>
+                </div>
+
+                <div
+                  class="login-actions login-actions-stacked"
+                  *ngIf="servers && servers.length === 2">
+                  <button
+                    class="login-btn login-btn-primary login-btn-full"
+                    (click)="submitForm($event, loginForm.value, '')"
+                    [disabled]="!validEula || loginForm.invalid"
+                    type="submit">
+                    {{ 'login.LOGIN' | translate }}
+                  </button>
+                  <div class="external-login-stack">
+                    <button
+                      class="login-btn login-btn-secondary"
+                      (click)="submitForm($event, loginForm.value, 'okta')"
+                      *ngIf="samlEnabled"
+                      [disabled]="!validEula">
+                      {{ 'login.OKTA_LOGIN' | translate }}
+                    </button>
+                    <div
+                      class="login-inline-divider"
+                      *ngIf="samlEnabled && oidcEnabled"
+                      translate="{{ 'login.OR' }}"></div>
+                    <button
+                      class="login-btn login-btn-secondary"
+                      (click)="submitForm($event, loginForm.value, 'oidc')"
+                      *ngIf="oidcEnabled"
+                      [disabled]="!validEula">
+                      {{ 'login.OIDC_LOGIN' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <div
+                class="text-danger text-center clearfix login-feedback"
+                [ngClass]="{ 'mt-3': servers && servers.length === 2 }">
+                <div *ngIf="authMsg">
+                  {{ authMsg }}
+                </div>
+                <div *ngIf="rbacAlertMessage">
+                  {{ 'login.RBAC_ALERT.PASSWORD_RETRIEVAL_ERROR' | translate }}
+                  <a (click)="showAlertDetails()">{{
+                    'login.RBAC_ALERT.ROLEBINDING_DETAILS_LINK' | translate
+                  }}</a>
+                </div>
+              </div>
+
+              <div
+                class="text-center clearfix login-feedback-secondary"
+                [ngClass]="{ 'mt-3': servers && servers.length === 2 }">
+                <div *ngIf="!rbacAlertMessage && bootstrapPasswordCommand">
+                  <a (click)="showAlertDetails()">{{
+                    'login.RBAC_ALERT.RETRIVE_BOOTSTRAP_PASSWORD' | translate
+                  }}</a>
+                </div>
+              </div>
+
+              <div class="preview-entry" *ngIf="isPreviewMode">
+                <div class="preview-entry__copy">
+                  <p class="preview-entry__eyebrow">
+                    {{ 'customUi.login.preview.eyebrow' | translate }}
+                  </p>
+                  <h3>{{ 'customUi.login.preview.title' | translate }}</h3>
+                  <p>{{ 'customUi.login.preview.desc' | translate }}</p>
+                  <div class="preview-entry__chips">
+                    <span>{{ 'customUi.login.preview.pages.dashboard' | translate }}</span>
+                    <span>{{ 'customUi.login.preview.pages.workloads' | translate }}</span>
+                    <span>{{ 'customUi.login.preview.pages.registries' | translate }}</span>
+                    <span>{{ 'customUi.login.preview.pages.vulnerabilities' | translate }}</span>
+                    <span>{{ 'customUi.login.preview.pages.events' | translate }}</span>
+                    <span>{{ 'customUi.login.preview.pages.support' | translate }}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="login-btn login-btn-secondary preview-entry__button"
+                  (click)="enterPreview()">
+                  {{ 'customUi.login.preview.enter' | translate }}
+                </button>
+              </div>
+
+              <div class="login-eula" *ngIf="!isEulaAccepted">
+                <app-eula (eulaStatus)="getEulaStatus($event)"></app-eula>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    <div class="text-center text-muted">
+      <span>&copy;</span>
+      <span>{{ app.year }}</span>
+      <span>-</span>
+      <span>{{ app.name }}</span
+      >&nbsp;|&nbsp;
+      <span>{{ app.description }}</span>
+    </div>
+  </div>
+</div>
+<app-custom-footer></app-custom-footer>

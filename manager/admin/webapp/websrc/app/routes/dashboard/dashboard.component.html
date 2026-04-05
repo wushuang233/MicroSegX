@@ -1,0 +1,197 @@
+<app-dashboard-printable-report
+  #dashboardReport
+  *ngIf="isPrinting"
+  class="printable-area"
+  [domain]="reportDomain"
+  [reportInfo]="reportInfo"
+  [details]="details">
+</app-dashboard-printable-report>
+<div class="screen-area page-shell dashboard-page">
+  <section class="dashboard-hero-shell">
+    <div class="dashboard-hero-shell__content">
+      <div class="dashboard-hero-shell__eyebrow">
+        {{ 'dashboard.TITLE' | translate }}
+      </div>
+      <h1 class="dashboard-hero-shell__title" id="events-title">
+        {{ 'dashboard.heading.SECURITY_RISK_SCORE' | translate }}
+      </h1>
+      <p class="dashboard-hero-shell__copy">
+        {{ 'customUi.header.captions.dashboard' | translate }}
+      </p>
+
+      <div class="dashboard-hero-shell__chips">
+        <span class="dashboard-hero-shell__chip">
+          {{ summaryInfo && summaryInfo.platform ? summaryInfo.platform : 'Kubernetes' }}
+        </span>
+        <span class="dashboard-hero-shell__chip">
+          {{ 'dashboard.heading.CVE_DB_VERSION' | translate }} {{ cveDbVersion }}
+        </span>
+        <span class="dashboard-hero-shell__chip">
+          {{ 'scan.AUTO' | translate }}
+          {{
+            details?.autoScanConfig
+              ? ('policy.status.ENABLED' | translate)
+              : ('policy.status.DISABLED' | translate)
+          }}
+        </span>
+      </div>
+
+      <div class="dashboard-hero-shell__metric-grid">
+        <article class="dashboard-metric-card dashboard-metric-card--primary">
+          <span>{{ 'dashboard.summary.HOST' | translate }}</span>
+          <strong>{{ hostsCount }}</strong>
+        </article>
+        <article class="dashboard-metric-card">
+          <span>{{ 'dashboard.summary.POD' | translate }}</span>
+          <strong>{{ podsCount }}</strong>
+        </article>
+        <article class="dashboard-metric-card">
+          <span>{{ 'dashboard.summary.SERVICE' | translate }}</span>
+          <strong>{{ servicesCount }}</strong>
+        </article>
+        <article class="dashboard-metric-card">
+          <span>{{ 'enum.QUARANTINED' | translate }}</span>
+          <strong>{{ quarantinedContainersCount }}</strong>
+        </article>
+      </div>
+    </div>
+
+    <div class="dashboard-hero-shell__rail">
+      <div class="dashboard-score-callout">
+        <span class="dashboard-score-callout__label">
+          {{ 'dashboard.heading.SECURITY_RISK_SCORE' | translate }}
+        </span>
+        <strong class="dashboard-score-callout__value">
+          {{ riskScoreValue }}
+        </strong>
+        <p class="dashboard-score-callout__copy">
+          {{ 'dashboard.heading.IMPROVE_SCORE' | translate }}
+        </p>
+      </div>
+
+      <div class="dashboard-rail-grid">
+        <article class="dashboard-rail-card">
+          <span>{{ 'dashboard.body.panel_title.TOP_SEC_EVENTS' | translate }}</span>
+          <strong>{{ criticalEventsTotal }}</strong>
+          <small>{{ 'enum.CRITICAL' | translate }}</small>
+        </article>
+        <article class="dashboard-rail-card">
+          <span>{{ 'enum.WARNING' | translate }}</span>
+          <strong>{{ warningEventsTotal }}</strong>
+          <small>{{ 'dashboard.heading.LAST_7_DAYS' | translate }}</small>
+        </article>
+        <article class="dashboard-rail-card">
+          <span>{{ 'dashboard.body.panel_title.EXPOSURES' | translate }}</span>
+          <strong>{{ ingressExposureCount + egressExposureCount }}</strong>
+          <small>Ingress {{ ingressExposureCount }} / Egress {{ egressExposureCount }}</small>
+        </article>
+        <article class="dashboard-rail-card dashboard-rail-card--wide">
+          <span>{{ 'dashboard.body.panel_title.TOP_VULNERABILITY' | translate }}</span>
+          <strong>{{ leadRiskContainer?.display_name || '-' }}</strong>
+          <small>
+            H {{ leadRiskContainer?.high4Dashboard || 0 }} / M
+            {{ leadRiskContainer?.medium4Dashboard || 0 }}
+          </small>
+        </article>
+      </div>
+
+      <app-loading-button
+        (btnClick)="iskube ? openDashboardReportList() : printDashboardReport()"
+        appearance="mat-icon-button"
+        buttonClasses="page-icon-button dashboard-hero-shell__print-button"
+        iconClasses="eos-icons"
+        iconName="print">
+      </app-loading-button>
+    </div>
+  </section>
+
+  <section class="dashboard-lead-grid">
+    <app-security-risk-panel
+      *ngIf="scoreInfo && summaryInfo && isShowingScore"
+      class="dashboard-panel-host"
+      [scoreInfo]="scoreInfo"
+      [details]="details"
+      [summaryInfo]="summaryInfo">
+    </app-security-risk-panel>
+
+    <div class="dashboard-panel-stack">
+      <app-security-events-panel
+        class="dashboard-panel-host"
+        [securityEvents]="securityEvents">
+      </app-security-events-panel>
+
+      <ng-container
+        *ngIf="
+          details &&
+            !details.autoScanConfig &&
+            details.highPriorityVulnerabilities &&
+            details.highPriorityVulnerabilities.containers.top5Containers
+              .length === 0 &&
+            details.highPriorityVulnerabilities.nodes.top5Nodes.length === 0;
+          else topVulnerableAssets
+        ">
+        <app-top-vulnerable-assets-panel
+          class="dashboard-panel-host"
+          assetType="assets"
+          [isScanOff]="!details.autoScanConfig"
+          [details]="details">
+        </app-top-vulnerable-assets-panel>
+      </ng-container>
+    </div>
+  </section>
+
+  <app-exposure-panel
+    *ngIf="scoreInfo"
+    class="dashboard-panel-host dashboard-panel-host--full"
+    [scoreInfo]="scoreInfo">
+  </app-exposure-panel>
+
+  <section class="dashboard-analytics-grid">
+    <app-top-security-events-panel
+      class="dashboard-panel-host"
+      direction="source"
+      [securityEvents]="securityEvents">
+    </app-top-security-events-panel>
+    <app-top-security-events-panel
+      class="dashboard-panel-host"
+      direction="destination"
+      [securityEvents]="securityEvents">
+    </app-top-security-events-panel>
+    <app-application-protocols-panel
+      class="dashboard-panel-host"
+      [details]="details">
+    </app-application-protocols-panel>
+  </section>
+
+  <section class="dashboard-policy-grid">
+    <app-policy-mode-panel
+      *ngIf="scoreInfo"
+      class="dashboard-panel-host"
+      assetType="services"
+      [scoreInfo]="scoreInfo"
+      [details]="details">
+    </app-policy-mode-panel>
+    <app-policy-mode-panel
+      *ngIf="scoreInfo"
+      class="dashboard-panel-host"
+      assetType="containers"
+      [scoreInfo]="scoreInfo"
+      [details]="details">
+    </app-policy-mode-panel>
+  </section>
+</div>
+
+<ng-template #topVulnerableAssets>
+  <div class="dashboard-vulnerability-split">
+    <app-top-vulnerable-assets-panel
+      class="dashboard-panel-host"
+      assetType="containers"
+      [details]="details">
+    </app-top-vulnerable-assets-panel>
+    <app-top-vulnerable-assets-panel
+      class="dashboard-panel-host"
+      assetType="nodes"
+      [details]="details">
+    </app-top-vulnerable-assets-panel>
+  </div>
+</ng-template>

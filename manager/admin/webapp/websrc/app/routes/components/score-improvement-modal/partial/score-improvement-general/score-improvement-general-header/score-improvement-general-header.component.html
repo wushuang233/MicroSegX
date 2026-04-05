@@ -1,0 +1,25 @@
+<div class="d-flex align-items-center score-header">
+  <div class="score-container score-container-flex">
+    <ngx-gauge
+      class="score"
+      type="arch"
+      [max]="100"
+      [value]="score"
+      [animate]="true"
+      [duration]="1"
+      [foregroundColor]="gaugeColor"
+      [thick]="10"
+      cap="round"
+      [size]="120">
+    </ngx-gauge>
+    <div
+      class="score-label"
+      *ngIf="gaugeLabelColor"
+      [ngStyle]="{ color: gaugeLabelColor }">
+      {{ gaugeLabel }}
+    </div>
+  </div>
+  <div class="m-4 text-muted mat-h4">
+    {{ 'dashboard.improveScoreModal.summary.INSTRUCTION' | translate }}
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="d-flex align-items-center justify-content-between">
+  <h4 mat-dialog-title class="mb-2">
+    {{
+      (this.data.isEdit
+        ? 'role.roleModal.EDIT_ROLE'
+        : 'role.roleModal.ADD_ROLE'
+      ) | translate
+    }}
+  </h4>
+  <button
+    (click)="onNoClick()"
+    class="mb-2"
+    aria-label="Close dialog"
+    mat-icon-button>
+    <i class="eos-icons">close</i>
+  </button>
+</div>
+<hr class="fancy" />
+<form (ngSubmit)="submit()" [formGroup]="form">
+  <div class="row">
+    <div class="col-md-4">
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'role.roleModal.ROLE_NAME' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="form.controls.name.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-md-8">
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'role.roleModal.COMMENT' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="comment"
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-1 d-flex align-items-center">
+      <label class="nv-modal-item-title">
+        {{ 'role.roleModal.PERMISSIONS' | translate }}
+      </label>
+    </div>
+    <div class="col-md-11">
+      <mat-form-field class="w-100">
+        <mat-chip-grid #chipList aria-label="Permissions selection">
+          <mat-chip-row
+            (removed)="remove(permissionChip.value)"
+            *ngFor="let permissionChip of permissionChips">
+            {{ permissionChip.name }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+          <input
+            #permissionInput
+            [formControl]="permissionCtrl"
+            [matChipInputFor]="chipList"
+            [matChipInputSeparatorKeyCodes]="[]"
+            [placeholder]="'role.roleModal.PERMISSION_HINT' | translate" />
+        </mat-chip-grid>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="permission-container">
+    <ul class="permission-list">
+      <ng-container
+        *ngFor="let permissionOption of permissionOptions | keyvalue: unsorted">
+        <li *ngIf="isPermissionOption(permissionOption.value)">
+          <div class="d-flex align-items-center">
+            <div class="mx-2">
+              <div>{{ permissionOption.value.displayName }}</div>
+              <span>
+                <small class="text-muted">
+                  {{ permissionOption.value.desc }}
+                </small>
+              </span>
+            </div>
+            <div class="ms-auto permission-checkbox">
+              <app-permission-checkbox
+                [permissionForm]="getPermissionForm(permissionOption.value.id)"
+                [permissionOption]="permissionOption.value"
+                (updatePermission)="
+                  updatePermission($event, permissionOption.value.id)
+                ">
+              </app-permission-checkbox>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+  <div class="d-flex justify-content-end mt-3">
+    <button
+      (click)="onNoClick()"
+      class="me-2"
+      aria-label="cancel"
+      [id]="dialogPrefix + '-role-dialog-cancel'"
+      mat-button
+      type="button">
+      {{ 'role.roleModal.CANCEL' | translate }}
+    </button>
+    <app-loading-button
+      [disabled]="form.invalid || !form.dirty || !!(saving$ | async)"
+      [loading]="!!(saving$ | async)"
+      [text]="(data.isEdit ? 'role.roleModal.UPDATE' : 'role.ADD') | translate"
+      appearance="mat-raised-button"
+      buttonClasses="me-1"
+      color="primary"
+      [id]="dialogPrefix + '-role-dialog-submit'"
+      type="submit">
+    </app-loading-button>
+  </div>
+</form>

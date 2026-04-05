@@ -1,0 +1,25 @@
+<div id="hostInfo" class="infoBox topLeftFloat-host" cdkDrag>
+  <div
+    cdkDragHandle
+    id="hostInfoHeader"
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 mat-dialog-title>
+      <img
+        src="assets/img/icons/graph/host.svg"
+        aria-label="Host"
+        style="width: 24px; height: 24px"
+        alt="hostIcon" />
+      {{ host.name }}
+    </h4>
+    <button
+      id="closeHostInfo"
+      (click)="popupState.leave()"
+      aria-label="Close icon button"
+      class="d-flex align-items-center justify-content-center"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy" />
+  <app-node-brief [host]="host"></app-node-brief>
+</div>

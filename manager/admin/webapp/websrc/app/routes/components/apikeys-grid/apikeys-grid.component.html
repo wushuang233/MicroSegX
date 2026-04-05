@@ -1,0 +1,34 @@
+<div class="d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center justify-content-start">
+    <span class="font-weight-bold text-info">
+      <span *ngIf="filtered">
+        {{ 'enum.FOUND' | translate }}
+        {{ filteredCount }}&nbsp;/
+      </span>
+      <span *ngIf="!filtered"> {{ 'enum.OUT_OF' | translate }}&nbsp; </span>
+      {{ apikeyCount }}
+    </span>
+  </div>
+  <div class="d-flex align-items-center justify-content-end">
+    <button
+      *ngIf="isWriteUserAuthorized"
+      (click)="addApikey()"
+      class="d-flex align-items-center justify-content-start px-2 my-3 me-3"
+      id="apikeys-add-dialog"
+      mat-stroked-button>
+      <i class="eos-icons me-2">add_circle</i>{{ 'apikey.ADD' | translate }}
+    </button>
+    <app-quick-filter
+      [gridOptions]="gridOptions"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false">
+    </app-quick-filter>
+  </div>
+</div>
+<ag-grid-angular
+  (window:resize)="onResize()"
+  [gridOptions]="gridOptions"
+  class="ag-theme-alpine"
+  style="width: 100%; height: calc(100vh - 330px)">
+</ag-grid-angular>

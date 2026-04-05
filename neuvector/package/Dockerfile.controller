@@ -1,0 +1,85 @@
+#
+# Builder
+#
+FROM registry.suse.com/bci/golang:1.25 AS builder
+
+ARG VERSION
+
+ENV GOPATH=/go
+ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
+# Setup build dependencies
+RUN zypper install -y pcre-devel
+
+# Build controller
+COPY agent/ /src/agent
+COPY controller/ /src/controller
+COPY db/ /src/db
+COPY monitor/ /src/monitor
+COPY package/ /src/package
+COPY tools/ /src/tools
+COPY share/ /src/share
+COPY scripts/ /src/scripts
+COPY templates/ /src/templates
+COPY upgrader/ /src/upgrader
+COPY vendor /src/vendor
+COPY go.mod go.sum base.h defs.h genlic.sh /src/
+WORKDIR /src
+RUN sed -i -e 's#interim.*xxxx#'"${VERSION}"'#g' ./controller/version.go
+RUN bash package/build_controller.sh
+
+#
+# Base image
+#
+FROM registry.suse.com/bci/bci-micro:15.7 AS micro
+FROM registry.suse.com/bci/bci-base:15.7 AS base
+
+ARG TARGETOS
+ARG TARGETARCH
+
+COPY --from=micro / /chroot/
+
+RUN zypper --non-interactive install --no-recommends unzip
+
+# Runtime dependencies
+RUN zypper refresh && zypper --non-interactive --installroot /chroot install --no-recommends \
+    ca-certificates iproute2 ethtool lsof procps curl jq iptables grep tar awk pcre-devel && \
+    zypper --non-interactive --installroot /chroot clean -a && \
+    rm -rf /chroot/var/log/
+
+RUN touch /chroot/usr/local/bin/.nvcontainer
+RUN mkdir -p /chroot/etc/neuvector/certs/internal/
+
+RUN zypper addrepo https://download.opensuse.org/repositories/isv:SUSE:neuvector/15.7/isv:SUSE:neuvector.repo && \
+    rpm --import https://download.opensuse.org/repositories/isv:SUSE:neuvector/15.7/repodata/repomd.xml.key && \
+    zypper -n refresh && \
+    zypper --installroot /chroot install -y consul opa
+RUN mv /chroot/usr/bin/consul /chroot/usr/local/bin/consul && mv /chroot/usr/bin/opa /chroot/usr/local/bin/opa
+
+RUN cd /chroot/usr/bin/ && rm -rf basename chcon chgrp chmod chown chroot cksum dd df dircolors dirname du install install-info join locale localedef mkdir mkfifo mknod mktemp paste pathchk readlink realpath sync smidiff smidump smilink smiquery smistrip smixlate tee tiemout tload top truncate unlink watch
+
+#
+# Artifact
+#
+FROM micro
+ARG VERSION
+ARG COMMIT
+WORKDIR /
+COPY --from=base /chroot/ /
+COPY --from=builder /src/stage /
+
+
+LABEL "name"="controller" \
+      "vendor"="SUSE Security" \
+      "neuvector.image"="neuvector/controller" \
+      "neuvector.role"="controller" \
+      "neuvector.rev"="${COMMIT}" \
+      "io.artifacthub.package.logo-url"=https://avatars2.githubusercontent.com/u/19367275 \
+      "io.artifacthub.package.readme-url"="https://raw.githubusercontent.com/neuvector/neuvector/${VERSION}/README.md" \
+      "org.opencontainers.image.description"="SUSE Security Controller" \
+      "org.opencontainers.image.title"="SUSE Security Controller" \
+      "org.opencontainers.image.source"="https://github.com/neuvector/neuvector/" \
+      "org.opencontainers.image.version"="${VERSION}" \
+      "org.opensuse.reference"="neuvector/controller:${VERSION}"
+
+ENTRYPOINT ["/usr/local/bin/monitor", "-c"]

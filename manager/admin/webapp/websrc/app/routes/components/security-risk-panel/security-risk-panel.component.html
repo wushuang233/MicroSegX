@@ -1,0 +1,43 @@
+<mat-card class="margin-bottom-m dashboard-card dashboard-hero-card">
+  <div class="row margin-horizon-0 align-items-stretch dashboard-hero-card__grid">
+    <div class="col-xl-2 col-lg-3 col-md-12 margin-bottom-m">
+      <div class="dashboard-hero-card__score-wrap">
+        <app-risk-score
+          *ngIf="scoreInfo && summaryInfo"
+          [score]="scoreInfo.security_scores.security_risk_score"
+          [nodesCnt]="summaryInfo.hosts"
+          [podsCnt]="summaryInfo.running_pods"
+          (mouseover)="mouseoverOnRiskScore()">
+        </app-risk-score>
+      </div>
+    </div>
+    <div
+      *ngIf="scoreInfo && summaryInfo"
+      class="col-xl-7 col-lg-9 col-md-12 row margin-horizon-0 margin-bottom-m dashboard-hero-card__factors">
+      <div class="row margin-horizon-0 dashboard-hero-card__risk-row">
+        <app-risk-factor
+          class="col-sm-4"
+          *ngFor="let riskFactor of riskFactorList; let i = index"
+          [riskFactor]="riskFactor"
+          (mouseover)="mouseoverOnRiskFactor(i)">
+        </app-risk-factor>
+      </div>
+      <div class="col-sm-12 text-center dashboard-hero-card__cta">
+        <em class="eos-icons icon-18 text-muted margin-right-s"
+          >auto_fix_high</em
+        >
+        <a class="link" (click)="openScoreImprovementConsole()">{{
+          'dashboard.heading.IMPROVE_SCORE' | translate
+        }}</a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-12 col-md-12 margin-bottom-m">
+      <app-risk-instruction
+        *ngIf="scoreInfo"
+        [activeIndex]="activeIndex4RiskInstruction"
+        [scoreInfo]="scoreInfo"
+        [details]="details">
+      </app-risk-instruction>
+    </div>
+  </div>
+</mat-card>

@@ -1,0 +1,255 @@
+<!-- START Top Navbar-->
+<app-custom-header></app-custom-header>
+<nav class="navbar topnavbar" role="navigation" aria-label="navbar">
+  <div class="navbar-header">
+    <a
+      class="navbar-brand brand-shell"
+      [routerLink]="['/dashboard']"
+      [attr.aria-label]="switchers.getAppSwitcher('name')">
+      <span class="brand-mark">
+        <span class="brand-mark__dot"></span>
+        <span class="brand-mark__text">MC</span>
+      </span>
+      <div class="brand-copy">
+        <span class="brand-title">{{ switchers.getAppSwitcher('name') }}</span>
+        <span class="brand-subtitle">
+          {{ switchers.getAppSwitcher('description') }}
+        </span>
+      </div>
+      <span class="brand-copy-collapsed">MC</span>
+    </a>
+  </div>
+
+  <div class="header-main">
+    <div class="header-main__start">
+      <a
+        class="nav-link d-none d-md-inline-flex header-toggle"
+        trigger-resize=""
+        (click)="toggleCollapsedSidebar()"
+        *ngIf="!isCollapsedText()">
+        <em class="fas fa-bars"></em>
+      </a>
+      <a
+        class="nav-link sidebar-toggle d-md-none header-toggle"
+        (click)="
+          switchers.toggleFrameSwitcher('leftSideToggled');
+          $event.stopPropagation()
+        ">
+        <em class="fas fa-bars"></em>
+      </a>
+
+      <div class="header-context">
+        <div class="header-context__eyebrow">
+          {{ 'customUi.header.workspace' | translate }}
+          <span class="preview-badge" *ngIf="isPreviewMode">
+            {{ 'customUi.header.preview' | translate }}
+          </span>
+        </div>
+        <div class="header-context__title">{{ pageTitle }}</div>
+        <div class="header-context__caption">{{ pageCaption }}</div>
+      </div>
+    </div>
+
+    <app-navsearch
+      [visible]="isNavSearchVisible"
+      (onclose)="setNavSearchVisible(false)"></app-navsearch>
+
+    <div class="navbar-nav flex-row nav-actions">
+      <button
+        mat-icon-button
+        type="button"
+        class="nav-icon-button"
+        (click)="openNavSearch($event)"
+        aria-label="Search">
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <app-global-notifications class="my-auto"></app-global-notifications>
+
+      <button
+        mat-stroked-button
+        type="button"
+        #languageMenuTrigger="matMenuTrigger"
+        [matMenuTriggerFor]="languageMenu"
+        class="nav-chip nav-language-button">
+        <span>{{ activeLanguageLabel }}</span>
+        <mat-icon>
+          {{ languageMenuTrigger.menuOpen ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </button>
+
+      <mat-menu #languageMenu="matMenu">
+        <button
+          *ngFor="let language of languages"
+          mat-menu-item
+          (click)="setLanguage(language.code)">
+          {{ language.text }}
+        </button>
+      </mat-menu>
+
+      <div
+        *ngIf="
+          !clusterNameError &&
+          !((isMasterRole && isAllowedToRedirectMultiCluster) || isMemberRole)
+        ">
+        <button mat-button class="nav-item nav-chip cluster-chip" type="button">
+          <label class="selected-cluster-text mb-0">{{ clusterName }}</label>
+        </button>
+      </div>
+
+      <ng-container *ngIf="!clustersError">
+        <div *ngIf="isMasterRole && isAllowedToRedirectMultiCluster">
+          <button
+            mat-button
+            type="button"
+            #menuTrigger="matMenuTrigger"
+            [matMenuTriggerFor]="dropdown_multiCluster"
+            [matMenuTriggerData]="clusters"
+            class="nav-item nav-chip">
+            <div class="d-flex justify-content-between align-items-center">
+              <i
+                class="fa-lg text-gray-light"
+                [ngClass]="isOnRemoteCluster ? 'fa fa-laptop' : 'fa fa-home'"></i>
+              <label class="selected-cluster-text hand me-2 mb-0">{{
+                selectedCluster?.name
+              }}</label>
+              <mat-icon>
+                {{ menuTrigger.menuOpen ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </div>
+          </button>
+          <mat-menu #dropdown_multiCluster="matMenu">
+            <ng-container *ngFor="let cluster of clusters; last as last">
+              <div class="cluster-menu-width">
+                <ng-container
+                  *ngIf="
+                    cluster.rest_version === primaryClusterRestVersion;
+                    else incompatibleVersionTemplate
+                  ">
+                  <button
+                    mat-menu-item
+                    (click)="redirectCluster(cluster)"
+                    [disabled]="
+                      cluster.status === 'disconnected' ||
+                      cluster.status === 'left' ||
+                      cluster.status === 'joint_upgrade_required' ||
+                      cluster.status === 'kicked' ||
+                      cluster.status === 'pending'
+                    ">
+                    <i
+                      class="fa-md me-1"
+                      [ngClass]="
+                        cluster.clusterType === 'master'
+                          ? 'fa fa-home'
+                          : 'fa fa-laptop'
+                      "></i>
+                    <span>{{ cluster?.name }}</span>
+                  </button>
+                </ng-container>
+                <ng-template #incompatibleVersionTemplate>
+                  <button mat-menu-item readonly style="cursor: default">
+                    <i class="fa-md me-1 text-muted" ngClass="fa fa-laptop"></i>
+                    <span
+                      class="text-muted"
+                      matTooltip="{{
+                        'multiCluster.messages.incompatible_version' | translate
+                      }}"
+                      matTooltipPosition="after"
+                      >{{ cluster?.name }}</span
+                    >
+                  </button>
+                </ng-template>
+              </div>
+              <mat-divider *ngIf="!last"></mat-divider>
+            </ng-container>
+          </mat-menu>
+        </div>
+
+        <div *ngIf="isMemberRole">
+          <button mat-button class="nav-item nav-chip no-pointer" type="button">
+            <i class="fa fa-home fa-lg text-gray-light brightness-70"></i>
+            <label
+              class="selected-cluster-text mb-0 brightness-70"
+              [matTooltip]="primaryMasterName"
+              [matTooltipDisabled]="primaryMasterName.length < 20"
+              matTooltipPosition="above"
+              >{{
+                primaryMasterName | shortenFromMiddle: 20
+              }}
+              &nbsp;&nbsp;/&nbsp;&nbsp;</label
+            >
+            <i class="fa fa-laptop fa-lg text-gray-light"></i>
+            <label
+              class="selected-cluster-text mb-0"
+              [matTooltip]="managedClusterName"
+              [matTooltipDisabled]="managedClusterName.length < 20"
+              matTooltipPosition="above"
+              >{{ managedClusterName | shortenFromMiddle: 20 }}
+            </label>
+          </button>
+        </div>
+      </ng-container>
+
+      <button
+        mat-button
+        type="button"
+        #avatarMenuTrigger="matMenuTrigger"
+        [matMenuTriggerFor]="menu"
+        class="nav-item profile-trigger">
+        <div class="d-flex justify-content-between align-items-center">
+          <ng-container *ngIf="gravatarEnabled; else altAvatar">
+            <div class="avatar">
+              <ngx-avatars
+                gravatarId="{{ email }}"
+                name="{{ username }}"></ngx-avatars>
+            </div>
+          </ng-container>
+          <ng-template #altAvatar>
+            <div class="avatar">
+              <ngx-avatars name="{{ username }}"></ngx-avatars>
+            </div>
+          </ng-template>
+          <div class="info me-1">
+            <div>{{ username }}</div>
+            <div>{{ displayRole }}</div>
+          </div>
+          <mat-icon>
+            {{ avatarMenuTrigger.menuOpen ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <div class="menu-width">
+          <button mat-menu-item (click)="goProfile()">
+            <i class="eos-icons icon-18 margin-right-s">badge</i>
+            {{ 'enum.MY_PROFILE' | translate }}
+          </button>
+        </div>
+        <button
+          *ngIf="!isOnRemoteCluster && isAllowedToOperateMultiCluster"
+          mat-menu-item
+          (click)="goMultiCluster()">
+          <i class="eos-icons icon-18 margin-right-s">organisms</i>
+          {{ 'enum.MULTI_CLUSTER' | translate }}
+        </button>
+        <button
+          mat-menu-item
+          (click)="goFederatedPolicy()"
+          *appDisplayControl="'multi_cluster'">
+          <i class="eos-icons icon-18 margin-right-s">policy</i>
+          {{ 'enum.FED_POLICY' | translate }}
+        </button>
+        <button *ngIf="!isSUSESSO" mat-menu-item (click)="logout()">
+          <i class="eos-icons icon-18 margin-right-s">logout</i>
+          {{ 'enum.LOGOUT' | translate }}
+        </button>
+        <button *ngIf="isSUSESSO" mat-menu-item (click)="reloadSSO()">
+          <i class="eos-icons icon-18 margin-right-s">refresh</i>
+          {{ 'enum.RELOAD' | translate }}
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</nav>
+<!-- END Top Navbar-->

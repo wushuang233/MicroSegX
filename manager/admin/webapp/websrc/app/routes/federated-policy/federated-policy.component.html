@@ -1,0 +1,85 @@
+<div>
+  <div class="clearfix">
+    <h1 class="font-weight-light" id="nodes-title">
+      {{ 'enum.FED_POLICY' | translate }}
+    </h1>
+  </div>
+  <div class="panel mb0">
+    <div class="panel-body">
+      <mat-tab-group
+        animationDuration="0ms"
+        (selectedTabChange)="activateTab($event)">
+        <mat-tab label="{{ 'sidebar.nav.GROUP' | translate }}">
+          <app-adjustable-div
+            [source]="navSource"
+            [minHeightOne]="163"
+            [minHeightTwo]="140">
+            <ng-container *appContainerOne="let height">
+              <app-groups
+                *ngIf="activeTabIndex === 0"
+                [source]="navSource"
+                [isScoreImprovement]="false"
+                [height]="height">
+              </app-groups>
+            </ng-container>
+            <ng-container *appContainerTwo="let height">
+              <div *ngIf="groupsView && groupsView.selectedGroups.length > 0">
+                <app-fed-group-details
+                  [height]="height"
+                  [groupName]="groupsView.selectedGroups[0].name"
+                  [kind]="groupsView.selectedGroups[0].kind"
+                  [members]="groupsView.selectedGroups[0].members">
+                </app-fed-group-details>
+              </div>
+              <div
+                [ngStyle]="{ height: height + 'px' }"
+                *ngIf="groupsView && groupsView.selectedGroups.length === 0">
+                <mat-card-content>
+                  <div class="hint-info">
+                    <em
+                      class="eos-icons hint-info-signal me-2"
+                      aria-hidden="true"
+                      >info</em
+                    >
+                    <div class="hint-info-text">
+                      {{ 'group.SELECT_GROUP_HINT' | translate }}
+                    </div>
+                  </div>
+                </mat-card-content>
+              </div>
+            </ng-container>
+          </app-adjustable-div>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.ADMISSION_CONTROL' | translate }}">
+          <app-admission-rules
+            *ngIf="activeTabIndex === 1"
+            [source]="navSource"></app-admission-rules>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.POLICY' | translate }}">
+          <app-network-rules *ngIf="activeTabIndex === 2" [source]="navSource">
+          </app-network-rules>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.DLP_SENSORS' | translate }}">
+          <app-dlp-sensors
+            *ngIf="activeTabIndex === 3"
+            [source]="navSource"></app-dlp-sensors>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.WAF_SENSORS' | translate }}">
+          <app-waf-sensors
+            *ngIf="activeTabIndex === 4"
+            [source]="navSource"></app-waf-sensors>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.RESPONSE_POLICY' | translate }}">
+          <app-response-rules
+            *ngIf="activeTabIndex === 5"
+            [source]="navSource"></app-response-rules>
+        </mat-tab>
+        <mat-tab label="{{ 'sidebar.nav.CONFIGURATION' | translate }}">
+          <app-federated-policy-configuration
+            *ngIf="activeTabIndex === 6"
+            [source]="navSource"></app-federated-policy-configuration>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</div>

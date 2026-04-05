@@ -1,0 +1,11 @@
+div.ag-root .ag-cell-focus,
+.full-width-panel .full-width-center {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.ag-row-highlight {
+  background-color: #eef0d6 !important;
+}

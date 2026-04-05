@@ -1,0 +1,121 @@
+<div
+  id="sniffer"
+  class="infoBox topLeftSession mediumBox resizable"
+  (window:mouseup)="mouseUp($event)"
+  cdkDrag>
+  <div
+    cdkDragHandle
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 mat-dialog-title>
+      {{ 'network.nodeDetails.SNIFF' | translate }}
+      <em class="fas fa-long-arrow-alt-right text-info mx-1"></em
+      >{{ containerName }}
+    </h4>
+    <button
+      id="closeSniffer"
+      (click)="stopRefresh(); popupState.leave()"
+      aria-label="Close icon button"
+      class="d-flex align-items-center justify-content-center"
+      mat-icon-button>
+      <i class="eos-icons ms-1">close</i>
+    </button>
+  </div>
+
+  <hr class="fancy" />
+  <ag-grid-angular
+    id="sniff-grid"
+    style="width: 100%; margin-top: 10px"
+    [ngStyle]="{ height: entriesGridHeight + 'px' }"
+    class="ag-theme-alpine"
+    [rowData]="sniffers"
+    [gridOptions]="gridOptions">
+  </ag-grid-angular>
+
+  <div class="row mx-0">
+    <div class="col-3">
+      <mat-checkbox
+        aria-label="Toggle schedule"
+        class="md-primary mx-1 mt-3"
+        [(ngModel)]="disabled"
+        (change)="toggleSchedule()">
+        <label
+          [ngClass]="!disabled ? 'text-muted' : 'text-primary'"
+          class="mb-0">
+          {{ 'network.SCHEDULE_JOB' | translate }}
+        </label>
+      </mat-checkbox>
+    </div>
+
+    <div class="custom-slider col-8 ps-0">
+      <ngx-slider
+        [value]="pcap.minValue"
+        [options]="pcap.options"
+        (userChangeEnd)="onUserChangeEnd($event)"></ngx-slider>
+    </div>
+  </div>
+  <div class="row mx-0">
+    <div class="col-7">
+      <button
+        mat-mini-fab
+        aria-label="Start sniff"
+        color="primary"
+        class="pull-left"
+        [disabled]="!isPacketCapAuthorized || disableStart()"
+        (click)="startSniff(containerId)">
+        <em class="fa fa-play"></em>
+      </button>
+      <div *ngIf="onSnifferErr" class="pull-left mt-2 ms-4">
+        <span class="text-danger">{{ snifferErrMsg }}</span>
+      </div>
+      <div *ngIf="errorMsg" class="pull-left mt-2 ms-4">
+        <span class="text-danger">{{ errorMsg }}</span>
+      </div>
+    </div>
+    <div class="docURLBase col-2">
+      <a
+        type="submit"
+        class="mat-stroked-button"
+        target="_self"
+        *ngIf="sniffer && downloadId === sniffer.id"
+        download="{{ exportFilename }}"
+        [href]="exportUrl">
+        <span>
+          <em class="fas fa-cloud-download-alt"></em>
+          &nbsp;{{ 'network.DOWNLOAD' | translate }}
+        </span>
+      </a>
+    </div>
+    <div class="col-3">
+      <div class="pull-right">
+        <button
+          mat-mini-fab
+          aria-label="Stop sniff"
+          color="primary"
+          class="me-2"
+          [disabled]="
+            !isPacketCapAuthorized || !sniffer || sniffer.status === 'stopped'
+          "
+          (click)="stopSniff(sniffer.id)">
+          <em class="fa fa-stop"></em>
+        </button>
+        <button
+          mat-mini-fab
+          aria-label="Download packet"
+          color="primary"
+          class="me-2"
+          [disabled]="!isPacketCapAuthorized || !sniffer"
+          (click)="downloadPacket(sniffer.id)">
+          <em class="far fa-file-archive"></em>
+        </button>
+        <button
+          mat-mini-fab
+          aria-label="Delete packet"
+          color="warn"
+          [disabled]="!isPacketCapAuthorized || !sniffer"
+          (click)="deleteSniff(sniffer.id)">
+          <em class="fa fa-trash"></em>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

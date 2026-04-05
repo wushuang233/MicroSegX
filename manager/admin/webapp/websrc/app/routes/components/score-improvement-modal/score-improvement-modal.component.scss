@@ -1,0 +1,31 @@
+.score-improvement-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--saas-border);
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.score-improvement-modal__content {
+  min-width: min(920px, 100%);
+  padding: 0 !important;
+}
+
+.score-improvement-modal__actions {
+  padding-top: 18px;
+}
+
+@media screen and (max-width: 960px) {
+  .score-improvement-modal__content {
+    min-width: 0;
+  }
+}

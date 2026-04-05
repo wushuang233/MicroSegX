@@ -1,0 +1,37 @@
+<div
+  *ngIf="
+    (params.data.cfg_type === CFG_TYPE.FED &&
+      isWriteRegistryAuthorized &&
+      isFedAdmin &&
+      !isRemote) ||
+    (params.data.cfg_type === CFG_TYPE.CUSTOMER && isWriteRegistryAuthorized)
+  ">
+  <button
+    (click)="edit()"
+    aria-label="Edit button"
+    matTooltip="{{ 'registry.TIP.EDIT' | translate }}"
+    matTooltipPosition="above"
+    mat-icon-button>
+    <i class="eos-icons">edit</i>
+  </button>
+  <button
+    (click)="delete()"
+    aria-label="Delete button"
+    matTooltip="{{ 'registry.TIP.DELETE' | translate }}"
+    matTooltipPosition="above"
+    mat-icon-button>
+    <i class="eos-icons">delete</i>
+  </button>
+</div>
+<button
+  *ngIf="
+    !isWriteRegistryAuthorized ||
+    (params.data.cfg_type === CFG_TYPE.FED && (isRemote || !isFedAdmin))
+  "
+  (click)="view()"
+  aria-label="View button"
+  matTooltip="{{ 'registry.TIP.VIEW' | translate }}"
+  matTooltipPosition="above"
+  mat-icon-button>
+  <mat-icon fontSet="fa" fontIcon="fa-newspaper"></mat-icon>
+</button>

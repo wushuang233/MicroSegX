@@ -1,0 +1,221 @@
+<app-containers-printable-report
+  *ngIf="isPrinting && loaded"
+  class="printable-area"
+  [containers]="quarantinedContainers"></app-containers-printable-report>
+
+<section id="containers-section" class="screen-area page-shell">
+  <div class="page-header">
+    <div class="page-header__copy">
+      <h1 id="containers-title">{{ 'sidebar.nav.CONTAINERS' | translate }}</h1>
+      <p>{{ 'customUi.header.captions.workloads' | translate }}</p>
+    </div>
+    <div class="page-header__actions">
+      <ng-container *ngIf="!error">
+        <div *ngIf="autoScanAuthorized && containers.length > 0">
+          <mat-slide-toggle
+            [formControl]="autoScan"
+            (change)="configAutoScan(auto_scan || false)">
+            {{ 'scan.AUTO' | translate }}
+            <em
+              class="fa fa-info-circle"
+              matTooltip="{{ 'scan.AUTO_TIP_WORKLOAD' | translate }}"
+              matTooltipPosition="above">
+            </em>
+          </mat-slide-toggle>
+        </div>
+        <app-assets-scan-report-button [assetType]="'container'">
+        </app-assets-scan-report-button>
+        <button
+          *ngIf="quarantinedContainers.length > 0"
+          aria-label="Print quarantined container report PDF"
+          type="button"
+          (click)="print()"
+          mat-stroked-button
+          class="page-action-button">
+          {{ 'containers.report.title' | translate }}
+          <em class="eos-icons icon-18 ms-1">print</em>
+        </button>
+        <button
+          mat-stroked-button
+          class="page-action-button"
+          [matMenuTriggerFor]="view_menu"
+          aria-label="View menu"
+          type="menu">
+          <i class="eos-icons me-1" style="font-size: 16px">settings</i>
+          {{ 'network.SETTING' | translate }}
+        </button>
+        <mat-menu #view_menu="matMenu">
+          <div
+            mat-menu-item
+            class="mat-menu-checkbox"
+            (click)="$event.stopPropagation()">
+            <mat-checkbox
+              [formControl]="showSystem"
+              (change)="nodeFilterChange()">
+              {{ 'network.SHOW_SYS_PODS' | translate }}
+            </mat-checkbox>
+          </div>
+        </mat-menu>
+      </ng-container>
+      <app-loading-button
+        (btnClick)="refresh()"
+        [appearance]="'mat-stroked-button'"
+        [buttonClasses]="'page-action-button d-flex justify-content-center align-items-center'"
+        [disabled]="!!(refreshing$ | async)"
+        [iconClasses]="'eos-icons icon-18'"
+        [iconName]="'refresh'"
+        [id]="'containers-refresh-button'"
+        [loading]="!!(refreshing$ | async)"
+        [text]="'network.REFRESH' | translate"
+        [type]="'button'">
+      </app-loading-button>
+    </div>
+  </div>
+
+  <div class="workloads-insight-grid" *ngIf="loaded && !error">
+    <article class="insight-card insight-card--primary">
+      <span class="insight-card__label">
+        {{ 'dashboard.summary.CONTAINER' | translate }}
+      </span>
+      <strong class="insight-card__value">{{ totalWorkloads }}</strong>
+      <span class="insight-card__meta">
+        {{ 'enum.RUNNING' | translate }} {{ runningWorkloads }}
+      </span>
+    </article>
+
+    <article class="insight-card">
+      <span class="insight-card__label">
+        {{ 'dashboard.body.panel_title.SERVICE_POLICY_MODE' | translate }}
+      </span>
+      <strong class="insight-card__value">{{ protectedWorkloads }}</strong>
+      <span class="insight-card__meta">
+        {{ 'enum.MONITOR' | translate }} / {{ 'enum.PROTECT' | translate }}
+      </span>
+    </article>
+
+    <article class="insight-card">
+      <span class="insight-card__label">
+        {{ 'enum.QUARANTINED' | translate }}
+      </span>
+      <strong class="insight-card__value">{{ quarantinedCount }}</strong>
+      <span class="insight-card__meta">
+        {{ 'containers.report.title' | translate }}
+      </span>
+    </article>
+
+    <article class="insight-card">
+      <span class="insight-card__label">
+        {{ 'sidebar.nav.SCAN' | translate }}
+      </span>
+      <strong class="insight-card__value">{{ vulnerableCount }}</strong>
+      <span class="insight-card__meta">
+        {{ 'scan.gridHeader.HIGH' | translate }} / {{ 'scan.gridHeader.MEDIUM' | translate }}
+      </span>
+    </article>
+  </div>
+
+  <section
+    class="workload-spotlight"
+    *ngIf="loaded && !error && activeContainer as focus">
+    <div class="workload-spotlight__main">
+      <div class="workload-spotlight__eyebrow">
+        {{ 'enum.DETAIL' | translate }}
+      </div>
+      <div class="workload-spotlight__title-row">
+        <h2>{{ focus.brief.display_name }}</h2>
+        <span class="workload-spotlight__status">
+          {{ activeStateLabel }}
+        </span>
+      </div>
+      <p class="workload-spotlight__image">
+        {{ focus.brief.image }}
+      </p>
+      <div class="workload-spotlight__summary">
+        <span>{{ focus.brief.domain }}</span>
+        <span>{{ activeService }}</span>
+        <span>{{ focus.brief.host_name }}</span>
+        <span>{{ activeApplications }}</span>
+      </div>
+    </div>
+
+    <div class="workload-spotlight__risk">
+      <div class="spotlight-stat">
+        <span>{{ 'scan.gridHeader.HIGH' | translate }}</span>
+        <strong>{{ activeHigh }}</strong>
+      </div>
+      <div class="spotlight-stat">
+        <span>{{ 'scan.gridHeader.MEDIUM' | translate }}</span>
+        <strong>{{ activeMedium }}</strong>
+      </div>
+      <div class="spotlight-stat">
+        <span>{{ 'network.gridHeader.SERVICE' | translate }}</span>
+        <strong>{{ activeService }}</strong>
+      </div>
+      <div class="spotlight-stat">
+        <span>{{ 'containers.detail.PORT_MAPPING' | translate }}</span>
+        <strong>{{ activePortsCount }}</strong>
+      </div>
+      <div class="spotlight-stat">
+        <span>{{ 'group.gridHeader.POLICY_MODE' | translate }}</span>
+        <strong>{{ activePolicyModeLabel }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <ng-container *ngIf="loaded; else loadingOrErrorTemplate">
+    <div class="workloads-workbench">
+      <mat-card class="page-card page-card--flush workbench-card">
+        <div class="workbench-card__header">
+          <div>
+            <h2>{{ 'sidebar.nav.CONTAINERS' | translate }}</h2>
+            <p>{{ 'customUi.header.captions.workloads' | translate }}</p>
+          </div>
+          <div class="workbench-card__chips">
+            <span class="workbench-chip">
+              {{ 'general.TOTAL' | translate }} {{ totalWorkloads }}
+            </span>
+            <span class="workbench-chip">
+              {{ 'enum.RUNNING' | translate }} {{ runningWorkloads }}
+            </span>
+            <span class="workbench-chip">
+              {{ 'enum.QUARANTINED' | translate }} {{ quarantinedCount }}
+            </span>
+          </div>
+        </div>
+        <app-containers-grid
+          [gridHeight]="listViewportHeight"
+          [isScanAuthorized]="isAutoScanAuthorized"
+          [linkedContainer]="linkedContainer"
+          (scan)="configScan($event)">
+        </app-containers-grid>
+      </mat-card>
+
+      <mat-card
+        *ngIf="activeContainer as focus; else emptySelectionTemplate"
+        class="page-card page-card--flush detail-workbench-card">
+        <app-container-details
+          [gridHeight]="detailViewportHeight"
+          [container]="focus">
+        </app-container-details>
+      </mat-card>
+    </div>
+  </ng-container>
+
+  <ng-template #loadingOrErrorTemplate>
+    <ng-container *ngIf="error; else loadingTemplate">
+      <mat-card class="page-card">
+        {{ error | json }}
+      </mat-card>
+    </ng-container>
+    <ng-template #loadingTemplate>
+      <app-loading-template></app-loading-template>
+    </ng-template>
+  </ng-template>
+
+  <ng-template #emptySelectionTemplate>
+    <mat-card class="page-card detail-empty-card">
+      <h2>{{ 'enum.DETAIL' | translate }}</h2>
+      <p>{{ 'group.SELECT_GROUP_HINT' | translate }}</p>
+    </mat-card>
+  </ng-template>
+</section>

@@ -1,0 +1,112 @@
+<div class="mx-3 mt-3" [formGroup]="exportOptionsForm">
+  <div
+    class="clearfix margin-top-m"
+    *ngIf="
+      page === 'group' && source !== GlobalConstant['NAV_SOURCE']['FED_POLICY']
+    ">
+    <div class="text-muted text-small mb-2">
+      <em class="eos-icons icon-18 text-info me-2">info</em
+      >{{ 'group.export.INFO' | translate }}
+    </div>
+    <label class="pull-left text-bold margin-right-m">{{
+      'group.POLICY_MODE' | translate
+    }}</label>
+    <mat-radio-group
+      class="pull-left margin-right-m"
+      aria-label="Select a mode"
+      formControlName="policy_mode">
+      <mat-radio-button value="discover" class="margin-right-s">{{
+        'topbar.mode.LEARNING' | translate
+      }}</mat-radio-button>
+      <mat-radio-button value="monitor" class="margin-right-s">{{
+        'topbar.mode.EVALUATION' | translate
+      }}</mat-radio-button>
+      <mat-radio-button value="protect" class="margin-right-s">{{
+        'topbar.mode.ENFORCE' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+    <div class="clearfix margin-top-m"></div>
+    <label class="pull-left text-bold margin-right-m"
+      >{{ 'group.PROFILE_MODE' | translate }}&nbsp;</label
+    >
+    <mat-radio-group
+      class="pull-left margin-right-m"
+      aria-label="Select a mode"
+      formControlName="profile_mode">
+      <mat-radio-button value="discover" class="margin-right-s">{{
+        'topbar.mode.LEARNING' | translate
+      }}</mat-radio-button>
+      <mat-radio-button value="monitor" class="margin-right-s">{{
+        'topbar.mode.EVALUATION' | translate
+      }}</mat-radio-button>
+      <mat-radio-button value="protect" class="margin-right-s">{{
+        'topbar.mode.ENFORCE' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <hr class="my-2" *ngIf="page === 'group'" />
+  <mat-checkbox
+    *ngIf="page === 'group'"
+    [checked]="useNameRef"
+    (change)="toggleNameRef($event)"
+    class="me-3 my-2">
+    {{ 'group.NAME_REFERRAL' | translate }}
+  </mat-checkbox>
+  <mat-radio-group formControlName="export_mode" class="d-flex flex-column">
+    <label class="text-border">{{
+      'group.DOWNLOAD_LOCATION' | translate
+    }}</label>
+    <mat-radio-button value="local"
+      >{{ 'setting.remote_repository.options.destination_local' | translate }}
+    </mat-radio-button>
+    <div class="d-flex flex-column flex-md-row">
+      <mat-radio-button
+        value="remote"
+        class="me-2"
+        [disabled]="!remoteRepoEnabled">
+        {{ 'setting.remote_repository.options.destination_remote' | translate }}
+      </mat-radio-button>
+      <div class="mt-0 ms-2">
+        <span class="text-muted small">{{
+          'setting.remote_repository.options.mode_description' | translate
+        }}</span>
+        <a href="#/settings/configuration" class="small">
+          {{ 'sidebar.nav.SETTING' | translate }}&nbsp;>&nbsp;{{
+            'sidebar.nav.CONFIGURATION' | translate
+          }}
+        </a>
+      </div>
+    </div>
+  </mat-radio-group>
+  <div
+    *ngIf="exportOptionsForm.get('export_mode')?.value === 'remote'"
+    class="d-flex flex-column mt-2">
+    <mat-form-field hidden>
+      <mat-label>{{
+        'setting.remote_repository.options.name' | translate
+      }}</mat-label>
+      <input
+        matInput
+        id="remote_repository_nickname"
+        type="text"
+        formControlName="remote_repository_nickname"
+        readonly />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{
+        'setting.remote_repository.options.destination' | translate
+      }}</mat-label>
+      <input
+        matInput
+        id="exporting_file_name"
+        type="text"
+        formControlName="file_path" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{
+        'setting.remote_repository.details.comment' | translate
+      }}</mat-label>
+      <input matInput id="comment" type="text" formControlName="comment" />
+    </mat-form-field>
+  </div>
+</div>

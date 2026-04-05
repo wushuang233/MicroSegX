@@ -1,0 +1,106 @@
+:host {
+  display: block;
+}
+
+.security-events-page {
+  padding-bottom: 24px;
+}
+
+.security-events-card {
+  position: relative;
+  overflow: visible;
+}
+
+.security-events-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.security-events-toolbar__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.security-events-toolbar__count {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(22, 119, 255, 0.1);
+  color: var(--saas-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.security-events-toolbar__actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.security-events-filter {
+  width: min(320px, 100%);
+}
+
+.security-events-chart-shell {
+  position: relative;
+  min-height: 120px;
+  margin-bottom: 20px;
+  padding: 24px 20px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 119, 255, 0.08);
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.security-events-slider-shell {
+  position: absolute;
+  top: 26px;
+  left: 24px;
+  right: 24px;
+}
+
+.security-events-list-shell {
+  position: relative;
+}
+
+.security-events-list-shell .sec-event-top-mask,
+.security-events-list-shell .sec-event-bottom-mask {
+  left: 0;
+  width: 100%;
+  min-height: 32px;
+}
+
+.security-events-list-shell .sec-event-top-mask {
+  top: 0;
+  border-radius: 18px 18px 0 0;
+}
+
+.security-events-list-shell .sec-event-bottom-mask {
+  bottom: 0;
+  border-radius: 0 0 18px 18px;
+}
+
+.security-events-timeline {
+  margin-top: 0;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+@media screen and (max-width: 768px) {
+  .security-events-toolbar__actions {
+    width: 100%;
+    justify-content: stretch;
+    margin-left: 0;
+  }
+
+  .security-events-filter {
+    width: 100%;
+  }
+}

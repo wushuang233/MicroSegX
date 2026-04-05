@@ -1,0 +1,165 @@
+<!-- START Sidebar (left)-->
+<div class="left-side">
+  <nav
+    class="sidebar"
+    [ngStyle]="customHeaderStyle"
+    aria-label="sidebar"
+    [class.show-scrollbar]="switchers.getFrameSwitcher('leftSideScrollbar')">
+    <div class="sidebar-workspace-card">
+      <div class="sidebar-workspace-card__eyebrow">
+        {{ 'customUi.sidebar.workspace' | translate }}
+      </div>
+      <div class="sidebar-workspace-card__title">
+        {{ 'customUi.sidebar.title' | translate }}
+      </div>
+      <div class="sidebar-workspace-card__copy">
+        {{ 'customUi.sidebar.subtitle' | translate }}
+      </div>
+      <div class="sidebar-workspace-card__meta">
+        <span>{{ 'customUi.sidebar.meta.runtime' | translate }}</span>
+        <span>{{ 'customUi.sidebar.meta.policy' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- START sidebar nav-->
+    <ul
+      class="sidebar-nav"
+      style="height: calc(100vh - 292px)"
+      [ngStyle]="customSideBarStyle">
+      <li
+        *ngFor="let item of menuItems; let idx = index"
+        [ngClass]="{ 'nav-heading': item.heading }"
+        [routerLinkActive]="['active']">
+        <a
+          href
+          mat-ripple
+          *ngIf="!item.heading && !item.submenu && item.elink"
+          [attr.target]="item.target"
+          [attr.href]="item.elink">
+          <span
+            class="float-right"
+            *ngIf="item.alert"
+            [ngClass]="item.label || 'badge badge-success'"
+            >{{ item.alert }}</span
+          >
+          <em
+            class="eos-icons icon-18"
+            *ngIf="item.icon"
+            matTooltip="{{ item.text }}"
+            matTooltipPosition="above"
+            >{{ item.icon }}</em
+          >
+          <span>{{ (item.translate | translate) || item.text }}</span>
+        </a>
+
+        <a
+          href
+          mat-ripple
+          *ngIf="!item.heading && !item.submenu && !item.elink"
+          [routerLink]="item.link"
+          [attr.route]="item.link"
+          (click)="toggleSubmenuClick($event)"
+          (mouseenter)="toggleSubmenuHover($event)">
+          <span
+            class="float-right"
+            *ngIf="item.alert"
+            [ngClass]="item.label || 'badge badge-success'"
+            >{{ item.alert }}</span
+          >
+          <em
+            class="eos-icons icon-18"
+            *ngIf="item.icon"
+            matTooltip="{{ item.text }}"
+            matTooltipPosition="above"
+            >{{ item.icon }}</em
+          >
+          <span>{{ (item.translate | translate) || item.text }}</span>
+        </a>
+
+        <a
+          href
+          mat-ripple
+          *ngIf="!item.heading && item.submenu"
+          (click)="toggleSubmenuClick($event, 'drop_down_' + idx)"
+          (mouseenter)="toggleSubmenuHover($event)">
+          <span
+            class="float-right"
+            *ngIf="item.alert"
+            [ngClass]="item.label || 'badge badge-success'"
+            >{{ item.alert }}</span
+          >
+          <em
+            class="eos-icons icon-18"
+            *ngIf="item.icon"
+            matTooltip="{{ item.text }}"
+            matTooltipPosition="above"
+            >{{ item.icon }}</em
+          >
+          <span>{{ (item.translate | translate) || item.text }}</span>
+          <em
+            id="{{ 'drop_down_' + idx }}"
+            class="eos-icons icon-18 pull-right menu-arrow"
+            >arrow_drop_down</em
+          >
+        </a>
+
+        <ul
+          *ngIf="item.submenu"
+          class="sidebar-nav sidebar-subnav"
+          [routerLinkActive]="['opening']">
+          <li class="sidebar-subnav-header">
+            {{ (item.translate | translate) || item.text }}
+          </li>
+          <li
+            *ngFor="let subitem of item.submenu"
+            [routerLinkActive]="['active']">
+            <a
+              href
+              mat-ripple
+              *ngIf="!subitem.heading && !subitem.submenu && subitem.elink"
+              [attr.target]="subitem.target"
+              [attr.href]="subitem.elink">
+              <span
+                class="float-right"
+                *ngIf="subitem.alert"
+                [ngClass]="subitem.label || 'badge badge-success'"
+                >{{ subitem.alert }}</span
+              >
+              <em class="eos-icons icon-18" *ngIf="subitem.icon">{{
+                subitem.icon
+              }}</em>
+              <span>{{ (subitem.translate | translate) || subitem.text }}</span>
+            </a>
+
+            <a
+              href
+              mat-ripple
+              *ngIf="!subitem.submenu && !subitem.elink"
+              [routerLink]="subitem.link"
+              [attr.route]="subitem.link">
+              <span
+                class="float-right"
+                *ngIf="subitem.alert"
+                [ngClass]="subitem.label || 'badge badge-success'"
+                >{{ subitem.alert }}</span
+              >
+              <em class="eos-icons icon-18" *ngIf="subitem.icon">{{
+                subitem.icon
+              }}</em>
+              <span [routerLink]="subitem.link" [attr.route]="subitem.link">{{
+                (subitem.translate | translate) || subitem.text
+              }}</span>
+            </a>
+          </li>
+
+          <li></li>
+        </ul>
+      </li>
+    </ul>
+    <!-- END sidebar nav-->
+
+    <footer class="footer-container" [ngStyle]="customFooterStyle" app-footer>
+    </footer>
+  </nav>
+</div>
+<!-- END Sidebar (left)-->

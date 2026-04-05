@@ -1,0 +1,49 @@
+<div class="nv-dialog">
+  <div class="d-flex align-items-center justify-content-between">
+    <h4 mat-dialog-title class="mb-2">
+      {{ 'multiCluster.joining.token' | translate }}
+    </h4>
+    <button
+      (click)="onCancel()"
+      class="mb-2"
+      aria-label="Close dialog"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy" />
+
+  <div mat-dialog-content class="dialog-content p0 m0">
+    <div>
+      <div class="ps-4 d-flex justify-content-between align-items-end">
+        <div class="d-flex flex-column flex-grow-1">
+          <mat-form-field appearance="outline" class="pe-4">
+            <textarea
+              matInput
+              [value]="data.token"
+              name="name"
+              id="token"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="3"
+              aria-label="token content"
+              required></textarea>
+          </mat-form-field>
+        </div>
+        <button
+          [cdkCopyToClipboard]="data.token"
+          mat-icon-button
+          class="mb-4 mat-raised-button"
+          aria-label="Copy to clipboard">
+          <i class="eos-icons">content_copy</i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="dialog-actions pull-right me-2">
+    <button mat-stroked-button aria-label="cancel" (click)="onCancel()">
+      {{ 'general.CLOSE' | translate }}
+    </button>
+  </div>
+</div>

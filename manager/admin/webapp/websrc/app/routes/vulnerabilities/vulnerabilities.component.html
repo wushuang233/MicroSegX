@@ -1,0 +1,128 @@
+<ng-container
+  *appObserve="
+    vulnerabilitiesData$ as vulnerabilitiesData;
+    error: errorTemplate;
+    loading: loadingTemplate
+  ">
+  <app-risks-view-report
+    #vulnerabilityViewReport
+    *ngIf="vulnerabilitiesList && isPrinting"
+    class="printable-area"
+    [reportPage]="'vulnerabilities'"
+    [withoutAppendix]="withoutAppendix"
+    [data]="vulnerabilitiesList"
+    [charts]="statisticCharts"
+    [view]="selectedView"
+    [filterService]="vulnerabilitiesFilterService">
+  </app-risks-view-report>
+  <app-assets-view-report
+    #assetsViewReport
+    *ngIf="vulnerabilitiesList && isPrintingAssets"
+    class="printable-area"
+    [reportPage]="'vulnerabilities'"
+    [withoutAppendix]="withoutAppendix"
+    [masterGrids]="masterGrids"
+    [dictionaryData]="vulnerabilitiesList">
+  </app-assets-view-report>
+
+  <div class="screen-area page-shell">
+    <div class="page-header">
+      <div class="page-header__copy">
+        <h1>{{ 'sidebar.nav.SCAN' | translate }}</h1>
+        <p>{{ 'customUi.header.captions.vulnerabilities' | translate }}</p>
+      </div>
+      <div class="page-header__actions">
+        <div
+          class="d-flex justify-content-center align-items-center"
+          *ngIf="vulnerabilitiesData.total_matched_records > 0">
+          <app-loading-button
+            (btnClick)="printAssetsPDF()"
+            appearance="mat-icon-button"
+            buttonClasses="page-icon-button me-1 d-flex justify-content-center align-items-center px-0 no-min-width"
+            iconClasses="eos-icons"
+            iconName="print">
+          </app-loading-button>
+          <app-loading-button
+            (btnClick)="downloadAssetsCsv()"
+            appearance="mat-icon-button"
+            buttonClasses="page-icon-button me-1 d-flex justify-content-center align-items-center px-0 no-min-width"
+            iconClasses="eos-icons"
+            iconName="csv_file">
+          </app-loading-button>
+          <div class="me-3">{{ 'scan.report.PDF_LINK2' | translate }}</div>
+          <app-loading-button
+            (btnClick)="printVulnerabilityPDF()"
+            appearance="mat-icon-button"
+            buttonClasses="page-icon-button me-1 d-flex justify-content-center align-items-center px-0 no-min-width"
+            iconClasses="eos-icons"
+            iconName="print">
+          </app-loading-button>
+          <app-loading-button
+            (btnClick)="downloadCsv()"
+            appearance="mat-icon-button"
+            buttonClasses="page-icon-button me-1 d-flex justify-content-center align-items-center px-0 no-min-width"
+            iconClasses="eos-icons"
+            iconName="csv_file">
+          </app-loading-button>
+          <div>{{ 'scan.report.PDF_LINK' | translate }}</div>
+        </div>
+        <app-loading-button
+          (btnClick)="refresh()"
+          [appearance]="'mat-stroked-button'"
+          [buttonClasses]="'page-action-button d-flex justify-content-center align-items-center'"
+          [disabled]="!!(refreshing$ | async)"
+          [iconClasses]="'eos-icons icon-18'"
+          [iconName]="'refresh'"
+          [id]="'vulnerabilities-refresh-button'"
+          [loading]="!!(refreshing$ | async)"
+          [text]="'network.REFRESH' | translate"
+          [type]="'button'">
+        </app-loading-button>
+      </div>
+    </div>
+
+    <mat-card class="page-card">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <label for="viewMenu" class="font-weight-normal mb-0 pe-2">
+            {{ 'scan.report.view.TITLE' | translate }}:
+          </label>
+          <button id="viewMenu" [matMenuTriggerFor]="viewMenu" mat-stroked-button>
+            {{ 'scan.report.view.' + selectedView.toUpperCase() | translate }}
+            <i class="eos-icons">arrow_drop_down</i>
+          </button>
+          <mat-menu #viewMenu="matMenu">
+            <button
+              *ngFor="let view of displayViews"
+              (click)="changeSelectedView(view)"
+              mat-menu-item>
+              {{ 'scan.report.view.' + view.toUpperCase() | translate }}
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <div style="height: 220px">
+        <app-vulnerability-charts></app-vulnerability-charts>
+      </div>
+
+      <div style="height: calc(100vh - 420px); position: relative">
+        <app-vulnerability-detail-dialog
+          top="-100"
+          [vulnerability]="selectedVulnerability">
+        </app-vulnerability-detail-dialog>
+        <app-vulnerability-items
+          (selectVulnerability)="vulnerabilitySelected($event)">
+        </app-vulnerability-items>
+      </div>
+    </mat-card>
+  </div>
+</ng-container>
+
+<ng-template #errorTemplate let-error>
+  {{ error | json }}
+</ng-template>
+
+<ng-template #loadingTemplate>
+  <app-loading-template></app-loading-template>
+</ng-template>

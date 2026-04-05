@@ -1,0 +1,191 @@
+<div class="nv-dialog">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 mat-dialog-title class="mb-2">
+      <span *ngIf="data.opType === modalOp.ADD">{{
+        'policy.addPolicy.TITLE' | translate
+      }}</span>
+      <span *ngIf="data.opType === modalOp.EDIT">{{
+        'policy.editPolicy.TITLE' | translate
+      }}</span>
+    </h4>
+    <button
+      (click)="onCancel()"
+      class="mb-2"
+      aria-label="Close dialog"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy mb-3" />
+  <div mat-dialog-content>
+    <form [formGroup]="addEditNetworkRuleForm">
+      <div class="row">
+        <mat-form-field
+          class="col-2 col-md-2"
+          *ngIf="data.opType !== modalOp.ADD">
+          <mat-label>{{ 'policy.editPolicy.POLICY_ID' | translate }}</mat-label>
+          <input matInput formControlName="id" [readonly]="'true'" />
+        </mat-form-field>
+        <mat-form-field
+          [ngClass]="{
+            'col-12 col-md-12': data.opType === modalOp.ADD,
+            'col-10 col-md-10': data.opType !== modalOp.ADD,
+          }">
+          <mat-label>{{ 'policy.addPolicy.COMMENT' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="comment"
+            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field class="col-6 col-md-6">
+          <mat-label>{{ 'policy.addPolicy.FROM' | translate }}</mat-label>
+          <input
+            type="text"
+            aria-label="From"
+            matInput
+            formControlName="from"
+            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+            [matAutocomplete]="autoForm" />
+          <mat-autocomplete autoActiveFirstOption #autoForm="matAutocomplete">
+            <mat-option
+              *ngFor="let endpoint of filteredFromEndpoints | async"
+              [value]="endpoint">
+              {{ endpoint }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field class="col-6 col-md-6">
+          <mat-label>{{ 'policy.addPolicy.TO' | translate }}</mat-label>
+          <input
+            type="text"
+            aria-label="To"
+            matInput
+            formControlName="to"
+            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+            [matAutocomplete]="autoTo" />
+          <mat-autocomplete autoActiveFirstOption #autoTo="matAutocomplete">
+            <mat-option
+              *ngFor="let endpoint of filteredToEndpoints | async"
+              [value]="endpoint">
+              {{ endpoint }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field class="col-12 col-md-12">
+          <mat-label>{{ 'policy.addPolicy.APP' | translate }}</mat-label>
+          <mat-chip-grid #chipList aria-label="From">
+            <mat-chip-row
+              *ngFor="let app of applications"
+              (removed)="removeApp(app)">
+              {{ app }}
+              <button matChipRemove>
+                <mat-icon class="eos-icons icon-18">cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+            <input
+              placeholder="{{ 'policy.message.ADD_APP' | translate }}"
+              #applicationsInput
+              formControlName="applicationsCtrl"
+              [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+              [matAutocomplete]="autoApp"
+              [matChipInputFor]="chipList"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes" />
+          </mat-chip-grid>
+          <mat-autocomplete
+            #autoApp="matAutocomplete"
+            (optionSelected)="selected($event)">
+            <mat-option
+              *ngFor="let appOption of filteredApps | async"
+              [value]="appOption">
+              {{ appOption }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field
+          [ngClass]="{
+            'col-10 col-md-9': data.opType === modalOp.ADD,
+            'col-8 col-md-6': data.opType !== modalOp.ADD,
+          }">
+          <mat-label>{{ 'policy.editPolicy.PORT' | translate }}</mat-label>
+          <input
+            matInput
+            formControlName="ports"
+            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+            placeholder="{{ 'policy.message.PORT_SAMPLE' | translate }}" />
+        </mat-form-field>
+        <div class="col-2 col-md-3 mt-1">
+          <section class="status-section">
+            <label class="status-margin text-label">{{
+              'policy.editPolicy.DENY_ALLOW' | translate
+            }}</label>
+            <mat-slide-toggle
+              id="network-action-toggle"
+              [(ngModel)]="isAllow"
+              [ngModelOptions]="{ standalone: true }"
+              (change)="toggleType()">
+              <span
+                [ngClass]="{
+                  'text-deny': !isAllow,
+                  'text-success': isAllow,
+                }">
+                {{
+                  (isAllow ? 'policy.action.ALLOW' : 'policy.action.DENY')
+                    | translate
+                }}
+              </span>
+            </mat-slide-toggle>
+          </section>
+        </div>
+        <div class="col-2 col-md-3 mt-1" *ngIf="data.opType !== modalOp.ADD">
+          <section class="status-section">
+            <label class="status-margin text-label">{{
+              'setting.STATUS' | translate
+            }}</label>
+            <mat-slide-toggle
+              id="network-status-toggle"
+              [(ngModel)]="enable"
+              [ngModelOptions]="{ standalone: true }">
+              <span
+                [ngClass]="{
+                  'text-muted': !enable,
+                  'text-success': enable,
+                }">
+                {{
+                  (enable ? 'policy.status.ENABLED' : 'policy.status.DISABLED')
+                    | translate
+                }}
+              </span>
+            </mat-slide-toggle>
+          </section>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end align-items-center">
+        <button
+          mat-stroked-button
+          aria-label="cancel"
+          class="me-2"
+          (click)="onCancel()">
+          {{ 'policy.addPolicy.CANCEL' | translate }}
+        </button>
+        <app-loading-button
+          [appearance]="'mat-raised-button'"
+          [color]="'primary'"
+          [loading]="submittingUpdate"
+          [text]="
+            (data.opType === modalOp.EDIT
+              ? 'policy.editPolicy.UPDATE'
+              : 'policy.addPolicy.ADD'
+            ) | translate
+          "
+          (btnClick)="updateRule()">
+        </app-loading-button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,187 @@
+<form (ngSubmit)="submitForm()" [formGroup]="samlForm">
+  <div class="d-flex align-items-center my-2 flex-wrap">
+    <i class="eos-icons me-3 text-primary">lightbulb</i>
+    <span class="me-3">{{ 'okta.CALLBACK_URL' | translate }}</span>
+    <span class="text-muted me-3">{{ samlRedirectURL }}</span>
+    <button
+      [cdkCopyToClipboard]="samlRedirectURL"
+      class="d-flex justify-content-center align-items-center"
+      mat-stroked-button
+      type="button">
+      <i class="eos-icons">content_copy</i>
+      {{ 'license.COPY_CODE' | translate }}
+    </button>
+  </div>
+  <div class="row align-items-center my-0 my-md-4">
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">organization</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'okta.IDP_URL' | translate }}</mat-label>
+        <input
+          formControlName="sso_url"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="samlForm.controls.sso_url.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+        <mat-error *ngIf="samlForm.controls.sso_url.hasError('invalidURL')">
+          {{ 'okta.INVALID_URL' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">account_box</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'okta.IDP_ISSUER' | translate }}</mat-label>
+        <input
+          formControlName="issuer"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="samlForm.controls.issuer.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+        <mat-error *ngIf="samlForm.controls.issuer.hasError('invalidURL')">
+          {{ 'okta.INVALID_URL' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">logout</i>
+      <span class="me-3 mb-4">{{ 'okta.SAML_SLO' | translate }}</span>
+      <mat-slide-toggle
+        class="mb-4"
+        formControlName="slo_enabled"></mat-slide-toggle>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">organization</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'okta.SLO_URL' | translate }}</mat-label>
+        <input
+          formControlName="slo_url"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="samlForm.controls.slo_url.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+        <mat-error *ngIf="samlForm.controls.slo_url.hasError('invalidURL')">
+          {{ 'okta.INVALID_URL' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">verified</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'okta.SLO_CERT' | translate }}</mat-label>
+        <textarea
+          cdkTextareaAutosize
+          formControlName="signing_cert"
+          matInput></textarea>
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">vpn_key</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'okta.SLO_KEY' | translate }}</mat-label>
+        <textarea
+          cdkTextareaAutosize
+          formControlName="signing_key"
+          matInput></textarea>
+        <mat-icon
+          *ngIf="signingKeySubmitted"
+          matSuffix
+          matTooltip="{{ 'okta.SLO_KEY_SUBMITTED' | translate }}"
+          class="text-success">
+          info
+        </mat-icon>
+      </mat-form-field>
+    </div>
+    <ng-container formArrayName="x509_certs">
+      <div
+        *ngFor="let _ of x509_certs.controls; let i = index"
+        class="col-12 d-flex align-items-center">
+        <ng-container *ngIf="i === 0; else extraCertTemplate">
+          <i class="eos-icons me-3 text-primary mb-4">verified</i>
+          <mat-form-field class="w-100">
+            <mat-label>{{ 'okta.CERTIFICATE' | translate }}</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              [formControlName]="i"
+              matInput></textarea>
+            <mat-error *ngIf="x509_certs.controls[0].hasError('required')">
+              {{ 'general.REQUIRED' | translate }}
+            </mat-error>
+          </mat-form-field>
+        </ng-container>
+        <ng-template #extraCertTemplate>
+          <i class="eos-icons me-3 text-primary invisible mb-4">verified</i>
+          <mat-form-field class="w-100">
+            <mat-label>{{ 'okta.EXTRA_CERT' | translate }}</mat-label>
+            <textarea
+              cdkTextareaAutosize
+              [formControlName]="i"
+              matInput></textarea>
+          </mat-form-field>
+          <button
+            (click)="removeExtraCert(i)"
+            aria-label="Remove extra X509_cert"
+            type="button"
+            class="mb-4"
+            mat-icon-button>
+            <mat-icon>delete_forever</mat-icon>
+          </button>
+        </ng-template>
+      </div>
+    </ng-container>
+    <div
+      class="col-12 d-flex align-items-center"
+      *ngIf="x509_certs.length <= 3">
+      <button (click)="addExtraCert()" type="button" mat-stroked-button>
+        <i class="eos-icons me-2 icon-16">add_circle</i>
+        {{ 'okta.ADD_EXTRA_CERT' | translate }}
+      </button>
+    </div>
+    <div class="col-12 d-flex align-items-center">
+      <i class="eos-icons me-3 text-primary mb-4">groups</i>
+      <mat-form-field class="w-100">
+        <mat-label> {{ 'okta.GROUP_CLAIM' | translate }}</mat-label>
+        <input
+          formControlName="group_claim"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-form-field style="width: 200px">
+    <mat-label>{{ 'ldap.DEFAULT_ROLE' | translate }}</mat-label>
+    <mat-select formControlName="default_role">
+      <mat-option
+        *ngFor="let role of samlData.server.mappable_roles.default_roles"
+        [value]="role">
+        {{ role ? role : 'none' }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <app-group-domain-role
+    (updateGroupMappedRoles)="updateGroupMappedRoles($event)"
+    [domains]="samlData.domains"
+    [groupMappedRoles]="groupMappedRoles"
+    [mappableRoles]="samlData.server.mappable_roles"
+    [isReadOnly]="!isWriteSamlAuthorized"></app-group-domain-role>
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+    <mat-checkbox formControlName="enable">{{
+      'ldap.ENABLE_LDAP' | translate
+    }}</mat-checkbox>
+    <button
+      *ngIf="isWriteSamlAuthorized"
+      [disabled]="!samlForm.valid || submittingForm"
+      color="primary"
+      mat-raised-button
+      type="submit">
+      <mat-spinner
+        *ngIf="submittingForm"
+        class="btn__spinner me-2"
+        diameter="20"></mat-spinner>
+      {{ 'general.SUBMIT' | translate }}
+    </button>
+  </div>
+</form>

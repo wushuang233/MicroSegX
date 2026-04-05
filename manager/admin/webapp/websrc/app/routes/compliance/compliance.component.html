@@ -1,0 +1,92 @@
+<ng-container
+  *appObserve="
+    complianceData$ as complianceData;
+    error: errorTemplate;
+    loading: loadingTemplate
+  ">
+  <app-risks-view-report
+    #complianceViewReport
+    *ngIf="complianceList && isPrinting"
+    class="printable-area"
+    [reportPage]="'compliance'"
+    [data]="complianceList"
+    [isMeetingReportLimit]="isMeetingReportLimit"
+    [charts]="statisticCharts"
+    [filterService]="complianceFilterService">
+  </app-risks-view-report>
+  <app-assets-view-report
+    #assetsViewReport
+    *ngIf="complianceList && isPrintingAssets"
+    class="printable-area"
+    [reportPage]="'compliance'"
+    [masterGrids]="masterGrids"
+    [isMeetingReportLimit]="isMeetingReportLimit"
+    [dictionaryData]="complianceList">
+  </app-assets-view-report>
+  <div class="screen-area" style="height: calc(100vh - 180px)">
+    <div class="d-flex justify-content-end align-items-center">
+      <div
+        class="d-flex justify-content-end align-items-center"
+        *ngIf="
+          (!complianceFilterService.filtered &&
+            complianceData.compliance.compliances.length > 0) ||
+          (complianceFilterService.filtered &&
+            complianceFilterService.filteredCount > 0)
+        ">
+        <app-loading-button
+          (btnClick)="printAssetsPDF()"
+          [text]="'cis.report.PDF_LINK2' | translate"
+          appearance="mat-button"
+          buttonClasses="me-1 d-flex justify-content-center align-items-center"
+          iconClasses="eos-icons"
+          iconName="print">
+          >
+        </app-loading-button>
+        <app-loading-button
+          (btnClick)="printCompliancePDF()"
+          [text]="'cis.report.PDF_LINK' | translate"
+          appearance="mat-button"
+          buttonClasses="me-1 d-flex justify-content-center align-items-center"
+          iconClasses="eos-icons"
+          iconName="print">
+        </app-loading-button>
+        <button
+          (click)="downloadCsv()"
+          class="me-1 d-flex justify-content-center align-items-center"
+          mat-button>
+          <i class="eos-icons icon-18">csv_file</i>
+        </button>
+      </div>
+      <app-loading-button
+        (btnClick)="refresh()"
+        [appearance]="'mat-button'"
+        [buttonClasses]="'d-flex justify-content-center align-items-center'"
+        [disabled]="false"
+        [iconClasses]="'eos-icons icon-18'"
+        [iconName]="'refresh'"
+        [id]="'compliance-refresh-button'"
+        [loading]="false"
+        [text]="'network.REFRESH' | translate"
+        [type]="'button'">
+      </app-loading-button>
+    </div>
+    <div style="height: 200px">
+      <app-compliance-charts
+        [compliances]="
+          complianceData.compliance.compliances
+        "></app-compliance-charts>
+    </div>
+    <div style="height: calc(100% - 160px)">
+      <app-compliance-items
+        [complianceDist]="complianceData.complianceDist"
+        [compliances]="complianceData.compliance.compliances"
+        [domains]="complianceData.domain"></app-compliance-items>
+    </div>
+  </div>
+</ng-container>
+<ng-template #errorTemplate let-error>
+  {{ error | json }}
+</ng-template>
+<ng-template #loadingTemplate>
+  <app-loading-template></app-loading-template>
+</ng-template>

@@ -1,0 +1,57 @@
+.terminal {
+  overflow-y: scroll;
+  background-color: #525252;
+  color: #e6e6e6;
+  height: calc(50vh - 185px);
+
+  .cmds {
+    text-align: left;
+    overflow-wrap: break-word;
+    padding: 10px;
+  }
+}
+
+.vulnerability-description-container {
+  height: calc(50vh - 185px);
+
+  .vulnerability-description {
+    border: #babfc7 1px solid;
+    text-align: left;
+    overflow-wrap: break-word;
+    height: 100%;
+  }
+}
+
+.registry-vulnerability-row {
+  height: calc(100% - 70px);
+}
+
+.vulnerability-description-header {
+  height: 47px;
+  border-bottom: #babfc7 1px solid;
+  padding: 10px;
+  color: black;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  background-color: rgb(248, 248, 248);
+}
+
+.vulnerability-description-body {
+  padding: 10px;
+  height: calc(100% - 47px);
+  overflow-y: scroll;
+}
+
+.vulnerability-verifiers-body {
+  padding: 10px;
+  height: calc(100% - 97px);
+  overflow: scroll;
+}
+
+.vulnerability-verifiers-footer {
+  padding: 5px 10px;
+  height: 50px;
+  font-size: 11px;
+}

@@ -1,0 +1,154 @@
+<ng-container *ngIf="reportPage === 'vulnerabilities'; then vuls; else comp">
+</ng-container>
+
+<ng-template #vuls>
+  <table class="print-table margin-top-l">
+    <thead>
+      <tr class="print-header">
+        <th class="print-cell" style="width: 10%">
+          {{ 'scan.report.gridHeader.NAME' | translate }}
+        </th>
+        <th class="print-cell" style="width: 25%">
+          {{ 'scan.report.gridHeader.DESC' | translate }}
+        </th>
+        <th class="print-cell" style="width: 6%">
+          {{ 'scan.report.gridHeader.SCORE' | translate }}
+        </th>
+        <th class="print-cell" style="width: 31%">
+          {{ 'scan.report.gridHeader.PACKAGES' | translate }}
+        </th>
+        <th class="print-cell" style="width: 8%">
+          {{ 'scan.gridHeader.PUBLISHED_TIME' | translate }}
+        </th>
+        <th class="print-cell" style="width: 20%" *ngIf="includesImpact">
+          {{ 'scan.report.gridHeader.IMPACT' | translate }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="print-row"
+        *ngFor="
+          let dataItem of data.slice(
+            0,
+            includesImpact
+              ? SEC_RISK_REPORT_NO_APPENDIX_MAX_ROW
+              : SEC_RISK_REPORT_MAX_ROW
+          );
+          let i = index
+        "
+        [attr.data-index]="i">
+        <td class="print-cell" style="width: 10%">
+          {{ dataItem.name }}
+        </td>
+        <td class="print-cell" style="width: 25%">
+          <app-risk-view-report-description-col
+            [description]="dataItem.description">
+          </app-risk-view-report-description-col>
+        </td>
+        <td
+          class="{{
+            'print-cell ' +
+              (dataItem.severity.toLowerCase() === 'high'
+                ? 'text-danger'
+                : dataItem.severity.toLowerCase() === 'medium'
+                  ? 'text-warning'
+                  : 'text-success')
+          }}"
+          style="width: 6%">
+          <div><strong>V2:</strong> {{ dataItem.score }}</div>
+          <div><strong>V3:</strong> {{ dataItem.score_v3 }}</div>
+        </td>
+        <td class="print-cell" style="width: 31%">
+          <app-risk-view-report-packages-col
+            [packages]="dataItem.packages"
+            [isInAppendix]="false">
+          </app-risk-view-report-packages-col>
+        </td>
+        <td class="print-cell" style="width: 8%">
+          {{ dataItem.published_timestamp * 1000 | date: 'MMM d, y hh:mm:ss' }}
+        </td>
+        <td class="print-cell" style="width: 20%" *ngIf="includesImpact">
+          <app-risk-view-report-impact-col
+            [nodes]="dataItem.nodes"
+            [containers]="dataItem.workloads"
+            [images]="dataItem.images">
+          </app-risk-view-report-impact-col>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+<ng-template #comp>
+  <table class="print-table margin-top-l">
+    <thead>
+      <tr class="print-header">
+        <th class="print-cell" style="width: 10%">
+          {{ 'cis.report.gridHeader.CATEGORY' | translate }}
+        </th>
+        <th class="print-cell" style="width: 6%">
+          {{ 'cis.report.gridHeader.NAME' | translate }}
+        </th>
+        <th class="print-cell" style="width: 15%">
+          {{ 'cis.report.gridHeader.DESC' | translate }}
+        </th>
+        <th class="print-cell" style="width: 6%">
+          {{ 'cis.report.gridHeader.LEVEL' | translate }}
+        </th>
+        <th class="print-cell" style="width: 6%">
+          {{ 'cis.report.gridHeader.SCORED' | translate }}
+        </th>
+        <th class="print-cell" style="width: 6%">
+          {{ 'cis.report.gridHeader.PROFILE' | translate }}
+        </th>
+        <th class="print-cell" style="width: 20%">
+          {{ 'cis.report.gridHeader.IMPACT' | translate }}
+        </th>
+        <th class="print-cell" style="width: 31%">
+          {{ 'cis.report.gridHeader.REMEDIATION' | translate }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="print-row"
+        *ngFor="let dataItem of data; let i = index"
+        [attr.data-index]="i">
+        <td class="print-cell" style="width: 10%">
+          {{ dataItem.category }}
+        </td>
+        <td class="print-cell" style="width: 6%">
+          {{ dataItem.name }}
+        </td>
+        <td class="print-cell" style="width: 15%">
+          <app-risk-view-report-description-col
+            [description]="dataItem.description">
+          </app-risk-view-report-description-col>
+        </td>
+        <td class="print-cell" style="width: 6%">
+          <div class="action-label px-1 {{ colourMap[dataItem.level] }}">
+            {{ 'enum.' + dataItem.level.toUpperCase() | translate }}
+          </div>
+        </td>
+        <td class="print-cell" style="width: 6%">
+          {{ dataItem.scored }}
+        </td>
+        <td class="print-cell" style="width: 6%">
+          {{ dataItem.profile }}
+        </td>
+        <td class="print-cell" style="width: 20%">
+          <app-risk-view-report-impact-col
+            [nodes]="dataItem.nodes"
+            [containers]="dataItem.filteredWorkloads"
+            [images]="dataItem.filteredImages">
+          </app-risk-view-report-impact-col>
+        </td>
+        <td class="print-cell" style="width: 31%">
+          <app-risk-view-report-description-col
+            [description]="dataItem.remediation">
+          </app-risk-view-report-description-col>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>

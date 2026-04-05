@@ -1,0 +1,24 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Werror",
+      "-fstrict-aliasing",
+      "-Wstrict-aliasing",
+      "-g",
+      "-I./",
+      "-I./",
+      "-O3",
+      "-include",
+      "./../base.h",
+      "-c",
+      "-o",
+      ".objs/monitor.o",
+      "monitor.c"
+    ],
+    "directory": "/home/neuvector/go/src/github.com/neuvector/neuvector/monitor",
+    "file": "/home/neuvector/go/src/github.com/neuvector/neuvector/monitor/monitor.c",
+    "output": "/home/neuvector/go/src/github.com/neuvector/neuvector/monitor/.objs/monitor.o"
+  }
+]

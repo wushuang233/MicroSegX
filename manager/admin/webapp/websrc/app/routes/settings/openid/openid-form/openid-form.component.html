@@ -1,0 +1,176 @@
+<form (ngSubmit)="submitForm()" [formGroup]="openidForm">
+  <div class="d-flex align-items-center my-2 flex-wrap">
+    <i class="eos-icons me-3 text-primary">lightbulb</i>
+    <span class="me-3">{{ 'openId.CALLBACK_URL' | translate }}</span>
+    <span class="text-muted me-3">{{ openidRedirectURL }}</span>
+    <button
+      [cdkCopyToClipboard]="openidRedirectURL"
+      class="d-flex justify-content-center align-items-center"
+      mat-stroked-button
+      type="button">
+      <i class="eos-icons">content_copy</i>
+      {{ 'license.COPY_CODE' | translate }}
+    </button>
+  </div>
+  <div class="row align-items-center my-0 my-md-4">
+    <div class="col-12 col-md-6 d-flex align-items-center my-2">
+      <i class="eos-icons me-3 text-primary mb-4">account_box</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.ISSUER' | translate }}</mat-label>
+        <input
+          formControlName="issuer"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="openidForm.controls.issuer.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+        <mat-error *ngIf="openidForm.controls.issuer.hasError('invalidURL')">
+          {{ 'okta.INVALID_URL' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div
+      class="col-12 col-md-6 d-flex align-items-center my-2"
+      *ngIf="isCreated">
+      <i class="eos-icons me-3 text-primary mb-4">assignment_ind</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.AUTHORIZATION_ENDPOINT' | translate }}</mat-label>
+        <input
+          formControlName="authorization_endpoint"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+    <div
+      class="col-12 col-md-6 d-flex align-items-center my-2"
+      *ngIf="isCreated">
+      <i class="eos-icons me-3 text-primary mb-4">assignment_ind</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.TOKEN_ENDPOINT' | translate }}</mat-label>
+        <input
+          formControlName="token_endpoint"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+    <div
+      class="col-12 col-md-6 d-flex align-items-center my-2"
+      *ngIf="isCreated">
+      <i class="eos-icons me-3 text-primary">assignment_ind</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.USER_INFO_ENDPOINT' | translate }}</mat-label>
+        <input
+          formControlName="user_info_endpoint"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">person</i>
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.CLIENT_ID' | translate }}</mat-label>
+        <input
+          formControlName="client_id"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+        <mat-error *ngIf="openidForm.controls.client_id.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center my-2 my-md-0">
+      <i class="eos-icons me-3 text-primary mb-4">vpn_key</i>
+      <mat-form-field
+        class="w-100"
+        [floatLabel]="isCreated ? 'always' : 'auto'">
+        <mat-label>{{ 'openId.CLIENT_SECRET' | translate }}</mat-label>
+        <input
+          [type]="passwordVisible ? 'text' : 'password'"
+          formControlName="client_secret"
+          placeholder="{{ isCreated ? '******' : '' }}"
+          matInput />
+        <mat-error
+          *ngIf="openidForm.controls.client_secret.hasError('required')">
+          {{ 'general.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <button
+        (click)="passwordVisible = !passwordVisible"
+        *ngIf="openidForm.controls.client_secret.value"
+        aria-label="Visibility icon to toggle password visibility"
+        class="mb-4"
+        mat-icon-button
+        type="button">
+        <i class="eos-icons">{{
+          passwordVisible ? 'visibility' : 'visibility_off'
+        }}</i>
+      </button>
+    </div>
+    <div class="col-12 d-flex align-items-center my-2">
+      <mat-form-field class="w-100">
+        <mat-label>{{ 'openId.SCOPES' | translate }}</mat-label>
+        <mat-chip-grid
+          #chipList
+          [disabled]="!isWriteOidcAuthorized"
+          aria-label="Scopes">
+          <mat-chip-row (removed)="remove(scope)" *ngFor="let scope of scopes">
+            {{ scope }}
+            <button matChipRemove *ngIf="removable(scope)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+          <input
+            (matChipInputTokenEnd)="add($event)"
+            [matChipInputAddOnBlur]="addOnBlur"
+            [matChipInputFor]="chipList"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+            [placeholder]="'cveProfile.TAGS_INPUT_TIP' | translate" />
+        </mat-chip-grid>
+      </mat-form-field>
+    </div>
+    <div class="col-12 d-flex align-items-center">
+      <i class="eos-icons me-3 text-primary mb-4">groups</i>
+      <mat-form-field class="w-100">
+        <mat-label> {{ 'okta.GROUP_CLAIM' | translate }}</mat-label>
+        <input
+          formControlName="group_claim"
+          matInput
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-form-field style="width: 200px">
+    <mat-label>{{ 'ldap.DEFAULT_ROLE' | translate }}</mat-label>
+    <mat-select formControlName="default_role">
+      <mat-option
+        *ngFor="let role of openidData.server.mappable_roles.default_roles"
+        [value]="role">
+        {{ role ? role : 'none' }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <app-group-domain-role
+    (updateGroupMappedRoles)="updateGroupMappedRoles($event)"
+    [domains]="openidData.domains"
+    [groupMappedRoles]="groupMappedRoles"
+    [mappableRoles]="openidData.server.mappable_roles"
+    [isReadOnly]="!isWriteOidcAuthorized"></app-group-domain-role>
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+    <mat-checkbox formControlName="enable">{{
+      'ldap.ENABLE_LDAP' | translate
+    }}</mat-checkbox>
+    <button
+      *ngIf="isWriteOidcAuthorized"
+      [disabled]="!openidForm.valid || submittingForm"
+      color="primary"
+      mat-raised-button
+      type="submit">
+      <mat-spinner
+        *ngIf="submittingForm"
+        class="btn__spinner me-2"
+        diameter="20"></mat-spinner>
+      {{ 'general.SUBMIT' | translate }}
+    </button>
+  </div>
+</form>

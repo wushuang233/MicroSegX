@@ -1,0 +1,45 @@
+<div class="nv-dialog">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 mat-dialog-title class="mb-2">
+      {{ 'admissionControl.EXPORT' | translate }}
+    </h4>
+    <button
+      (click)="onCancel()"
+      class="mb-2"
+      aria-label="Close dialog"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy mb-2" />
+  <form (ngSubmit)="submitExport()" [formGroup]="exportForm">
+    <div *ngIf="data.source !== GlobalConstant['NAV_SOURCE']['FED_POLICY']">
+      <mat-checkbox class="mx-3" formControlName="isIncludingConfig">
+        {{ 'admissionControl.CONFIG' | translate }}
+      </mat-checkbox>
+    </div>
+    <app-export-options [exportOptions]="exportForm"></app-export-options>
+    <div class="d-flex justify-content-end mt-2">
+      <!--      <button mat-button-->
+      <!--        [color]="'primary'"-->
+      <!--        (click)="onCancel()"-->
+      <!--        class="me-2"-->
+      <!--      >-->
+      <!--        {{'general.CANCEL' | translate}}-->
+      <!--      </button>-->
+      <app-loading-button
+        [appearance]="'mat-raised-button'"
+        [color]="'primary'"
+        [disabled]="
+          !(
+            exportForm.controls.isIncludingConfig.value ||
+            data.selectedAdmissionRules
+          ) || submittingForm
+        "
+        [loading]="submittingForm"
+        [text]="'general.SUBMIT' | translate"
+        [type]="'submit'">
+      </app-loading-button>
+    </div>
+  </form>
+</div>

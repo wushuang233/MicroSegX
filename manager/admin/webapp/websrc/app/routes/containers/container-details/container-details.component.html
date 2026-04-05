@@ -1,0 +1,273 @@
+<ng-container *ngIf="container">
+  <section class="detail-hero">
+    <div class="detail-hero__lead">
+      <div class="detail-hero__eyebrow">
+        {{ 'enum.DETAIL' | translate }}
+      </div>
+      <div class="detail-hero__title-row">
+        <h2>{{ container.brief.display_name }}</h2>
+        <span class="detail-badge detail-badge--state">
+          {{ containerStateLabel }}
+        </span>
+        <span class="detail-badge detail-badge--scan">
+          {{ scanStatusLabel }}
+        </span>
+      </div>
+      <p class="detail-hero__image">{{ container.brief.image }}</p>
+      <div class="detail-hero__meta">
+        <span>{{ container.brief.domain }}</span>
+        <span>{{ container.brief.host_name }}</span>
+        <span>{{ applicationSummary }}</span>
+      </div>
+      <div class="detail-hero__mode-row">
+        <span class="detail-chip">
+          {{ 'group.gridHeader.POLICY_MODE' | translate }}:
+          {{ policyModeLabel }}
+        </span>
+        <span class="detail-chip">
+          {{ 'group.BASELINE_PROFILE' | translate }}:
+          {{ profileModeLabel }}
+        </span>
+        <span class="detail-chip">
+          {{ 'containers.detail.PORT_MAPPING' | translate }}: {{ portCount }}
+        </span>
+        <span class="detail-chip">
+          {{ 'containers.detail.NETWORK_INTERFACES' | translate }}:
+          {{ interfaceCount }}
+        </span>
+      </div>
+      <div class="detail-hero__alert" *ngIf="quarantineReason">
+        {{ quarantineReason }}
+      </div>
+    </div>
+
+    <div class="detail-hero__risk">
+      <div class="risk-card">
+        <span>{{ 'scan.gridHeader.HIGH' | translate }}</span>
+        <strong>{{ highCount }}</strong>
+      </div>
+      <div class="risk-card">
+        <span>{{ 'scan.gridHeader.MEDIUM' | translate }}</span>
+        <strong>{{ mediumCount }}</strong>
+      </div>
+      <div class="risk-card">
+        <span>{{ 'network.gridHeader.SERVICE' | translate }}</span>
+        <strong>{{ container.brief.service || '-' }}</strong>
+      </div>
+      <div class="risk-card">
+        <span>{{ 'scan.gridHeader.TIME' | translate }}</span>
+        <strong>
+          {{
+            container.security.scan_summary.scanned_at
+              | date: 'MMM dd, y HH:mm:ss'
+          }}
+        </strong>
+      </div>
+    </div>
+  </section>
+
+  <ng-container [ngSwitch]="activeTab">
+    <ng-container *ngSwitchCase="'compliance'">
+      <div class="filter" [class.filter-icon-1]="!complianceEmpty">
+        <div class="d-flex">
+          <button
+            *ngIf="!complianceEmpty"
+            aria-label="Export compliance CSV"
+            type="button"
+            class="me-3"
+            (click)="complianceGrid.exportCSV()"
+            mat-icon-button>
+            <i class="eos-icons icon-18">csv_file</i>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'vulnerabilities'">
+      <div class="filter" [ngClass]="'filter-icon-' + visibleIcons">
+        <div class="d-flex align-items-center">
+          <button
+            [matMenuTriggerFor]="menu"
+            class="mx-2 d-flex align-items-center justify-content-center"
+            mat-button>
+            {{ activeScore }} <i class="eos-icons">arrow_drop_down</i>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button (click)="changeScoreView('V2')" mat-menu-item>
+              {{ 'scan.gridHeader.SCORE_V2' | translate }}
+            </button>
+            <button (click)="changeScoreView('V3')" mat-menu-item>
+              {{ 'scan.gridHeader.SCORE_V3' | translate }}
+            </button>
+          </mat-menu>
+          <ng-container *ngIf="isVulsAuthorized">
+            <button
+              *ngIf="
+                isWriteVulsAuthorized &&
+                selectedVulnerability &&
+                !isAccepted(selectedVulnerability)
+              "
+              attr.aria-label="{{ 'cveProfile.ACCEPT_VUL' | translate }}"
+              matTooltip="{{ 'cveProfile.ACCEPT_VUL' | translate }}"
+              matTooltipPosition="above"
+              class="me-3"
+              (click)="onAcceptVulnerability(selectedVulnerability)"
+              mat-icon-button>
+              <i class="eos-icons">check_box</i>
+            </button>
+            <button
+              #acceptedTooltip="matTooltip"
+              type="button"
+              [attr.aria-label]="acceptedVulsMsg"
+              [matTooltip]="acceptedVulsMsg"
+              matTooltipPosition="above"
+              class="me-3"
+              (click)="toggleAcceptedVuls()"
+              mat-icon-button>
+              <i class="eos-icons">{{ !showAcceptedVuls ? 'visibility' : 'visibility_off' }}</i>
+            </button>
+          </ng-container>
+          <button
+            *ngIf="!vulEmpty"
+            aria-label="Export vulnerabilities CSV"
+            type="button"
+            class="me-3"
+            (click)="exportCVE()"
+            mat-icon-button>
+            <i class="eos-icons icon-18">csv_file</i>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'process'">
+      <div class="filter filter-icon-1">
+        <div class="d-flex">
+          <button
+            #processHistoryTooltip="matTooltip"
+            mat-icon-button
+            style="top: 12px"
+            [attr.aria-label]="processHistoryMsg"
+            [matTooltip]="processHistoryMsg"
+            matTooltipPosition="above"
+            type="button"
+            class="me-3"
+            (click)="toggleProcessHistory()">
+            <mat-icon
+              style="font-size: 14px"
+              fontSet="fa"
+              [fontIcon]="
+                !showProcessHistory ? 'fa-eye' : 'fa-eye-slash'
+              "></mat-icon>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+      <div class="filter" [style.visibility]="'hidden'">
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input matInput disabled />
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <mat-tab-group
+    [ngClass]="
+      activeTab === 'vulnerabilities'
+        ? 'filter-icon-' + visibleIcons
+        : activeTab === 'compliance'
+          ? !complianceEmpty
+            ? 'filter-icon-1'
+            : 'filter-icon-0'
+          : activeTab === 'process'
+            ? 'filter-icon-1'
+            : ''
+    "
+    class="h-100 detail-tabs container-detail-tab-group"
+    mat-align-tabs="start"
+    (selectedTabChange)="activateTab($event)">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-address-card pe-1"></em>
+        {{ 'containers.detail.TAB_TITLE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <app-container-detail [container]="container"></app-container-detail>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-gavel pe-1"></em>
+        {{ 'cis.tab.COMPLIANCE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="containerCompliance">
+          <app-compliance-grid
+            [path]="container.brief.name"
+            [repository]="''"
+            [dockerCisVersion]="containerCompliance.docker_cis_version"
+            [kubernetesCisVersion]="containerCompliance.kubernetes_cis_version"
+            [runAt]="containerCompliance.run_at"
+            [rowData]="containerCompliance.items"
+            [useQuickFilterService]="true"
+            [isContainer]="true"
+            [tableHeight]="gridHeight + 'px'">
+          </app-compliance-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-bug pe-1"></em>
+        {{ 'sidebar.nav.SCAN' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="containerVuls">
+          <app-vulnerabilities-grid
+            (vulnerabilitySelected)="vulnerabilitySelected($event)"
+            [rowData]="containerVuls"
+            [useQuickFilterService]="true"
+            [preselect]="false"
+            [tableHeight]="gridHeight + 'px'"></app-vulnerabilities-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-terminal pe-1"></em>
+        {{ 'containers.process.TAB_TITLE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="containerProcess">
+          <app-process-grid
+            [rowData]="containerProcess"
+            [useQuickFilterService]="true"
+            [tableHeight]="gridHeight + 'px'"></app-process-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-chart-line pe-1"></em>
+        {{ 'containers.detail.TAB_STATS' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <app-container-stats></app-container-stats>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+  <app-vulnerability-detail-dialog
+    [vulnerability]="selectedVulnerability"></app-vulnerability-detail-dialog>
+</ng-container>

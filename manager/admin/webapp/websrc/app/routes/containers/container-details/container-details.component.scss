@@ -1,0 +1,221 @@
+:host {
+  display: block;
+}
+
+.detail-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(22, 119, 255, 0.12), transparent 38%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.detail-hero__lead {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.detail-hero__eyebrow {
+  color: var(--saas-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.detail-hero__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-hero__title-row h2 {
+  margin: 0;
+  color: var(--saas-text);
+  font-family: Poppins, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.detail-hero__image {
+  margin: 0;
+  color: var(--saas-text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.detail-hero__meta,
+.detail-hero__mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-hero__meta span,
+.detail-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #4b6480;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-chip {
+  background: #f5f8fd;
+}
+
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-badge--state {
+  background: rgba(22, 119, 255, 0.12);
+  color: var(--saas-primary);
+}
+
+.detail-badge--scan {
+  background: rgba(82, 196, 26, 0.12);
+  color: var(--saas-success);
+}
+
+.detail-hero__alert {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 77, 79, 0.08);
+  color: var(--saas-danger);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.detail-hero__risk {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.risk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 104px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(22, 119, 255, 0.08);
+}
+
+.risk-card span {
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.risk-card strong {
+  color: var(--saas-text);
+  font-family: Poppins, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.filter,
+.filter-icon-1,
+.filter-icon-2,
+.filter-icon-3 {
+  left: auto !important;
+}
+
+.filter {
+  position: static;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  margin: 18px 24px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--saas-card-shadow);
+}
+
+.filter .d-flex {
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-filter {
+  width: min(320px, 100%);
+  margin-bottom: 0;
+}
+
+.detail-tabs {
+  margin-top: 0;
+}
+
+:host ::ng-deep .quick-filter .mat-mdc-form-field-subscript-wrapper,
+:host ::ng-deep .quick-filter .mat-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .container-detail-tab-group {
+  display: block;
+  overflow: hidden;
+  margin: 0 24px 24px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--saas-card-shadow);
+}
+
+:host ::ng-deep .container-detail-tab-group .mat-mdc-tab-header,
+:host ::ng-deep .container-detail-tab-group .mat-tab-header {
+  padding: 0 20px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--saas-border);
+}
+
+:host ::ng-deep .container-detail-tab-group .mat-mdc-tab-body-wrapper,
+:host ::ng-deep .container-detail-tab-group .mat-tab-body-wrapper {
+  padding: 10px 20px 22px;
+}
+
+@media screen and (max-width: 768px) {
+  .detail-hero {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .filter {
+    padding: 16px;
+    margin: 16px 20px;
+    justify-content: stretch;
+  }
+
+  .quick-filter {
+    width: 100%;
+  }
+
+  :host ::ng-deep .container-detail-tab-group {
+    margin: 0 20px 20px;
+  }
+}

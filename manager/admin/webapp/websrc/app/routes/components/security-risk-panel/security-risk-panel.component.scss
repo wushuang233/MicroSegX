@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.dashboard-hero-card {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 119, 255, 0.08) 0%,
+    rgba(22, 119, 255, 0.02) 24%,
+    #ffffff 54%
+  ) !important;
+}
+
+.dashboard-hero-card__grid {
+  row-gap: 24px;
+}
+
+.dashboard-hero-card__score-wrap {
+  margin: 0 auto;
+  width: 152px;
+  min-height: 184px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(22, 119, 255, 0.12);
+  background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+}
+
+.dashboard-hero-card__factors {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  align-content: space-between;
+  row-gap: 20px;
+}
+
+.dashboard-hero-card__risk-row {
+  width: 100%;
+  row-gap: 16px;
+}
+
+.dashboard-hero-card__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 4px;
+  color: var(--saas-text-secondary);
+}
+
+.dashboard-hero-card__cta .link {
+  font-weight: 600;
+}

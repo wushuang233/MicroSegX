@@ -1,0 +1,145 @@
+<ng-container
+  *ngIf="
+    registryDetails$ | async as registryDetails;
+    else loadingOrErrorTemplate
+  ">
+  <div
+    class="detail-header registry-detail-header d-flex justify-content-start align-items-center px-1">
+    <div class="h4 mb-0">
+      <span
+        *ngIf="
+          registryDetails.selectedRegistry.isFedRepo;
+          else localRepoNameTemplate
+        ">
+        {{
+          'registry.' + registryDetails.selectedRegistry.name.toUpperCase()
+            | translate
+        }}
+      </span>
+    </div>
+  </div>
+  <ng-template #localRepoNameTemplate>
+    <span>{{ registryDetails.selectedRegistry.name }}&nbsp;</span>
+    <span *ngIf="!registryDetails.selectedRegistry.isAllView">
+      ({{ registryDetails.selectedRegistry.registry }})
+    </span>
+  </ng-template>
+
+  <ng-container [ngSwitch]="maTabGroup.selectedIndex">
+    <ng-container *ngSwitchCase="0">
+      <div
+        class="filter"
+        [class.filter-icon-1]="
+          (registryDetails.repositories?.images &&
+            (registryDetails.repositories?.images)!.length) ||
+          (registryDetails.allScannedImagesSummary &&
+            registryDetails.allScannedImagesSummary?.totalRecords > 0)
+        ">
+        <div
+          class="d-flex"
+          *ngIf="
+            (!registryDetails.isAllView &&
+              registryDetails.repositories?.images &&
+              (registryDetails.repositories?.images)!.length) ||
+            (registryDetails.allScannedImagesSummary &&
+              registryDetails.allScannedImagesSummary?.totalRecords > 0)
+          ">
+          <button
+            aria-label="Export registry vulnerabilities CSV"
+            type="button"
+            class="me-1"
+            (click)="
+              registryDetails.isAllView
+                ? exportAllScannedImagesCSV()
+                : exportCSV(registryDetails)
+            "
+            mat-icon-button>
+            <i class="eos-icons icon-18">csv_file</i>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input id="detail_filter" [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+      <div class="filter" [style.visibility]="'hidden'">
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input matInput disabled />
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <mat-tab-group
+    #maTabGroup
+    class="h-100 detail-tabs registry-detail-tab-group"
+    [ngClass]="
+      maTabGroup.selectedIndex === 0
+        ? (registryDetails.repositories?.images &&
+            (registryDetails.repositories?.images)!.length) ||
+          (registryDetails.allScannedImagesSummary &&
+            registryDetails.allScannedImagesSummary!.total_records > 0)
+          ? 'filter-icon-1'
+          : 'filter-icon-0'
+        : ''
+    ">
+    <mat-tab [label]="'registry.DETAILS' | translate">
+      <div class="mt-2">
+        <app-registry-details-table
+          *ngIf="!registryDetails.isAllView"
+          [filter]="filter"
+          [rowData]="
+            registryDetails.repositories
+              ? registryDetails.repositories.images
+              : []
+          "
+          [gridHeight]="gridHeight"
+          [linkedImage]="linkedImage"
+          [linkedTag]="linkedTag"
+          [selectedRegistry]="registryDetails.selectedRegistry">
+        </app-registry-details-table>
+        <app-registry-details-table-all-view
+          *ngIf="registryDetails.isAllView"
+          [filter]="filter"
+          [queryToken]="registryDetails.allScannedImagesSummary!.queryToken"
+          [totalCount]="registryDetails.allScannedImagesSummary!.totalRecords"
+          [gridHeight]="gridHeight"
+          [linkedImage]="linkedImage"
+          [linkedTag]="linkedTag"
+          [selectedRegistry]="registryDetails.selectedRegistry">
+        </app-registry-details-table-all-view>
+      </div>
+    </mat-tab>
+    <mat-tab [label]="'registry.OVERVIEW' | translate">
+      <app-registry-overview
+        *ngIf="!registryDetails.isAllView"
+        [isAllView]="!!registryDetails.isAllView"
+        [gridHeight]="gridHeight"
+        [registryDetails]="
+          registryDetails.repositories
+            ? registryDetails.repositories.images
+            : []
+        ">
+      </app-registry-overview>
+      <app-registry-overview
+        *ngIf="registryDetails.isAllView"
+        [isAllView]="!!registryDetails.isAllView"
+        [gridHeight]="gridHeight"
+        [summary4AllView]="registryDetails">
+      </app-registry-overview>
+    </mat-tab>
+  </mat-tab-group>
+</ng-container>
+<ng-template #loadingOrErrorTemplate>
+  <ng-container *ngIf="error; else loadingTemplate">
+    <mat-card>
+      {{ error | json }}
+    </mat-card>
+  </ng-container>
+  <ng-template #loadingTemplate>
+    <app-loading-template></app-loading-template>
+  </ng-template>
+</ng-template>

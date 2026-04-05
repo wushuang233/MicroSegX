@@ -1,0 +1,29 @@
+<div class="d-flex align-items-center justify-content-between">
+  <div>
+    <span class="font-weight-bold text-info">
+      <span *ngIf="filtered">
+        {{ 'enum.FOUND' | translate }}
+        {{ filteredCount }}&nbsp;/
+      </span>
+      <span *ngIf="!filtered"> {{ 'enum.OUT_OF' | translate }}&nbsp; </span>
+      {{ clusterCount }}
+    </span>
+  </div>
+
+  <app-quick-filter
+    [gridOptions]="gridOptions"
+    [gridApi]="gridApi"
+    (filterCountChange)="filterCountChanged($event)"
+    [showCount]="false"
+    [condition]="quickFilterParents">
+  </app-quick-filter>
+</div>
+<ag-grid-angular
+  id="multi-clusters-grid"
+  class="ag-theme-balham"
+  style="width: 100%"
+  (window:resize)="onResize()"
+  [gridOptions]="gridOptions"
+  [ngStyle]="{ height: gridHeight + 'px' }"
+  [context]="context">
+</ag-grid-angular>

@@ -1,0 +1,15 @@
+<div
+  class="h-100 overflow-auto"
+  *ngIf="namespace.labels && hasObject(namespace.labels)">
+  <div class="my-sm-4">
+    <div class="h4">
+      {{ 'namespaces.detail.LABELS' | translate }}
+    </div>
+    <div class="row mx-0" *ngFor="let label of labels">
+      <div class="col-sm-4 text-right">{{ label }}</div>
+      <div class="col-sm-8 text-muted">
+        {{ namespace.labels[label] || '&nbsp;' }}
+      </div>
+    </div>
+  </div>
+</div>

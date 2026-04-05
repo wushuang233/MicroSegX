@@ -1,0 +1,71 @@
+<div class="grid-toolbar" *ngIf="!gridOnly">
+  <div class="grid-toolbar__summary">
+    <div class="grid-metric">
+      <span>{{ 'general.TOTAL' | translate }}</span>
+      <strong>{{ containersCount }}</strong>
+    </div>
+
+    <div class="grid-metric" *ngIf="filtered">
+      <span>{{ 'enum.FOUND' | translate }}</span>
+      <strong>{{ filteredCount }}</strong>
+    </div>
+
+    <ng-container [ngSwitch]="versionInfoService.template">
+      <div class="grid-metric" *ngSwitchCase="'compliance'">
+        <span>{{ 'cis.tab.COMPLIANCE' | translate }}</span>
+        <strong>
+          {{
+            versionInfoService.infoData.docker_cis_version ||
+              versionInfoService.infoData.kubernetes_cis_version ||
+              '-'
+          }}
+        </strong>
+      </div>
+      <div class="grid-metric" *ngSwitchCase="'vulnerabilities'">
+        <span>{{ 'audit.gridHeader.CVE_DB_VERSION' | translate }}</span>
+        <strong>
+          {{
+            versionInfoService.infoData.security?.scan_summary
+              ?.scanner_version || '-'
+          }}
+        </strong>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="grid-toolbar__actions">
+    <div *ngIf="isScanAuthorized">
+      <ng-container *ngIf="selectedContainer$ | async as selectedContainer">
+        <button
+          mat-stroked-button
+          aria-label="Scan action"
+          type="button"
+          class="grid-toolbar__button"
+          (click)="scan.emit(selectedContainer)"
+          [disabled]="
+            !selectedContainer || selectedContainer.brief.state === 'exit'
+          ">
+          {{ 'scan.SCAN' | translate }}
+        </button>
+      </ng-container>
+    </div>
+    <app-quick-filter
+      *ngIf="!useQuickFilterService"
+      [gridOptions]="gridOptions"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false"
+      [condition]="quickFilterParents">
+    </app-quick-filter>
+  </div>
+</div>
+<ag-grid-angular
+  #agGrid
+  (window:resize)="onResize()"
+  [ngStyle]="{ height: gridHeight + 'px' }"
+  [gridOptions]="gridOptions"
+  [rowData]="containersService.displayContainers"
+  id="containers-grid"
+  style="width: 100%"
+  class="ag-theme-alpine workload-grid">
+</ag-grid-angular>

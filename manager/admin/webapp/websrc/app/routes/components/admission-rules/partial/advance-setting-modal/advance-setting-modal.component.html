@@ -1,0 +1,98 @@
+<div class="nv-dialog">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 mat-dialog-title class="mb-2">
+      {{ 'admissionControl.GLOBAL_OPS' | translate }}
+    </h4>
+    <button
+      (click)="onCancel()"
+      class="mb-2"
+      aria-label="Close dialog"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy mb-2" />
+  <div class="margin-top-l margin-bottom-m">
+    {{ 'admissionControl.CLIENT_MODE' | translate }}
+  </div>
+  <form (ngSubmit)="submitClientMode()" [formGroup]="clientModeFormGroup">
+    <div class="clearfix">
+      <mat-radio-group
+        formControlName="clientModeFormControl"
+        aria-label="Select an option">
+        <div class="col-12">
+          <mat-radio-button value="service" class="me-3 mt-2 pull-left">
+            {{ 'admissionControl.SERVICE' | translate }}
+            ({{ data.state.adm_client_mode_options.service }})
+          </mat-radio-button>
+          <button
+            [cdkCopyToClipboard]="data.state.adm_client_mode_options.service"
+            aria-label="copy to clipboard"
+            color="primary"
+            mat-button>
+            <i class="eos-icons icon-18">content_copy</i>
+          </button>
+        </div>
+        <div class="col-12 mt-2">
+          <mat-radio-button value="url" class="me-3 mt-2 pull-left">
+            {{ 'admissionControl.URL' | translate }}
+            ({{ data.state.adm_client_mode_options.url }})
+          </mat-radio-button>
+          <button
+            [cdkCopyToClipboard]="data.state.adm_client_mode_options.url"
+            class=""
+            aria-label="copy to clipboard"
+            color="primary"
+            mat-button>
+            <i class="eos-icons icon-18">content_copy</i>
+          </button>
+        </div>
+      </mat-radio-group>
+    </div>
+    <div class="text-warning">
+      <span *ngIf="clientModeFormGroup.dirty">{{
+        'admissionControl.msg.SAVE_CLIENT_MODE' | translate
+      }}</span>
+    </div>
+    <div class="clearfix">
+      <app-loading-button
+        [appearance]="'mat-raised-button'"
+        [color]="'primary'"
+        [disabled]="!clientModeFormGroup.dirty"
+        [loading]="submittingForm"
+        [text]="'setting.SUBMIT' | translate"
+        [type]="'submit'"
+        class="pull-right ms-auto">
+      </app-loading-button>
+    </div>
+  </form>
+  <hr class="solid" style="margin: 16px 0" />
+  <div>
+    {{ 'admissionControl.TEST_K8S' | translate }}
+    <div>
+      <div>
+        <small>{{ 'admissionControl.TEST_K8S_INSTRUCTION' | translate }}</small>
+        <div>
+          <div *ngIf="isTestCompleted && isTestOK">
+            <div class="text-success">
+              <em class="eos-icons text-success">task_alt</em>
+              {{ 'admissionControl.msg.TEST_K8S_OK' | translate }}
+            </div>
+          </div>
+          <div *ngIf="isTestCompleted && !isTestOK">
+            <em class="eos-icons text-danger">highlight_off</em>
+            {{ testErrMsg }}
+          </div>
+          <app-loading-button
+            [appearance]="'mat-raised-button'"
+            [color]="'primary'"
+            [loading]="submittingTest"
+            [text]="'admissionControl.TEST' | translate"
+            (btnClick)="testK8s()"
+            class="pull-right ms-auto">
+          </app-loading-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

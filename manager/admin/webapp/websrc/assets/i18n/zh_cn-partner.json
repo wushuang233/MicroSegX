@@ -1,0 +1,65 @@
+{
+  "partner": {
+    "general": {
+      "WEB_URL": "#",
+      "PROVIDER": "面向多云环境的主动微隔离系统",
+      "DOCUMENT_URL": "#",
+      "LOGO_NAME": "LOGO"
+    },
+    "top_security_events": {
+      "txt2_3": "3. 检查被攻陷或被黑客攻击的容器，检测有无多个可疑进程，有无黑客试图安装恶意代码或进行文件操作，有无被安装易受攻击的软件包和/或启动了可疑进程等等。使用系统安全策略启动容器隔离，并按需抓取数据包进行保护。",
+      "txt4_3": "3. 检查被攻陷或被黑客攻击的容器，检测有无多个可疑进程，有无黑客试图安装恶意代码或进行文件操作，有无被安装易受攻击的软件包和/或启动了可疑进程等等。使用系统安全策略启动容器隔离，并按需抓取数据包进行保护。"
+    },
+    "top_incident_pod": {
+      "txt2": "改进方法：检查被攻陷或被黑客攻击的容器，检测有无多个可疑进程，有无黑客试图安装恶意代码或进行文件操作，有无被安装易受攻击的软件包和/或启动了可疑进程等等。使用系统安全策略启动容器隔离，并按需抓取数据包进行保护。"
+    },
+    "containers": {
+      "report": {
+        "header": "面向多云环境的主动微隔离系统 容器安全报告"
+      }
+    },
+    "securityEvent": {
+      "pdf": {
+        "HEADER": "面向多云环境的主动微隔离系统 容器安全报告"
+      }
+    },
+    "group": {
+      "CRITERIA_HINT": "例如：container=容器名, namespace!=default, node=ubuntu*, image=*nginx*, address=216.58.194.0/24, address=0.0.0.0/0, address=0.0.0.0-255.255.255.255, address=*.microseg.local, container~k8s_zoo[12] 或者 键=值 ('='完全匹配, 'not'非, '？ 和 *'通配符, '~'正则表达式)"
+    },
+    "admissionControl": {
+      "msg": {
+        "CLUSTER_ROLE_NOT_CONFIG": "没有正确配置准入控制所需的 neuvector-binding-admission \"cluster role\" 和 \"cluster role binding\"。",
+        "WEBHOOK_NOT_CONFIG": "没有正确配置准入控制所需的 neuvector-svc-admission-webhook 服务。",
+        "NO_UPD_PROMISSION": "默认服务账户没有服务资源的更新权限。"
+      }
+    },
+    "license": {
+      "HEAD": " 用户许可证协议",
+      "SUB_HEAD": "面向多云环境的主动微隔离系统 开源产品许可协议",
+      "server": {
+        "APPLY_DESC": "请输入平台支持渠道提供的授权码",
+        "EMAIL": "support@microseg.local"
+      }
+    },
+    "setting": {
+      "SUPPORT_INFO": "请联系平台支持渠道",
+      "IBM_SETUP_URL": "平台交付说明地址"
+    },
+    "ldap": {
+      "ADMIN_HINT": "添加 LDAP/AD 组，以映射到管理员",
+      "READER_HINT": "添加 LDAP/AD 组，以映射到用户",
+      "CI_HINT": "添加 LDAP/AD 组，以映射到CI集成",
+      "BASE_DN_HINT": "添加 LDAP/AD Root 节点，以搜索用户和用户组，例如： dc=securitysuite, dc=com"
+    },
+    "okta": {
+      "ADMIN_HINT": "添加SAML组到管理员",
+      "READER_HINT": "添加SAML组到用户",
+      "CI_HINT": "添加SAML组到CI集成"
+    },
+    "openId": {
+      "ADMIN_HINT": "添加OpenID Connect组到管理员",
+      "READER_HINT": "添加OpenID Connect组到用户",
+      "CI_HINT": "添加OpenID Connect组到CI集成"
+    }
+  }
+}

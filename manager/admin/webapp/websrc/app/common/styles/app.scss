@@ -1,0 +1,59 @@
+/*!
+ *
+ * NeuVector - Bootstrap Admin Template
+ *
+ * Version: 4.8.1
+ *
+ */
+
+//googleapis
+@import 'googleapis/material_icons';
+@import 'googleapis/lato';
+@import 'googleapis/poppins';
+@import 'googleapis/roboto_mono';
+
+
+// eos-ds
+@import "eos-ds/scss/index";
+@import "eos-ds/css/eos-style";
+// eos-icon
+@import "eos-icon/css/eos-icons";
+
+
+// Variables
+@import 'app/variables';
+// Globals
+@import 'app/material/colors';
+@import 'app/utils-mixins';
+// Layout
+@import 'app/layout';
+@import 'app/layout-extra';
+@import 'app/layout-animation';
+@import 'app/top-navbar';
+@import 'app/sidebar';
+@import 'app/offsidebar';
+@import 'app/settings';
+// Common
+@import 'app/typo';
+// Material
+@import 'app/material/welcome';
+@import 'app/material/cards';
+@import 'app/material/md-forms';
+@import 'app/material/md-list';
+@import 'app/material/md-inputs';
+@import 'app/material/ngmaterial';
+@import 'app/material/overrides';
+// ag-grid
+@import '~ag-grid-community/styles/ag-grid.css';
+@import '~ag-grid-community/styles/ag-theme-alpine.css';
+
+@import '~jsoneditor/dist/jsoneditor.min.css';
+
+//Custom
+@import 'app/common';
+@import 'app/badge';
+@import 'app/security-event';
+@import 'app/settings';
+@import 'app/login-legacy';
+@import 'app/ag-grid-extra';
+@import 'app/saas-theme';

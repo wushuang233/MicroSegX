@@ -1,0 +1,29 @@
+<div class="d-flex align-items-end mb-2">
+  <span
+    *ngIf="to.labelPosition === 'before'"
+    class="toggle-label me-3"
+    [id]="to.label"
+    [ngClass]="to.fixed ? 'mat-slide-toggle-fixed-' + to.fixed : ''"
+    >{{ field.templateOptions?.label ?? '' | translate }}
+    <mat-icon
+      *ngIf="to.tooltip"
+      [matTooltip]="tooltip"
+      matTooltipPosition="above"
+      class="toggle-tooltip">
+      info
+    </mat-icon>
+  </span>
+  <mat-slide-toggle
+    [formControl]="formControl"
+    [formlyAttributes]="field"
+    [aria-labelledby]="to.label ? to.label : to.ariaLabelledBy"
+    class="margin-left-m"
+    style="margin: auto 0">
+  </mat-slide-toggle>
+  <span
+    *ngIf="!to.labelPosition || to.labelPosition === 'after'"
+    class="toggle-label ms-3"
+    [ngClass]="to.fixed ? 'mat-slide-toggle-fixed-' + to.fixed : ''"
+    >{{ field.templateOptions?.label ?? '' | translate }}</span
+  >
+</div>

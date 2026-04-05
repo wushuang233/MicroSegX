@@ -1,0 +1,13 @@
+<button
+  aria-label="Open panel instructions"
+  class="dashboard-panel-instruction-trigger"
+  mat-icon-button
+  [matMenuTriggerFor]="beforeMenu">
+  <em class="eos-icons icon-18">info</em>
+</button>
+<mat-menu
+  #beforeMenu="matMenu"
+  xPosition="before"
+  class="dashboard-panel-instruction-content">
+  <div *ngFor="let instruction of instructions">{{ instruction }}</div>
+</mat-menu>

@@ -1,0 +1,21 @@
+.accept-button {
+  font-weight: 600;
+  color: #fff;
+  background-color: #1677ff;
+  border-radius: 8px;
+  border: none;
+  &:hover,
+  &:focus {
+    background-color: #4096ff;
+  }
+}
+
+.eula-content {
+  height: calc(100vh - 240px);
+  overflow-y: auto;
+}
+
+.eula-title,
+.eula-section-title {
+  color: #1677ff;
+}

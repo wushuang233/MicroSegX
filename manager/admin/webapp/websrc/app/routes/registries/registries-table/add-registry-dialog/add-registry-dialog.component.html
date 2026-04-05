@@ -1,0 +1,51 @@
+<div class="d-flex align-items-center justify-content-between">
+  <h1 mat-dialog-title>
+    {{
+      (!data.editable
+        ? 'registry.VIEW_REPO'
+        : data.config
+          ? 'registry.EDIT_REPO'
+          : 'registry.ADD_REPO'
+      ) | translate
+    }}
+  </h1>
+  <button
+    (click)="openTestConnectionDialog()"
+    *ngIf="canTestConnection"
+    [disabled]="form.invalid || submittingForm"
+    class="me-1"
+    color="primary"
+    id="add-registry-dialog-test-setting"
+    mat-raised-button
+    type="button">
+    {{ 'registry.TEST_REPO' | translate }}
+  </button>
+</div>
+<form (ngSubmit)="submit()" [formGroup]="form">
+  <formly-form
+    [fields]="fields"
+    [form]="form"
+    [options]="options"
+    [model]="model"></formly-form>
+  <div class="d-flex justify-content-end">
+    <button
+      (click)="onNoClick()"
+      class="me-2"
+      id="add-registry-dialog-cancel"
+      mat-stroked-button
+      type="button">
+      {{ 'general.CANCEL' | translate }}
+    </button>
+    <app-loading-button
+      *ngIf="data.editable"
+      [disabled]="form.invalid || submittingForm || !!(saving$ | async)"
+      [loading]="submittingForm || !!(saving$ | async)"
+      [text]="'general.SUBMIT' | translate"
+      appearance="mat-raised-button"
+      buttonClasses="me-1"
+      color="primary"
+      id="add-registry-dialog-submit"
+      type="submit">
+    </app-loading-button>
+  </div>
+</form>

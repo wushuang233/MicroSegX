@@ -1,0 +1,189 @@
+<ng-container *ngIf="node">
+  <ng-container [ngSwitch]="activeTab">
+    <ng-container *ngSwitchCase="'compliance'">
+      <div class="filter" [class.filter-csv]="!complianceEmpty">
+        <div class="me-3 filter-actions">
+          <button
+            mat-button
+            aria-label="Export compliance CSV"
+            type="button"
+            *ngIf="!complianceEmpty"
+            (click)="complianceGrid.exportCSV()">
+            <i class="eos-icons icon-18">csv_file</i>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'vulnerabilities'">
+      <div
+        class="filter"
+        [class.filter-csv]="!isVulsAuthorized && !vulEmpty"
+        [class.filter-view-csv]="isVulsAuthorized && !vulEmpty"
+        [class.filter-view]="isVulsAuthorized && vulEmpty">
+        <div class="me-3 filter-actions align-items-center">
+          <button
+            [matMenuTriggerFor]="menu"
+            class="mx-2 d-flex align-items-center justify-content-center"
+            mat-button>
+            {{ activeScore }} <i class="eos-icons">arrow_drop_down</i>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button (click)="changeScoreView('V2')" mat-menu-item>
+              {{ 'scan.gridHeader.SCORE_V2' | translate }}
+            </button>
+            <button (click)="changeScoreView('V3')" mat-menu-item>
+              {{ 'scan.gridHeader.SCORE_V3' | translate }}
+            </button>
+          </mat-menu>
+          <button
+            mat-button
+            aria-label="Export vulnerabilities CSV"
+            type="button"
+            *ngIf="!vulEmpty"
+            (click)="exportCVE()">
+            <i class="eos-icons icon-18">csv_file</i>
+          </button>
+          <ng-container *ngIf="isVulsAuthorized">
+            <button
+            mat-icon-button
+            class="mb-1"
+            *ngIf="
+              isWriteVulsAuthorized &&
+              selectedVulnerability &&
+              !isAccepted(selectedVulnerability)
+            "
+            [attr.aria-label]="'cveProfile.ACCEPT_VUL' | translate"
+            matTooltip="{{ 'cveProfile.ACCEPT_VUL' | translate }}"
+            matTooltipPosition="above"
+            type="button"
+            (click)="onAcceptVulnerability(selectedVulnerability)">
+              <i class="eos-icons">check_box</i>
+            </button>
+            <button
+              mat-icon-button
+              class="mb-1"
+              (click)="toggleAcceptedVuls()"
+              [attr.aria-label]="(showAcceptedVuls ? 'enum.HIDE_ACCEPTED_VULS' : 'enum.SHOW_ACCEPTED_VULS') | translate"
+              [matTooltip]="(showAcceptedVuls ? 'enum.HIDE_ACCEPTED_VULS' : 'enum.SHOW_ACCEPTED_VULS') | translate"
+              matTooltipPosition="above"
+              type="button">
+              <i class="eos-icons">{{ showAcceptedVuls ? 'visibility_off' : 'visibility' }}</i>
+            </button>
+          </ng-container>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'containers'">
+      <div class="filter" [class.filter-container]="true">
+        <div class="me-3 filter-actions">
+          <button
+            mat-icon-button
+            style="top: 12px"
+            [attr.aria-label]="sysContainersMsg"
+            [matTooltip]="sysContainersMsg"
+            matTooltipPosition="above"
+            type="button"
+            (click)="toggleSysContainers()">
+            <mat-icon
+              style="font-size: 14px"
+              fontSet="fa"
+              [fontIcon]="
+                !showSysContainers ? 'fa-eye' : 'fa-eye-slash'
+              "></mat-icon>
+          </button>
+        </div>
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input [formControl]="filter" matInput />
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+      <div class="filter" [style.visibility]="'hidden'">
+        <mat-form-field class="quick-filter">
+          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
+          <input matInput disabled />
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </ng-container>
+  <mat-tab-group
+    class="h-100 node-detail-tab-group"
+    mat-align-tabs="start"
+    (selectedTabChange)="activateTab($event)">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-address-card pe-1"></em>
+        {{ 'nodes.detail.TAB_TITLE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <app-node-detail [node]="node"></app-node-detail>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-gavel pe-1"></em>
+        {{ 'cis.tab.COMPLIANCE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="nodeCompliance">
+          <app-compliance-grid
+            [path]="node.name"
+            [repository]="''"
+            [dockerCisVersion]="nodeCompliance.docker_cis_version"
+            [kubernetesCisVersion]="nodeCompliance.kubernetes_cis_version"
+            [runAt]="nodeCompliance.run_at"
+            [rowData]="nodeCompliance.items"
+            [useQuickFilterService]="true"
+            [isContainer]="true"
+            [includeRemediation]="true"
+            (remediation)="openRemediation($event)"
+            [tableHeight]="gridHeight + 'px'">
+          </app-compliance-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="fa fa-bug pe-1"></em>
+        {{ 'sidebar.nav.SCAN' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="nodeVuls">
+          <app-vulnerabilities-grid
+            (vulnerabilitySelected)="vulnerabilitySelected($event)"
+            [rowData]="nodeVuls"
+            [useQuickFilterService]="true"
+            [preselect]="false"
+            [tableHeight]="gridHeight + 'px'"></app-vulnerabilities-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <em class="far fa-square pe-1"></em>
+        {{ 'nodes.containers.TAB_TITLE' | translate }}
+      </ng-template>
+      <ng-template matTabContent>
+        <div class="mt-2" *ngIf="nodeContainers">
+          <app-containers-grid
+            [gridOnly]="true"
+            [useQuickFilterService]="true"
+            [gridHeight]="gridHeight"></app-containers-grid>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+  <app-vulnerability-detail-dialog
+    [vulnerability]="selectedVulnerability"></app-vulnerability-detail-dialog>
+  <app-remediation-detail-dialog
+    [compliance]="selectedRemediation"></app-remediation-detail-dialog>
+</ng-container>

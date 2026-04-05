@@ -1,0 +1,140 @@
+<div
+  class="d-flex flex-row align-items-center justify-content-between"
+  *ngIf="source === navSource['SELF']">
+  <div class="d-flex">
+    <h1 class="font-weight-light" id="response rules title">
+      {{ 'responsePolicy.head.TITLE' | translate }}
+    </h1>
+  </div>
+  <div class="d-flex align-items-center justify-content-end">
+    <button
+      mat-button
+      aria-label="export response rules"
+      *appDisplayControl="'review_rule'"
+      [disabled]="
+        !selectedExportableRules || selectedExportableRules.length === 0
+      "
+      (click)="exportResponseRules()">
+      <em class="eos-icons icon-18">download</em>
+      {{ 'admissionControl.EXPORT' | translate }}
+    </button>
+    <button
+      mat-button
+      aria-label="import response rules"
+      (click)="openImportResponseRulesModal()"
+      *appDisplayControl="'write_dlp_rule'">
+      <em class="eos-icons icon-18">upload</em>
+      {{ 'admissionControl.IMPORT' | translate }}
+    </button>
+    <app-loading-button
+      (btnClick)="refresh()"
+      [disabled]="!!(refreshing$ | async)"
+      [appearance]="'mat-button'"
+      [buttonClasses]="'d-flex justify-content-center align-items-center'"
+      [disabled]="false"
+      [iconClasses]="'eos-icons icon-18'"
+      [iconName]="'refresh'"
+      [id]="'response-rule-refresh-button'"
+      [loading]="!!(refreshing$ | async)"
+      [text]="'network.REFRESH' | translate"
+      [type]="'button'">
+    </app-loading-button>
+  </div>
+</div>
+<div>
+  <div
+    [ngClass]="{
+      panel: source === navSource['SELF'],
+      mb0: source === navSource['SELF'],
+    }">
+    <div [ngClass]="{ 'panel-body': source === navSource['SELF'] }">
+      <div
+        class="d-flex justify-content-between align-items-center"
+        *ngIf="
+          source !== navSource['GROUP'] && source !== navSource['FED_GROUP']
+        ">
+        <div class="d-flex justify-content-start align-items-center">
+          <span class="font-weight-bold text-info">
+            <span *ngIf="filtered">
+              {{ 'enum.FOUND' | translate }}
+              {{ filteredCount }}&nbsp;/
+            </span>
+            <span *ngIf="!filtered">
+              {{ 'enum.OUT_OF' | translate }}&nbsp;
+            </span>
+            {{ responseRulesService.responseRules.length }}
+          </span>
+        </div>
+        <div class="d-flex justify-content-end align-items-center">
+          <ng-container *ngIf="!responsePolicyErr">
+            <div *ngIf="source === navSource['FED_POLICY']">
+              <button
+                mat-button
+                aria-label="export fed response rules"
+                *appDisplayControl="'review_rule'"
+                [disabled]="
+                  !selectedExportableRules ||
+                  selectedExportableRules.length === 0
+                "
+                (click)="exportResponseRules()">
+                <em class="eos-icons icon-18">download</em>
+                {{ 'admissionControl.EXPORT' | translate }}
+              </button>
+              <button
+                mat-button
+                aria-label="import fed response rules"
+                (click)="openImportResponseRulesModal()"
+                *appDisplayControl="'write_dlp_rule'">
+                <em class="eos-icons icon-18">upload</em>
+                {{ 'admissionControl.IMPORT' | translate }}
+              </button>
+            </div>
+            <button
+              mat-stroked-button
+              aria-Label="add rule"
+              class="me-4"
+              (click)="addResponseRule2Top($event)"
+              *ngIf="isWriteResponseRuleAuthorized">
+              <em class="eos-icons icon-18">add_circle</em>
+              {{ 'policy.toolBar.INSERT_TO_TOP' | translate }}
+            </button>
+          </ng-container>
+          <app-quick-filter
+            (filterCountChange)="filterCountChanged($event)"
+            [gridOptions]="gridOptions"
+            [gridApi]="gridApi"
+            [showCount]="false">
+          </app-quick-filter>
+        </div>
+      </div>
+      <div
+        *ngIf="
+          source === navSource['GROUP'] || source === navSource['FED_GROUP']
+        "
+        class="clearfix">
+        <app-quick-filter
+          *ngIf="!useQuickFilterService"
+          class="pull-right"
+          [gridOptions]="gridOptions"
+          [gridApi]="gridApi"
+          [filteredCount]="filteredCount"
+          [showCount]="false">
+        </app-quick-filter>
+      </div>
+      <ag-grid-angular
+        id="response-rule-grid"
+        style="width: 100%"
+        [ngStyle]="{
+          height:
+            (source === navSource['GROUP'] || source === navSource['FED_GROUP']
+              ? resizableHeight - 90
+              : gridHeight) + 'px',
+        }"
+        class="ag-theme-balham"
+        [gridOptions]="gridOptions"
+        [rowData]="responseRulesService.responseRules"
+        [context]="context">
+      </ag-grid-angular>
+    </div>
+  </div>
+</div>

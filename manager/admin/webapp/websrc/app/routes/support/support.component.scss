@@ -1,0 +1,141 @@
+:host {
+  display: block;
+}
+
+.support-page {
+  padding-bottom: 24px;
+}
+
+.support-grid {
+  row-gap: 24px;
+}
+
+.support-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+}
+
+.support-card--primary {
+  background: linear-gradient(135deg, #eef5ff 0%, #ffffff 60%) !important;
+}
+
+.support-card__icon {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22, 119, 255, 0.18) 0%,
+      rgba(111, 177, 255, 0.2) 100%
+    );
+  color: #0b63e6;
+  box-shadow: inset 0 0 0 1px rgba(22, 119, 255, 0.12);
+}
+
+.support-card__icon--secondary {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(10, 63, 145, 0.16) 0%,
+      rgba(22, 119, 255, 0.22) 100%
+    );
+  color: #084298;
+}
+
+.support-card h2,
+.support-checklist h2 {
+  margin: 0;
+  color: #1f2329;
+  font-family: Poppins, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.support-card p,
+.support-checklist__header p,
+.support-checklist__item p {
+  margin: 0;
+  color: #637083;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.support-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.support-list li {
+  position: relative;
+  padding-left: 18px;
+  color: #1f2329;
+  line-height: 1.65;
+}
+
+.support-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1677ff;
+}
+
+.support-checklist {
+  margin-top: 4px;
+}
+
+.support-checklist__header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.support-checklist__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.support-checklist__item {
+  padding: 20px;
+  border-radius: 18px;
+  background: #f8fbff;
+  border: 1px solid rgba(22, 119, 255, 0.08);
+}
+
+.support-checklist__item span {
+  display: inline-flex;
+  margin-bottom: 12px;
+  color: #1677ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.support-checklist__item strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2329;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 991px) {
+  .support-checklist__grid {
+    grid-template-columns: 1fr;
+  }
+}

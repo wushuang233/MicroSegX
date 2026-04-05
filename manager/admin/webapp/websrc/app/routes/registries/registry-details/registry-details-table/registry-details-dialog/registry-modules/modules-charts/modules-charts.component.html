@@ -1,0 +1,33 @@
+<ng-container *ngIf="noVunerablities; else chartsTemplate">
+  <div class="h-100 d-flex justify-content-center align-items-center mb-4">
+    <i class="eos-icons me-2">security</i>
+    <span class="d-block">{{ 'registry.NO_VULS' | translate }}</span>
+  </div>
+</ng-container>
+<ng-template #chartsTemplate>
+  <span class="font-weight-bold">{{
+    'registry.TOP_RISKIEST_MODULE' | translate
+  }}</span>
+  <div class="row" style="height: calc(50vh - 200px)">
+    <div class="col-6 d-flex justify-content-center">
+      <canvas
+        [data]="pieChartData.data"
+        [labels]="pieChartData.data.labels"
+        [options]="pieChartData.options"
+        [type]="pieChartData.type"
+        baseChart
+        style="max-height: 275px">
+      </canvas>
+    </div>
+    <div class="col-6 d-flex justify-content-center">
+      <canvas
+        [data]="barChartData.data"
+        [labels]="barChartData.data.labels"
+        [options]="barChartData.options"
+        [type]="barChartData.type"
+        baseChart
+        style="max-height: 275px">
+      </canvas>
+    </div>
+  </div>
+</ng-template>

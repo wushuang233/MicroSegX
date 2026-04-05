@@ -1,0 +1,112 @@
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fact-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 108px;
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.fact-card--wide {
+  grid-column: span 2;
+}
+
+.fact-card__label {
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fact-card__value {
+  color: var(--saas-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.fact-card__value--wrap {
+  white-space: normal;
+}
+
+.fact-card__link {
+  color: var(--saas-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fact-card__link:hover {
+  text-decoration: underline;
+}
+
+.detail-section {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.detail-section__title {
+  margin-bottom: 16px;
+  color: var(--saas-text);
+  font-family: Poppins, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detail-list-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 18px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.detail-list-row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.detail-list-row__key {
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-list-row__value {
+  color: var(--saas-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.detail-list-row__nested + .detail-list-row__nested {
+  margin-top: 8px;
+}
+
+@media screen and (max-width: 991px) {
+  .fact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .fact-grid,
+  .detail-list-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fact-card--wide {
+    grid-column: span 1;
+  }
+}

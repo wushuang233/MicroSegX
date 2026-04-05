@@ -1,0 +1,17 @@
+<button
+  mat-icon-button
+  style="line-height: 24px; margin-bottom: 8px"
+  matTooltip="{{ 'apikey.VIEW' | translate }}"
+  matTooltipPosition="above"
+  (click)="view()">
+  <i class="eos-icons text-action">feed</i>
+</button>
+<button
+  *ngIf="params.isWriteUserAuthorized"
+  mat-icon-button
+  style="line-height: 24px; margin-bottom: 8px"
+  matTooltip="{{ 'apikey.REMOVE' | translate }}"
+  matTooltipPosition="above"
+  (click)="delete()">
+  <i class="eos-icons text-action">delete</i>
+</button>

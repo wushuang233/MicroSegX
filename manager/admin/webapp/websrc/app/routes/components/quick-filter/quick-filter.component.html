@@ -1,0 +1,18 @@
+<div>
+  <mat-form-field class="example-full-width pull-left quick-filter">
+    <mat-label>
+      {{ 'enum.FILTER' | translate }}
+    </mat-label>
+    <input
+      (keyup)="onFilterChange(filter.value || '')"
+      [formControl]="filter"
+      matInput
+      [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+  </mat-form-field>
+  <div
+    *ngIf="showCount"
+    class="pull-left margin-top-l margin-left-m quick-filter__item_count">
+    <div *ngIf="filteredCountText">{{ filteredCountText }}</div>
+    <div>{{ totalCountText }}</div>
+  </div>
+</div>

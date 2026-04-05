@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+
+.registry-detail-header {
+  min-height: 74px;
+  margin-bottom: 16px;
+  padding: 20px 24px !important;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--saas-card-shadow);
+}
+
+.filter,
+.filter-icon-1 {
+  left: auto !important;
+}
+
+.filter {
+  position: static;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--saas-card-shadow);
+}
+
+.filter .d-flex {
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-tabs {
+  margin-top: 0;
+}
+
+:host ::ng-deep .quick-filter .mat-mdc-form-field-subscript-wrapper,
+:host ::ng-deep .quick-filter .mat-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .registry-detail-tab-group {
+  display: block;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: var(--saas-card-shadow);
+}
+
+:host ::ng-deep .registry-detail-tab-group .mat-mdc-tab-header,
+:host ::ng-deep .registry-detail-tab-group .mat-tab-header {
+  padding: 0 20px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--saas-border);
+}
+
+:host ::ng-deep .registry-detail-tab-group .mat-mdc-tab-body-wrapper,
+:host ::ng-deep .registry-detail-tab-group .mat-tab-body-wrapper {
+  padding: 10px 20px 22px;
+}
+
+@media screen and (max-width: 768px) {
+  .registry-detail-header,
+  .filter {
+    padding: 16px !important;
+  }
+}

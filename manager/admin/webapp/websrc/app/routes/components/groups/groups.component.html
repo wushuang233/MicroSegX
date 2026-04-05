@@ -1,0 +1,225 @@
+<div
+  class="d-flex align-items-center justify-content-between"
+  *ngIf="!isScoreImprovement; else scoreImprovementHeader">
+  <div
+    class="d-flex align-items-center justify-content-start"
+    *ngIf="!groupsErr">
+    <span class="text-info font-weight-bold me-2">
+      <span *ngIf="filtered">
+        {{ 'enum.FOUND' | translate }}
+        {{ filteredCount }}&nbsp;/
+      </span>
+      <span *ngIf="!filtered"> {{ 'enum.OUT_OF' | translate }}&nbsp; </span>
+      {{ groupsCount }}
+    </span>
+    <span
+      class="text-success font-weight-bold me-2"
+      *ngIf="source === navSource['SELF'] && selectedGroups.length">
+      {{ 'group.GROUP_LIST' | translate }}:&nbsp;
+      {{ selectedGroups.length }}
+    </span>
+  </div>
+  <div class="d-flex align-items-center justify-content-end ms-auto">
+    <div *ngIf="source === navSource['FED_POLICY']">
+      <button
+        mat-button
+        (click)="openImportFedGroupsDialog()"
+        *appDisplayControl="'write_group'">
+        <i class="eos-icons icon-18">upload</i>
+        {{ 'group.IMPORT_GROUP_POLICY' | translate }}
+      </button>
+    </div>
+    <button
+      mat-button
+      [disabled]="!selectedGroups || selectedGroups.length === 0"
+      (click)="exportGroups()"
+      class="me-3">
+      <em class="eos-icons icon-18">download</em>
+      {{ 'group.export.TITLE' | translate }}
+    </button>
+    <button
+      *ngIf="
+        isWriteGroupAuthorized && selectedGroups.length > 0 && hasModeCapGroups
+      "
+      (click)="openSwitchModeModal()"
+      class="d-flex align-items-center justify-content-start px-2 me-2"
+      id="switch-mode-dialog"
+      mat-stroked-button>
+      <em class="eos-icons">change_circle</em>
+      {{ 'service.SWITCH_MODE' | translate }}
+    </button>
+    <button
+      *ngIf="isWriteGroupAuthorized"
+      (click)="openAddGroupModal()"
+      class="d-flex align-items-center justify-content-start px-2 me-2"
+      id="groups-add-dialog"
+      mat-stroked-button>
+      <em class="eos-icons">add_circle</em>
+      {{ 'role.ADD' | translate }}
+    </button>
+    <mat-checkbox
+      *ngIf="
+        isWriteGroupAuthorized &&
+        selectedGroups.length > 0 &&
+        hasScoredCapGroups
+      "
+      [matTooltipDisabled]="!hasNonScorable"
+      [matTooltip]="hasNonScorableMsg"
+      matTooltipPosition="above"
+      [disabled]="hasNonScorable"
+      [checked]="allScorable"
+      [indeterminate]="someScorable"
+      (change)="toggleScorable($event)"
+      class="me-3 mt-2">
+      {{ 'group.SWITCH_SCORABLE' | translate }}
+    </mat-checkbox>
+    <app-quick-filter
+      [gridOptions]="gridOptions4Groups"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false">
+    </app-quick-filter>
+    <app-loading-button
+      *ngIf="source !== navSource['SELF']"
+      (btnClick)="getFedGroups()"
+      [appearance]="'mat-button'"
+      [buttonClasses]="'d-flex justify-content-center align-items-center'"
+      [disabled]="!!isRefreshing"
+      [iconClasses]="'eos-icons icon-18'"
+      [iconName]="'refresh'"
+      [id]="'groups-refresh-button'"
+      [loading]="!!isRefreshing"
+      [text]="'network.REFRESH' | translate"
+      [type]="'button'">
+    </app-loading-button>
+  </div>
+</div>
+<ng-template #scoreImprovementHeader>
+  <div class="d-flex justify-content-between score-improvement-header">
+    <div
+      [style.visibility]="selectedGroups.length > 0 ? 'visible' : 'hidden'"
+      class="d-flex align-items-center">
+      <button
+        mat-button
+        [disabled]="isAllProtectMode"
+        class="d-flex align-items-center font-weight-bold pe-1 me-2"
+        aria-label="Switch mode"
+        [matMenuTriggerFor]="switchMenu">
+        <span
+          class="no-warp-menu-btn-icon"
+          [ngClass]="{ 'mat-small text-success': isAllProtectMode }">
+          {{
+            (isAllProtectMode
+              ? 'dashboard.improveScoreModal.ALL_PROTECT_MODE_DECLARE'
+              : 'service.SWITCH_POLICY_MODE'
+            ) | translate
+          }}
+        </span>
+        <i class="eos-icons m-auto" *ngIf="!isAllProtectMode"
+          >arrow_drop_down</i
+        >
+      </button>
+      <mat-menu #switchMenu="matMenu">
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('Discover', '')">
+          <em class="fa fa-binoculars fa-fw text-discover me-2"></em>
+          {{ 'enum.DISCOVER' | translate }}
+        </button>
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('Monitor', '')">
+          <em class="fa fa-bell fa-fw text-monitor me-2"></em>
+          {{ 'enum.MONITOR' | translate }}
+        </button>
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('Protect', '')">
+          <em class="fa fa-shield-alt fa-fw text-protect me-2"></em>
+          {{ 'enum.PROTECT' | translate }}
+        </button>
+      </mat-menu>
+      <button
+        mat-button
+        [disabled]="isAllProtectMode"
+        class="d-flex align-items-center font-weight-bold pe-1 me-2"
+        aria-label="Switch profile mode"
+        [matMenuTriggerFor]="switchMenu4ProfileModes">
+        <span
+          class="no-warp-menu-btn-icon"
+          [ngClass]="{ 'mat-small text-success': isAllProtectMode }">
+          {{
+            (isAllProtectMode ? '' : 'service.SWITCH_PROFILE_MODE') | translate
+          }}
+        </span>
+        <i class="eos-icons m-auto" *ngIf="!isAllProtectMode"
+          >arrow_drop_down</i
+        >
+      </button>
+      <mat-menu #switchMenu4ProfileModes="matMenu">
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('', 'Discover')">
+          <em class="fa fa-binoculars fa-fw text-discover me-2"></em>
+          {{ 'enum.DISCOVER' | translate }}
+        </button>
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('', 'Monitor')">
+          <em class="fa fa-bell fa-fw text-monitor me-2"></em>
+          {{ 'enum.MONITOR' | translate }}
+        </button>
+        <button
+          mat-menu-item
+          class="d-flex align-items-center"
+          (click)="switchServiceMode('', 'Protect')">
+          <em class="fa fa-shield-alt fa-fw text-protect me-2"></em>
+          {{ 'enum.PROTECT' | translate }}
+        </button>
+      </mat-menu>
+      <span class="mat-small font-weight-bold me-3">{{
+        'group.BASELINE_PROFILE' | translate
+      }}</span>
+      <mat-radio-group
+        [(ngModel)]="baselineProfile"
+        (change)="switchBaselineProfile()"
+        aria-label="Baseline profile mode"
+        class="d-flex">
+        <mat-radio-button
+          value="basic"
+          class="me-3 mb-0-sub-label service-risk-radio-label">
+          <span class="mat-small font-weight-bold">
+            {{ 'enum.BASIC' | translate }}
+          </span>
+        </mat-radio-button>
+        <mat-radio-button
+          value="zero-drift"
+          class="me-3 mb-0-sub-label service-risk-radio-label">
+          <span class="mat-small font-weight-bold">
+            {{ 'enum.ZERODRIFT' | translate }}
+          </span>
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <app-quick-filter
+      [gridOptions]="gridOptions4Groups"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false">
+    </app-quick-filter>
+  </div>
+</ng-template>
+<ag-grid-angular
+  (window:resize)="onResize()"
+  [ngStyle]="{ height: height - 90 + 'px' }"
+  [gridOptions]="gridOptions4Groups"
+  [context]="context"
+  id="groups-grid"
+  style="width: 100%"
+  class="ag-theme-balham">
+</ag-grid-angular>

@@ -1,0 +1,94 @@
+<div>
+  <div class="d-flex justify-content-between align-items-start">
+    <div class="d-flex flex-column justify-content-start align-items-start">
+      <div
+        ng2FileDrop
+        [ngClass]="{ 'nv-file-over': hasBaseDropZoneOver }"
+        (fileOver)="fileOverBase($event)"
+        [uploader]="uploader"
+        class="well my-drop-zone">
+        {{ 'setting.DROP_ZONE' | translate }}
+      </div>
+      <span class="hidden-file">
+        <input
+          class="file-selection"
+          type="file"
+          #testFileInput
+          ng2FileSelect
+          multiple
+          [uploader]="uploader" />
+      </span>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="testFileInput.click(); browseFile()">
+        {{ 'setting.BROWSE' | translate }}
+      </button>
+    </div>
+
+    <div class="d-flex flex-column justify-content-end align-items-center ms-2">
+      <table class="table file-table">
+        <thead>
+          <tr>
+            <th style="width: 50%">{{ 'setting.FILE_NAME' | translate }}</th>
+            <th>{{ 'setting.FILE_SIZE' | translate }}</th>
+            <th>{{ 'setting.PROGRESS' | translate }}</th>
+            <th>{{ 'setting.STATUS' | translate }}</th>
+            <th>{{ 'setting.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of uploader.queue[0] ? [uploader.queue[0]] : []">
+            <td>
+              <strong>{{ item?.file?.name | shortenFromMiddle: 30 }}</strong>
+            </td>
+            <td *ngIf="uploader.options.isHTML5" nowrap>
+              {{ item?.file?.size / 1024 / 1024 | number: '.2' }} MB
+            </td>
+            <td *ngIf="uploader.options.isHTML5">
+              <div class="progress" style="margin-bottom: 0">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  [ngStyle]="{ width: percentage + '%' }"></div>
+              </div>
+            </td>
+            <td class="text-center">
+              <span *ngIf="item.isSuccess"
+                ><i class="eos-icons icon-18 text-success"
+                  >download_done</i
+                ></span
+              >
+              <span *ngIf="item.isCancel"
+                ><i class="eos-icons icon-18 text-info">folder_off</i></span
+              >
+              <span *ngIf="item.isError">
+                <i
+                  class="eos-icons icon-18 text-danger"
+                  matTooltip="{{ errMsg }}"
+                  matTooltipPosition="above"
+                  >close</i
+                >
+              </span>
+            </td>
+            <td nowrap>
+              <button
+                type="button"
+                class="btn btn-upload btn-xs"
+                (click)="item.upload()"
+                [disabled]="item.isReady || item.isUploading || item.isSuccess">
+                <em class="eos-icons icon-18">flask</em>
+              </button>
+              <button
+                type="button"
+                class="btn btn-remove-file btn-xs"
+                (click)="item.remove()">
+                <em class="eos-icons icon-18">delete</em>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

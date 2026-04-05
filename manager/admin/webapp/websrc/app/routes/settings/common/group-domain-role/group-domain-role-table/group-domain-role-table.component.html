@@ -1,0 +1,84 @@
+<ng-container *ngIf="!['admin', 'fedAdmin'].includes(global_role)">
+  <mat-table
+    (matSortChange)="announceSortChange($event)"
+    [dataSource]="dataSource"
+    class="border w-100 role-table"
+    matSort>
+    <ng-container matColumnDef="namespaceRoles">
+      <mat-header-cell
+        *matHeaderCellDef
+        class="namespace-role"
+        mat-sort-header="namespaceRole">
+        {{ 'ldap.gridHeader.DOMAIN_ROLES' | translate }}
+      </mat-header-cell>
+      <mat-cell *matCellDef="let element" class="namespace-role">
+        {{ element.namespaceRole }}
+      </mat-cell>
+    </ng-container>
+    <ng-container matColumnDef="namespaces">
+      <mat-header-cell *matHeaderCellDef mat-sort-header="namespaces">
+        {{ 'ldap.gridHeader.DOMAINS' | translate }}
+      </mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span
+          *ngFor="let name of element.namespaces"
+          class="badge badge-primary text-white">
+          {{ name }}
+        </span>
+      </mat-cell>
+    </ng-container>
+    <mat-header-row
+      *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row
+      (click)="clickRow(row.namespaceRole)"
+      *matRowDef="let row; columns: displayedColumns"
+      [class.active-role]="activeRole === row.namespaceRole"></mat-row>
+  </mat-table>
+  <div
+    class="d-flex flex-row justify-content-center align-items-center"
+    *ngIf="!isReadOnly">
+    <div class="me-4 role-map text-bold d-flex flex-row align-items-center">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Name icon"
+        class="d-flex user__icon me-2"
+        fontSet="far"
+        fontIcon="fa-id-card">
+      </mat-icon>
+      {{ activeRole }} {{ 'ldap.GROUP_ADMIN' | translate }}
+    </div>
+    <mat-form-field class="flex-grow-1">
+      <mat-label>{{ 'ldap.gridHeader.DOMAINS' | translate }}</mat-label>
+      <mat-chip-grid #chipList aria-label="Namespace selection">
+        <mat-chip-row
+          (removed)="remove(domainChip)"
+          *ngFor="let domainChip of domainChips">
+          {{ domainChip }}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+        <input
+          #namespaceInput
+          (matChipInputTokenEnd)="add($event)"
+          [formControl]="namespaceCtrl"
+          [matAutocomplete]="auto"
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [attr.maxlength]="'general.FILTER_MAX_LEN' | translate"
+          placeholder="{{ 'ldap.ADD_DOMAIN' | translate }}&nbsp;{{
+            'general.TYPE_PRESS_TXT' | translate
+          }}" />
+      </mat-chip-grid>
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="selected($event)">
+        <mat-option
+          *ngFor="let domain of filteredDomains | async"
+          [value]="domain">
+          {{ domain }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+</ng-container>

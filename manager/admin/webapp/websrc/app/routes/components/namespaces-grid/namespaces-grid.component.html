@@ -1,0 +1,39 @@
+<div class="d-flex align-items-center justify-content-between">
+  <span class="font-weight-bold text-info">
+    <span *ngIf="filtered">
+      {{ 'enum.FOUND' | translate }}
+      {{ filteredCount }}&nbsp;/
+    </span>
+    <span *ngIf="!filtered"> {{ 'enum.OUT_OF' | translate }}&nbsp; </span>
+    {{ domainsCount }}
+  </span>
+  <div class="d-flex align-items-center">
+    <span
+      *ngIf="hasNamespaceBoundaryEnabled"
+      class="small d-flex align-items-center">
+      <span class="badge ag-badge badge-info me-1">{{
+        namespaceBoundaryDisplayName
+      }}</span>
+      <span class="font-weight-bolder me-1">:</span>
+      <span>
+        {{ 'general.NAMESPACE_BOUNDARY_ENABLED' | translate }}
+      </span>
+    </span>
+    <app-quick-filter
+      [gridOptions]="gridOptions"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false"
+      class="ms-5">
+    </app-quick-filter>
+  </div>
+</div>
+<ag-grid-angular
+  (window:resize)="onResize()"
+  [ngStyle]="{ height: gridHeight + 'px' }"
+  [gridOptions]="gridOptions"
+  [rowData]="namespacesService.namespaces"
+  id="namespace-grid"
+  style="width: 100%"
+  class="ag-theme-balham">
+</ag-grid-angular>

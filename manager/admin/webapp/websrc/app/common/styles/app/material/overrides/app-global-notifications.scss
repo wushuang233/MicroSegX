@@ -1,0 +1,40 @@
+.mat-menu-panel.global-notification-list,
+.mat-mdc-menu-panel.global-notification-list {
+  width: 348px;
+  max-width: min(92vw, 348px);
+  min-height: auto;
+  padding: 8px;
+  border: 1px solid #eaf0f6;
+  border-radius: 18px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.14);
+  .mat-menu-item {
+    white-space: normal;
+    font-size: 12px;
+    line-height: 20px;
+    height: auto;
+    min-height: 68px;
+    margin: 0;
+    padding: 14px 14px 14px 0;
+    border-radius: 14px;
+    align-items: flex-start;
+    transition: background-color 0.18s ease;
+
+    &:hover {
+      background: #f7fbff;
+    }
+  }
+
+  .unwrap-menu-item {
+    gap: 10px;
+  }
+
+  .notification-message {
+    flex: 1;
+    min-width: 0;
+    padding-right: 6px;
+  }
+
+  a {
+    color: #1677ff;
+  }
+}

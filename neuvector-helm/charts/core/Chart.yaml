@@ -1,0 +1,14 @@
+name: core
+apiVersion: v1
+version: 2.8.12
+appVersion: 5.5.0
+description: Helm chart for NeuVector's core services
+home: https://neuvector.com
+icon: https://avatars2.githubusercontent.com/u/19367275?s=200&v=4
+maintainers:
+  - name: becitsthere
+    email: support@neuvector.com
+engine: gotpl
+sources:
+  - https://github.com/neuvector/neuvector
+  - https://github.com/neuvector/neuvector-helm

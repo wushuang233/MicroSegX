@@ -1,0 +1,44 @@
+<div class="d-flex justify-content-between align-items-center">
+  <h1 class="font-weight-light">
+    <a [routerLink]="['../']" class="font-weight-light">
+      {{ 'sidebar.nav.SETTING' | translate }}
+    </a>
+    >&nbsp;{{ 'sidebar.nav.CONFIGURATION' | translate }}
+  </h1>
+</div>
+<ng-container *ngIf="config; else loadingTemplate">
+  <mat-card>
+    <app-config-form [config]="config"></app-config-form>
+  </mat-card>
+  <br />
+  <mat-card *ngIf="isConfigAuthorized">
+    <app-remote-repository-form
+      [remoteRepoData]="remoteRepository"></app-remote-repository-form>
+  </mat-card>
+  <br />
+  <mat-card *ngIf="isConfigAuthorized || isImportAuthorized">
+    <app-export-form></app-export-form>
+  </mat-card>
+  <br />
+  <mat-card *ngIf="isConfigAuthorized">
+    <app-support-form [debug_enabled]="debug_enabled"></app-support-form>
+  </mat-card>
+  <br />
+  <mat-card
+    *ngIf="
+      isConfigAuthorized &&
+      config.misc.csp_type &&
+      config.misc.csp_type !== 'none'
+    ">
+    <app-csp-support-form
+      [cspType]="config.misc.csp_type"></app-csp-support-form>
+  </mat-card>
+</ng-container>
+<ng-template #errorTemplate let-error>
+  {{ error | json }}
+</ng-template>
+<ng-template #loadingTemplate>
+  <mat-card>
+    <app-loading-template></app-loading-template>
+  </mat-card>
+</ng-template>

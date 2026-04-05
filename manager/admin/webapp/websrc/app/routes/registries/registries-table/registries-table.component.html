@@ -1,0 +1,85 @@
+<div class="d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center justify-content-start">
+    <span class="font-weight-bold text-info">
+      <span *ngIf="filtered">
+        {{ 'enum.FOUND' | translate }}
+        {{ filteredCount }}&nbsp;/
+      </span>
+      <span *ngIf="!filtered"> {{ 'enum.OUT_OF' | translate }}&nbsp; </span>
+      {{
+        rowData.length
+          ? rowData.length -
+            (isVulAuthorized && includesViewAll ? 1 : 0) -
+            (isMultiClusterAuthorized && includesFedRepo ? 1 : 0)
+          : 0
+      }}
+    </span>
+  </div>
+  <div class="d-flex align-items-center justify-content-end">
+    <button
+      (click)="openDialog()"
+      *ngIf="isRegistryScanAuthorized"
+      class="d-flex align-items-center justify-content-start me-3"
+      id="registries-add-dialog"
+      mat-stroked-button>
+      <i class="eos-icons me-2">add_circle</i>{{ 'role.ADD' | translate }}
+    </button>
+    <app-quick-filter
+      [gridOptions]="gridOptions"
+      [gridApi]="gridApi"
+      (filterCountChange)="filterCountChanged($event)"
+      [showCount]="false">
+    </app-quick-filter>
+  </div>
+</div>
+<ag-grid-angular
+  (window:resize)="onResize()"
+  [gridOptions]="gridOptions"
+  [ngStyle]="{ height: gridHeight + 'px' }"
+  class="ag-theme-alpine"
+  style="width: 100%">
+</ag-grid-angular>
+<div
+  class="d-flex align-items-center justify-content-end mt-2"
+  *ngIf="
+    !registriesCommunicationService.selectedRegistry?.isAllView &&
+    !registriesCommunicationService.selectedRegistry?.isFedRepo
+  ">
+  <app-loading-button
+    (btnClick)="startScan()"
+    [appearance]="'mat-stroked-button'"
+    [buttonClasses]="'me-2'"
+    *ngIf="
+      isRegistryScanAuthorized && !(isFedRegistry && (isRemote || !isFedAdmin))
+    "
+    [disabled]="
+      (gridApi && !gridApi.getSelectedNodes().length) ||
+      (gridApi &&
+        gridApi.getSelectedNodes().length &&
+        gridApi.getSelectedNodes()[0].data.status === 'scanning') ||
+      !!(startingScan$ | async)
+    "
+    [id]="'registries-start-scan-button'"
+    [loading]="!!(startingScan$ | async)"
+    [text]="'registry.START_SCAN' | translate"
+    [type]="'button'">
+  </app-loading-button>
+  <app-loading-button
+    (btnClick)="stopScan()"
+    [appearance]="'mat-stroked-button'"
+    *ngIf="
+      isRegistryScanAuthorized && !(isFedRegistry && (isRemote || !isFedAdmin))
+    "
+    [disabled]="
+      (gridApi && !gridApi.getSelectedNodes().length) ||
+      (gridApi &&
+        gridApi.getSelectedNodes().length &&
+        gridApi.getSelectedNodes()[0].data.status === 'idle') ||
+      !!(stoppingScan$ | async)
+    "
+    [id]="'registries-stop-scan-button'"
+    [loading]="!!(stoppingScan$ | async)"
+    [text]="'registry.STOP_SCAN' | translate"
+    [type]="'button'">
+  </app-loading-button>
+</div>

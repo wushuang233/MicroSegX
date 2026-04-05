@@ -1,0 +1,62 @@
+<div
+  id="activeSessions"
+  class="infoBox topLeftSession resizable"
+  (window:mouseup)="mouseUp($event)"
+  cdkDrag>
+  <div
+    cdkDragHandle
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 mat-dialog-title>
+      {{ 'dashboard.panelItems.NETWORK_TRAFFIC' | translate }}&nbsp;-&nbsp;{{
+        currentName
+      }}
+    </h4>
+    <div class="d-flex align-items-center justify-content-end">
+      <div *ngIf="conversations && conversations.length > 4" class="me-4">
+        <app-quick-filter
+          [gridOptions]="gridOptions"
+          [gridApi]="gridApi"
+          (filterCountChange)="filterCountChanged($event)"
+          [showCount]="false">
+        </app-quick-filter>
+      </div>
+      <mat-slide-toggle
+        id="autoRefresh"
+        name="refreshStatus"
+        [(ngModel)]="autoRefresh"
+        (ngModelChange)="doAutoRefreshToggle(autoRefresh)">
+        <span
+          [ngClass]="{
+            'text-muted': !autoRefresh,
+            'text-success': autoRefresh,
+          }">
+          {{ 'network.AUTO_REFRESH' | translate }}
+        </span>
+      </mat-slide-toggle>
+      <button
+        id="closeActiveSessions"
+        (click)="stopRefreshSession(); popupState.leave()"
+        aria-label="Close icon button"
+        class="d-flex align-items-center justify-content-center ms-2"
+        mat-icon-button>
+        <i class="eos-icons">close</i>
+      </button>
+    </div>
+  </div>
+  <hr class="fancy" />
+  <div *ngIf="conversations && conversations.length > 0">
+    <ag-grid-angular
+      id="activeSessionGrid"
+      (window:resize)="onResize()"
+      [rowData]="conversations"
+      [gridOptions]="gridOptions"
+      class="ag-theme-alpine"
+      style="width: 100%; margin-top: 10px"
+      [ngStyle]="{ height: entriesGridHeight + 'px' }">
+    </ag-grid-angular>
+  </div>
+
+  <div class="mv-sm" *ngIf="conversations.length === 0">
+    <span translate="{{ 'network.NO_ACTIVE_SESSIONS' }}"> </span>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+<div>
+  {{ os }}
+  <span
+    *ngIf="os_scan_status === OS_STATUS.UNSUPPORTED"
+    class="type-label ms-2 customer-rule">
+    {{ 'registry.OS_UNSUPPORTED' | translate }}
+  </span>
+</div>

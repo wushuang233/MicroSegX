@@ -1,0 +1,27 @@
+<div class="workload-name-cell" [class.workload-name-cell--child]="isChild">
+  <button
+    *ngIf="isParent"
+    type="button"
+    class="workload-name-cell__toggle"
+    (click)="toggleVisible()">
+    <i class="eos-icons">
+      {{ isChildVisible ? 'expand_more' : 'chevron_right' }}
+    </i>
+  </button>
+
+  <span *ngIf="!isParent" class="workload-name-cell__branch"></span>
+
+  <div class="workload-name-cell__body">
+    <div class="workload-name-cell__title-row">
+      <span class="workload-name-cell__title">{{ name }}</span>
+      <span *ngIf="childCount > 0" class="workload-name-cell__count">
+        {{ childCount + 1 }}
+      </span>
+    </div>
+    <div class="workload-name-cell__meta">
+      <span>{{ domain }}</span>
+      <span>{{ service }}</span>
+      <span>{{ host }}</span>
+    </div>
+  </div>
+</div>
