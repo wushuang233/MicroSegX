@@ -12,187 +12,269 @@
         [routerLink]="['/microsegx/ziti']">
         {{ 'customUi.microsegx.portExposure.gotoZiti' | translate }}
       </a>
+      <button
+        mat-stroked-button
+        class="page-action-button"
+        (click)="triggerScan()"
+        [disabled]="scanInProgress">
+        <mat-icon *ngIf="!scanInProgress">refresh</mat-icon>
+        <mat-spinner *ngIf="scanInProgress" diameter="18"></mat-spinner>
+        {{
+          scanInProgress
+            ? ('customUi.microsegx.portExposure.scanning' | translate)
+            : ('customUi.microsegx.portExposure.scanNow' | translate)
+        }}
+      </button>
       <button mat-stroked-button class="page-action-button" (click)="refresh()">
         {{ 'general.REFRESH' | translate }}
       </button>
     </div>
   </div>
 
-  <section class="microsegx-hero">
-    <div class="microsegx-hero__copy">
-      <div class="microsegx-hero__eyebrow">
-        {{ 'customUi.microsegx.shared.workspace' | translate }}
-      </div>
-      <h2>{{ 'customUi.microsegx.portExposure.heroTitle' | translate }}</h2>
-      <p>{{ 'customUi.microsegx.portExposure.heroCopy' | translate }}</p>
-      <div class="microsegx-hero__badges">
-        <span class="microsegx-chip">
-          {{
-            'customUi.microsegx.portExposure.cards.managedServices' | translate
-          }}
-          {{ overview?.portExposure?.managedServices || 0 }}
-        </span>
-        <span class="microsegx-chip">
-          {{ 'customUi.microsegx.portExposure.cards.openPorts' | translate }}
-          {{ overview?.portExposure?.openPorts || 0 }}
-        </span>
-        <span class="microsegx-chip">
-          {{
-            'customUi.microsegx.portExposure.cards.trafficTargets' | translate
-          }}
-          {{ overview?.portExposure?.trafficTargets || 0 }}
-        </span>
-      </div>
-    </div>
-
+  <!-- Summary Cards -->
+  <section class="microsegx-summary-section">
     <div class="microsegx-summary-grid">
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{
-          'customUi.microsegx.portExposure.cards.managedServices' | translate
-        }}</span>
-        <strong>{{ overview?.portExposure?.managedServices || 0 }}</strong>
-        <p>
-          {{
-            'customUi.microsegx.portExposure.cards.managedServicesDesc'
-              | translate
-          }}
-        </p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--primary">
+          <mat-icon>dns</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.portExposure?.managedServices || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.portExposure.cards.managedServices' | translate
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{
-          'customUi.microsegx.portExposure.cards.openPorts' | translate
-        }}</span>
-        <strong>{{ overview?.portExposure?.openPorts || 0 }}</strong>
-        <p>
-          {{
-            'customUi.microsegx.portExposure.cards.openPortsDesc' | translate
-          }}
-        </p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--warning">
+          <mat-icon>lan</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.portExposure?.openPorts || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.portExposure.cards.openPorts' | translate
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{
-          'customUi.microsegx.portExposure.cards.exposedTargets' | translate
-        }}</span>
-        <strong>{{ overview?.portExposure?.exposedTargets || 0 }}</strong>
-        <p>
-          {{
-            'customUi.microsegx.portExposure.cards.exposedTargetsDesc'
-              | translate
-          }}
-        </p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--info">
+          <mat-icon>public</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.portExposure?.exposedTargets || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.portExposure.cards.exposedTargets' | translate
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{
-          'customUi.microsegx.portExposure.cards.nodes' | translate
-        }}</span>
-        <strong>{{ overview?.portExposure?.nodes || 0 }}</strong>
-        <p>
-          {{ 'customUi.microsegx.portExposure.cards.nodesDesc' | translate }}
-        </p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--success">
+          <mat-icon>device_hub</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.portExposure?.nodes || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.portExposure.cards.nodes' | translate
+          }}</span>
+        </div>
       </mat-card>
     </div>
   </section>
 
   <div *ngIf="error" class="microsegx-error">
+    <mat-icon>error</mat-icon>
     {{ error }}
   </div>
 
-  <div class="microsegx-layout-grid">
-    <mat-card class="page-card microsegx-guide-card">
-      <div class="microsegx-guide-card__header">
-        <h3>{{ 'customUi.microsegx.portExposure.guideTitle' | translate }}</h3>
-        <p>{{ 'customUi.microsegx.portExposure.guideCopy' | translate }}</p>
-      </div>
-      <div class="microsegx-guide-list">
-        <div class="microsegx-guide-item">
-          <span>01</span>
-          <strong>{{
-            'customUi.microsegx.portExposure.guide.one.title' | translate
-          }}</strong>
-          <p>
-            {{ 'customUi.microsegx.portExposure.guide.one.desc' | translate }}
-          </p>
-        </div>
-        <div class="microsegx-guide-item">
-          <span>02</span>
-          <strong>{{
-            'customUi.microsegx.portExposure.guide.two.title' | translate
-          }}</strong>
-          <p>
-            {{ 'customUi.microsegx.portExposure.guide.two.desc' | translate }}
-          </p>
-        </div>
-        <div class="microsegx-guide-item">
-          <span>03</span>
-          <strong>{{
-            'customUi.microsegx.portExposure.guide.three.title' | translate
-          }}</strong>
-          <p>
-            {{ 'customUi.microsegx.portExposure.guide.three.desc' | translate }}
-          </p>
-        </div>
-      </div>
-    </mat-card>
+  <!-- View Tabs -->
+  <mat-card class="view-tabs-card">
+    <mat-tab-group [(selectedIndex)]="viewTabIndex">
+      <mat-tab
+        label="{{
+          'customUi.microsegx.portExposure.tabs.exposure' | translate
+        }}">
+        <div class="tab-content">
+          <!-- Filters -->
+          <div class="filter-bar">
+            <mat-form-field appearance="outline" class="filter-namespace">
+              <mat-label>{{
+                'customUi.microsegx.portExposure.filter.namespace' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="selectedNamespace">
+                <mat-option value="">{{
+                  'customUi.microsegx.portExposure.filter.allNamespaces'
+                    | translate
+                }}</mat-option>
+                <mat-option *ngFor="let ns of uniqueNamespaces" [value]="ns">{{
+                  ns
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="filter-search">
+              <mat-label>{{
+                'customUi.microsegx.portExposure.filter.search' | translate
+              }}</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchText"
+                placeholder="Search..." />
+              <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+          </div>
 
-    <mat-card class="page-card microsegx-guide-card microsegx-guide-card--side">
-      <div class="microsegx-guide-card__header">
-        <h3>{{ 'customUi.microsegx.portExposure.sideTitle' | translate }}</h3>
-        <p>{{ 'customUi.microsegx.portExposure.sideCopy' | translate }}</p>
-      </div>
-      <dl class="microsegx-fact-list">
-        <div>
-          <dt>
-            {{
-              'customUi.microsegx.portExposure.cards.resourceCount' | translate
-            }}
-          </dt>
-          <dd>{{ overview?.portExposure?.resourceCount || 0 }}</dd>
+          <!-- Exposure Table -->
+          <table
+            mat-table
+            [dataSource]="filteredExposureItems"
+            class="exposure-table"
+            matSort>
+            <ng-container matColumnDef="namespace">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                {{
+                  'customUi.microsegx.portExposure.table.namespace' | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.namespace }}</td>
+            </ng-container>
+            <ng-container matColumnDef="resource">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                {{
+                  'customUi.microsegx.portExposure.table.resource' | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <span class="resource-name">{{ item.resource_name }}</span>
+                <span class="resource-kind">{{ item.resource_kind }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="port">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.portExposure.table.port' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <span class="port-badge"
+                  >{{ item.port }}/{{ item.protocol }}</span
+                >
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.portExposure.table.status' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <span class="status-badge" [ngClass]="getStatusClass(item)">
+                  <mat-icon *ngIf="item.traffic_observed">warning</mat-icon>
+                  <mat-icon
+                    *ngIf="!item.traffic_observed && item.listener_observed"
+                    >info</mat-icon
+                  >
+                  <mat-icon
+                    *ngIf="!item.traffic_observed && !item.listener_observed"
+                    >check_circle</mat-icon
+                  >
+                  {{
+                    item.traffic_observed
+                      ? ('customUi.microsegx.portExposure.status.traffic'
+                        | translate)
+                      : item.listener_observed
+                        ? ('customUi.microsegx.portExposure.status.listener'
+                          | translate)
+                        : ('customUi.microsegx.portExposure.status.normal'
+                          | translate)
+                  }}
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+          <div *ngIf="filteredExposureItems.length === 0" class="empty-state">
+            <mat-icon>info</mat-icon>
+            <p>{{ 'customUi.microsegx.portExposure.noData' | translate }}</p>
+          </div>
         </div>
-        <div>
-          <dt>
-            {{
-              'customUi.microsegx.portExposure.cards.generatedAt' | translate
-            }}
-          </dt>
-          <dd>{{ overview?.portExposure?.generatedAt || '-' }}</dd>
+      </mat-tab>
+      <mat-tab
+        label="{{
+          'customUi.microsegx.portExposure.tabs.services' | translate
+        }}">
+        <div class="tab-content">
+          <table
+            mat-table
+            [dataSource]="filteredServiceControls"
+            class="services-table"
+            matSort>
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                {{
+                  'customUi.microsegx.portExposure.table.serviceName'
+                    | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="namespace">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                {{
+                  'customUi.microsegx.portExposure.table.namespace' | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.namespace }}</td>
+            </ng-container>
+            <ng-container matColumnDef="ports">
+              <th mat-header-cell *matHeaderCellDef>
+                {{
+                  'customUi.microsegx.portExposure.table.openPorts' | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <span class="port-chip" *ngFor="let port of item.open_ports">{{
+                  port
+                }}</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="serviceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: serviceColumns"></tr>
+          </table>
         </div>
-        <div>
-          <dt>
-            {{ 'customUi.microsegx.portExposure.sideFabric' | translate }}
-          </dt>
-          <dd>
-            {{ overview?.ziti?.aliveRouters || 0 }} /
-            {{ overview?.ziti?.services || 0 }}
-          </dd>
+      </mat-tab>
+      <mat-tab
+        label="{{ 'customUi.microsegx.portExposure.tabs.nodes' | translate }}">
+        <div class="tab-content">
+          <table mat-table [dataSource]="nodes" class="nodes-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>
+                {{
+                  'customUi.microsegx.portExposure.table.nodeName' | translate
+                }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.name || item }}</td>
+            </ng-container>
+            <ng-container matColumnDef="ip">
+              <th mat-header-cell *matHeaderCellDef>IP</th>
+              <td mat-cell *matCellDef="let item">{{ item.ip || '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="ports">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.portExposure.table.ports' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.port_count || 0 }}
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="nodeColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: nodeColumns"></tr>
+          </table>
         </div>
-      </dl>
-    </mat-card>
-  </div>
-
-  <section class="microsegx-workspace-shell">
-    <div class="microsegx-workspace-shell__head">
-      <div>
-        <div class="microsegx-hero__eyebrow">
-          {{ 'customUi.microsegx.shared.embedded' | translate }}
-        </div>
-        <h3>
-          {{ 'customUi.microsegx.portExposure.workspaceTitle' | translate }}
-        </h3>
-        <p>{{ 'customUi.microsegx.portExposure.workspaceCopy' | translate }}</p>
-      </div>
-      <a
-        mat-stroked-button
-        class="page-action-button"
-        href="/microsegx/ui/port-exposure/"
-        target="_blank"
-        rel="noreferrer">
-        {{ 'customUi.microsegx.shared.openNewTab' | translate }}
-      </a>
-    </div>
-    <div class="microsegx-iframe-shell" [class.is-loading]="loading">
-      <iframe
-        [src]="workspaceUrl"
-        title="MicroSegX Port Exposure Workspace"></iframe>
-    </div>
-  </section>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
 </div>

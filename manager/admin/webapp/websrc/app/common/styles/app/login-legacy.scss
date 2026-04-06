@@ -250,6 +250,7 @@
 
   .form-group {
     margin-top: 20px;
+    position: relative;
   }
 
   > div > label {
@@ -257,6 +258,15 @@
     font-size: 14px;
     font-weight: 600;
     text-align: left;
+  }
+
+  .form-control-feedback {
+    top: 36px;
+    right: 14px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
   }
 }
 
@@ -271,15 +281,6 @@
 .login-input:focus {
   border-color: #1677ff !important;
   box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.12) !important;
-}
-
-.login-icon {
-  top: 0.5rem;
-  right: 0.25rem;
-  width: 2.75rem;
-  height: 2.75rem;
-  line-height: 2.75rem;
-  font-size: 14px;
 }
 
 .password-toggle {

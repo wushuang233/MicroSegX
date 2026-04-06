@@ -18,139 +18,240 @@
     </div>
   </div>
 
-  <section class="microsegx-hero microsegx-hero--ziti">
-    <div class="microsegx-hero__copy">
-      <div class="microsegx-hero__eyebrow">
-        {{ 'customUi.microsegx.shared.workspace' | translate }}
-      </div>
-      <h2>{{ 'customUi.microsegx.ziti.heroTitle' | translate }}</h2>
-      <p>{{ 'customUi.microsegx.ziti.heroCopy' | translate }}</p>
-      <div class="microsegx-hero__badges">
-        <span class="microsegx-chip">
-          {{ 'customUi.microsegx.ziti.cards.controller' | translate }}
-          {{ overview?.ziti?.defaultControllerUrl || '-' }}
-        </span>
-        <span class="microsegx-chip">
-          {{ 'customUi.microsegx.ziti.cards.routers' | translate }}
-          {{ overview?.ziti?.aliveRouters || 0 }}
-        </span>
-      </div>
-    </div>
-
+  <!-- Summary Cards -->
+  <section class="microsegx-summary-section">
     <div class="microsegx-summary-grid">
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{ 'customUi.microsegx.ziti.cards.routers' | translate }}</span>
-        <strong>{{ overview?.ziti?.aliveRouters || 0 }}</strong>
-        <p>{{ 'customUi.microsegx.ziti.cards.routersDesc' | translate }}</p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon" [ngClass]="controllerStatusClass">
+          <mat-icon>hub</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__label">{{
+            'customUi.microsegx.ziti.cards.controller' | translate
+          }}</span>
+          <span class="summary-card__value summary-card__value--small">{{
+            controllerStatusText
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{ 'customUi.microsegx.ziti.cards.services' | translate }}</span>
-        <strong>{{ overview?.ziti?.services || 0 }}</strong>
-        <p>{{ 'customUi.microsegx.ziti.cards.servicesDesc' | translate }}</p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--primary">
+          <mat-icon>router</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value"
+            >{{ overview?.ziti?.aliveRouters || 0 }}/{{
+              overview?.ziti?.deployedRouters || 0
+            }}</span
+          >
+          <span class="summary-card__label">{{
+            'customUi.microsegx.ziti.cards.routers' | translate
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{
-          'customUi.microsegx.ziti.cards.identities' | translate
-        }}</span>
-        <strong>{{ overview?.ziti?.identities || 0 }}</strong>
-        <p>{{ 'customUi.microsegx.ziti.cards.identitiesDesc' | translate }}</p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--success">
+          <mat-icon>category</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.ziti?.services || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.ziti.cards.services' | translate
+          }}</span>
+        </div>
       </mat-card>
-      <mat-card class="page-card microsegx-summary-card">
-        <span>{{ 'customUi.microsegx.ziti.cards.configs' | translate }}</span>
-        <strong>{{ overview?.ziti?.configs || 0 }}</strong>
-        <p>{{ 'customUi.microsegx.ziti.cards.configsDesc' | translate }}</p>
+      <mat-card class="summary-card">
+        <div class="summary-card__icon summary-card__icon--info">
+          <mat-icon>badge</mat-icon>
+        </div>
+        <div class="summary-card__content">
+          <span class="summary-card__value">{{
+            overview?.ziti?.identities || 0
+          }}</span>
+          <span class="summary-card__label">{{
+            'customUi.microsegx.ziti.cards.identities' | translate
+          }}</span>
+        </div>
       </mat-card>
     </div>
   </section>
 
   <div *ngIf="error" class="microsegx-error">
+    <mat-icon>error</mat-icon>
     {{ error }}
   </div>
 
-  <div class="microsegx-layout-grid">
-    <mat-card class="page-card microsegx-guide-card">
-      <div class="microsegx-guide-card__header">
-        <h3>{{ 'customUi.microsegx.ziti.guideTitle' | translate }}</h3>
-        <p>{{ 'customUi.microsegx.ziti.guideCopy' | translate }}</p>
-      </div>
-      <div class="microsegx-guide-list">
-        <div class="microsegx-guide-item">
-          <span>01</span>
-          <strong>{{
-            'customUi.microsegx.ziti.guide.one.title' | translate
-          }}</strong>
-          <p>{{ 'customUi.microsegx.ziti.guide.one.desc' | translate }}</p>
-        </div>
-        <div class="microsegx-guide-item">
-          <span>02</span>
-          <strong>{{
-            'customUi.microsegx.ziti.guide.two.title' | translate
-          }}</strong>
-          <p>{{ 'customUi.microsegx.ziti.guide.two.desc' | translate }}</p>
-        </div>
-        <div class="microsegx-guide-item">
-          <span>03</span>
-          <strong>{{
-            'customUi.microsegx.ziti.guide.three.title' | translate
-          }}</strong>
-          <p>{{ 'customUi.microsegx.ziti.guide.three.desc' | translate }}</p>
+  <!-- Controller Info -->
+  <mat-card class="controller-info-card" *ngIf="overview?.ziti?.available">
+    <div class="controller-info">
+      <div class="controller-info__item">
+        <mat-icon>link</mat-icon>
+        <div class="controller-info__content">
+          <span class="controller-info__label">{{
+            'customUi.microsegx.ziti.cards.controller' | translate
+          }}</span>
+          <span class="controller-info__value">{{
+            overview?.ziti?.defaultControllerUrl
+          }}</span>
         </div>
       </div>
-    </mat-card>
-
-    <mat-card class="page-card microsegx-guide-card microsegx-guide-card--side">
-      <div class="microsegx-guide-card__header">
-        <h3>{{ 'customUi.microsegx.ziti.sideTitle' | translate }}</h3>
-        <p>{{ 'customUi.microsegx.ziti.sideCopy' | translate }}</p>
-      </div>
-      <dl class="microsegx-fact-list">
-        <div>
-          <dt>{{ 'customUi.microsegx.ziti.cards.controller' | translate }}</dt>
-          <dd>{{ overview?.ziti?.defaultControllerUrl || '-' }}</dd>
-        </div>
-        <div>
-          <dt>{{ 'customUi.microsegx.ziti.cards.credentials' | translate }}</dt>
-          <dd>
+      <div class="controller-info__item">
+        <mat-icon>vpn_key</mat-icon>
+        <div class="controller-info__content">
+          <span class="controller-info__label">{{
+            'customUi.microsegx.ziti.cards.credentials' | translate
+          }}</span>
+          <span class="controller-info__value">
             {{
               overview?.ziti?.defaultCredentialsConfigured
                 ? ('policy.status.ENABLED' | translate)
                 : ('policy.status.DISABLED' | translate)
             }}
-          </dd>
+          </span>
         </div>
-        <div>
-          <dt>{{ 'customUi.microsegx.ziti.sidePortExposure' | translate }}</dt>
-          <dd>
-            {{ overview?.portExposure?.managedServices || 0 }} /
-            {{ overview?.portExposure?.openPorts || 0 }}
-          </dd>
-        </div>
-      </dl>
-    </mat-card>
-  </div>
-
-  <section class="microsegx-workspace-shell">
-    <div class="microsegx-workspace-shell__head">
-      <div>
-        <div class="microsegx-hero__eyebrow">
-          {{ 'customUi.microsegx.shared.embedded' | translate }}
-        </div>
-        <h3>{{ 'customUi.microsegx.ziti.workspaceTitle' | translate }}</h3>
-        <p>{{ 'customUi.microsegx.ziti.workspaceCopy' | translate }}</p>
       </div>
-      <a
-        mat-stroked-button
-        class="page-action-button"
-        href="/microsegx/ui/ziti/"
-        target="_blank"
-        rel="noreferrer">
-        {{ 'customUi.microsegx.shared.openNewTab' | translate }}
-      </a>
+      <div class="controller-info__item">
+        <mat-icon>settings_applications</mat-icon>
+        <div class="controller-info__content">
+          <span class="controller-info__label">{{
+            'customUi.microsegx.ziti.cards.configs' | translate
+          }}</span>
+          <span class="controller-info__value">{{
+            overview?.ziti?.configs || 0
+          }}</span>
+        </div>
+      </div>
     </div>
-    <div
-      class="microsegx-iframe-shell microsegx-iframe-shell--tall"
-      [class.is-loading]="loading">
-      <iframe [src]="workspaceUrl" title="MicroSegX Ziti Workspace"></iframe>
-    </div>
-  </section>
+  </mat-card>
+
+  <!-- Not configured warning -->
+  <mat-card class="warning-card" *ngIf="!loading && !overview?.ziti?.available">
+    <mat-card-content>
+      <div class="warning-content">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <h3>
+            {{ 'customUi.microsegx.ziti.notConfigured.title' | translate }}
+          </h3>
+          <p>{{ 'customUi.microsegx.ziti.notConfigured.desc' | translate }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- View Tabs -->
+  <mat-card class="view-tabs-card" *ngIf="overview?.ziti?.available">
+    <mat-tab-group [(selectedIndex)]="viewTabIndex">
+      <mat-tab label="{{ 'customUi.microsegx.ziti.tabs.routers' | translate }}">
+        <div class="tab-content">
+          <table mat-table [dataSource]="routers" class="routers-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.routerName' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.status' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <span
+                  class="status-badge"
+                  [ngClass]="item.online ? 'status-ok' : 'status-error'">
+                  <mat-icon>{{
+                    item.online ? 'check_circle' : 'cancel'
+                  }}</mat-icon>
+                  {{
+                    item.online
+                      ? ('customUi.microsegx.ziti.status.online' | translate)
+                      : ('customUi.microsegx.ziti.status.offline' | translate)
+                  }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="ip">
+              <th mat-header-cell *matHeaderCellDef>IP</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.ip_address || '-' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="version">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.version' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.version || '-' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="routerColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: routerColumns"></tr>
+          </table>
+          <div *ngIf="routers.length === 0" class="empty-state">
+            <mat-icon>router</mat-icon>
+            <p>{{ 'customUi.microsegx.ziti.noRouters' | translate }}</p>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab
+        label="{{ 'customUi.microsegx.ziti.tabs.services' | translate }}">
+        <div class="tab-content">
+          <table mat-table [dataSource]="services" class="services-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.serviceName' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dns">
+              <th mat-header-cell *matHeaderCellDef>DNS</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.dns_hostname || '-' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="port">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.port' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.port || '-' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="serviceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: serviceColumns"></tr>
+          </table>
+        </div>
+      </mat-tab>
+      <mat-tab
+        label="{{ 'customUi.microsegx.ziti.tabs.identities' | translate }}">
+        <div class="tab-content">
+          <table mat-table [dataSource]="identities" class="identities-table">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.identityName' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.type' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">{{ item.type || '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="default">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'customUi.microsegx.ziti.table.default' | translate }}
+              </th>
+              <td mat-cell *matCellDef="let item">
+                <mat-icon *ngIf="item.is_default" class="default-icon"
+                  >star</mat-icon
+                >
+                <span *ngIf="!item.is_default">-</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="identityColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: identityColumns"></tr>
+          </table>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
 </div>

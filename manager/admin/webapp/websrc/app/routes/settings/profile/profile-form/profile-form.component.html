@@ -80,22 +80,6 @@
           </mat-error>
         </mat-form-field>
       </div>
-      <div class="profile__field">
-        <mat-icon
-          aria-hidden="false"
-          aria-label="User icon"
-          class="me-3 mb-3 profile__icon"
-          >language
-        </mat-icon>
-        <mat-form-field class="w-100 mb-0">
-          <mat-label>{{ 'profile.LOCALE' | translate }}</mat-label>
-          <mat-select formControlName="locale">
-            <mat-option *ngFor="let lang of getLanguages()" [value]="lang.code">
-              {{ lang.text }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
     </div>
     <div
       *ngIf="!isLocalUser"

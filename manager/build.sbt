@@ -100,7 +100,23 @@ lazy val common = (project in file("common"))
     buildSettings,
     commonSettings,
     promptTheme := ScalapenosTheme,
-    libraryDependencies ++= commonDependencies
+    libraryDependencies ++= commonDependencies,
+    assembly / assemblyMergeStrategy := {
+      case PathList(ps @ _*) if ps.contains("module-info.class") => MergeStrategy.discard
+      case PathList("META-INF", "versions", _, "OSGI-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", "versions", xs @ _*) => MergeStrategy.first
+      case PathList("META-INF", "hk2-locator", xs @ _*) => MergeStrategy.first
+      case PathList("META-INF", "OSGI-INF", xs @ _*) => MergeStrategy.first
+      case PathList(ps @ _*) if ps.last == "io.netty.versions.properties" => MergeStrategy.first
+      case PathList("META-INF", xs @ _*) if xs.contains("mailcap.default") => MergeStrategy.first
+      case PathList("META-INF", xs @ _*) if xs.contains("mimetypes.default") => MergeStrategy.first
+      case PathList("javax", "activation", xs @ _*) => MergeStrategy.first
+      case PathList("javax", xs @ _*) => MergeStrategy.first
+      case x =>
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        oldStrategy(x)
+    }
   )
 
 lazy val admin = (project in file("admin"))
@@ -113,7 +129,23 @@ lazy val admin = (project in file("admin"))
     libraryDependencies += pekkoHttp,
     libraryDependencies += pekkoJson,
     libraryDependencies += pekkoSlf4j,
-    libraryDependencies += pekkoStream
+    libraryDependencies += pekkoStream,
+    assembly / assemblyMergeStrategy := {
+      case PathList(ps @ _*) if ps.contains("module-info.class") => MergeStrategy.discard
+      case PathList("META-INF", "versions", _, "OSGI-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+      case PathList("META-INF", "versions", xs @ _*) => MergeStrategy.first
+      case PathList("META-INF", "hk2-locator", xs @ _*) => MergeStrategy.first
+      case PathList("META-INF", "OSGI-INF", xs @ _*) => MergeStrategy.first
+      case PathList(ps @ _*) if ps.last == "io.netty.versions.properties" => MergeStrategy.first
+      case PathList("META-INF", xs @ _*) if xs.contains("mailcap.default") => MergeStrategy.first
+      case PathList("META-INF", xs @ _*) if xs.contains("mimetypes.default") => MergeStrategy.first
+      case PathList("javax", "activation", xs @ _*) => MergeStrategy.first
+      case PathList("javax", xs @ _*) => MergeStrategy.first
+      case x =>
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        oldStrategy(x)
+    }
   )
 
 resolvers ++= Seq(
@@ -140,11 +172,19 @@ assembly / test := {}
 Revolver.settings: Seq[sbt.Def.Setting[_]]
 
 assembly / assemblyMergeStrategy := {
-  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  // Discard all module-info.class files anywhere in the path
+  case PathList(ps @ _*) if ps.contains("module-info.class") => MergeStrategy.discard
+  // Discard OSGI-INF MANIFEST.MF files in META-INF/versions
+  case PathList("META-INF", "versions", _, "OSGI-INF", "MANIFEST.MF") => MergeStrategy.discard
+  // Discard regular MANIFEST.MF files (usually META-INF/MANIFEST.MF)
+  case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  // Use first for remaining META-INF/versions files
   case PathList("META-INF", "versions", xs @ _*) => MergeStrategy.first
+  // Use first for hk2-locator files
   case PathList("META-INF", "hk2-locator", xs @ _*) => MergeStrategy.first
+  // Use first for OSGI-INF files (after discarding specific ones above)
   case PathList("META-INF", "OSGI-INF", xs @ _*) => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+  // Use first for other known conflicts
   case PathList(ps @ _*) if ps.last == "io.netty.versions.properties" => MergeStrategy.first
   case PathList("META-INF", xs @ _*) if xs.contains("mailcap.default") => MergeStrategy.first
   case PathList("META-INF", xs @ _*) if xs.contains("mimetypes.default") => MergeStrategy.first

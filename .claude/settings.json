@@ -130,7 +130,17 @@
       "Bash(curl -s -X POST \"http://localhost:30084/v1/auth\" -H \"Content-Type: application/json\" -d '{\"password\":{\"username\":\"admin\",\"password\":\"Admin@123\"}}')",
       "Bash(curl -L -o /tmp/consul.zip https://releases.hashicorp.com/consul/1.17.0/consul_1.17.0_linux_amd64.zip)",
       "Bash(unzip /tmp/consul.zip -d /tmp/)",
-      "Bash(chmod +x /tmp/consul)"
+      "Bash(chmod +x /tmp/consul)",
+      "Bash(sudo sbt:*)",
+      "Bash(sbt assembly:*)",
+      "Bash(sudo -S rm -rf /home/wushuang/MicroSegX/manager/admin/target /home/wushuang/MicroSegX/manager/target /home/wushuang/MicroSegX/manager/common/target)",
+      "Bash(sbt clean:*)",
+      "Bash(ls -la /home/wushuang/MicroSegX/manager/target/scala-3.3.5/*.jar)",
+      "Bash(ls -la /home/wushuang/MicroSegX/manager/admin/target/scala-3.3.5/*.jar)",
+      "Bash(unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy)",
+      "Bash(jar tf:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -E \"\\\\.js$|\\\\.html$|\\\\.css$\")"
     ],
     "additionalDirectories": [
       "/home/wushuang/MicroSegX/microsegx-helm/test",

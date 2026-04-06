@@ -26,7 +26,6 @@ export class ProfileFormComponent implements OnInit {
     email: new FormControl(null, [Validators.email]),
     role: new FormControl(),
     timeout: new FormControl(null, [Validators.min(30), Validators.max(3600)]),
-    locale: new FormControl(),
     passwordForm: new FormGroup(
       {
         currentPassword: new FormControl(null, [Validators.required]),
@@ -59,10 +58,6 @@ export class ProfileFormComponent implements OnInit {
     private notificationService: NotificationService,
     private router: Router
   ) {}
-
-  getLanguages(): { code: string; text: string }[] {
-    return this.tr.getAvailableLanguages();
-  }
 
   refreshForm(): void {
     Object.keys(this.user).forEach((key: string) => {
@@ -120,7 +115,6 @@ export class ProfileFormComponent implements OnInit {
     if (this.isEdit) {
       this.profileForm.controls['email'].enable();
       this.profileForm.controls['timeout'].enable();
-      this.profileForm.controls['locale'].enable();
       this.profileForm.controls['passwordForm'].enable();
     } else {
       this.profileForm.disable();
