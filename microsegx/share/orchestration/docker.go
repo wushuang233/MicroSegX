@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 // example: Docker Trusted Registry 2.2.5 - (Replica 543ae781fcab)

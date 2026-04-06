@@ -1,7 +1,7 @@
 package nvcrd
 
 import (
-	"github.com/microsegx/k8s"
+	"github.com/wushuang233/k8s"
 	log "github.com/sirupsen/logrus"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1" // apiextensions.k8s.io/v1beta1 API version of CustomResourceDefinition is no longer served as of k8s v1.22
@@ -12,16 +12,16 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/cache"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/kv"
-	admission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/rest"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/cache"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	admission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rest"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type nvCrdSchmaBuilder struct {

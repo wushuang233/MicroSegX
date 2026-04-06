@@ -14,12 +14,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/rpc"
-	"github.com/microsegx/microsegx/share"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/scan/registry"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rpc"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/registry"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var jfrogRepoRegexp = regexp.MustCompile(`<a href="([a-zA-Z0-9\-\._]+)\/*">([a-zA-Z0-9\-\._]+)\/*</a>`)

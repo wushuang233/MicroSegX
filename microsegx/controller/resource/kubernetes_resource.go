@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/microsegx/k8s"
+	"github.com/wushuang233/k8s"
 	log "github.com/sirupsen/logrus"
 	admregv1 "k8s.io/api/admissionregistration/v1"
 	admregv1b1 "k8s.io/api/admissionregistration/v1beta1"
@@ -35,12 +35,12 @@ import (
 	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	orchAPI "github.com/microsegx/microsegx/share/orchestration"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	orchAPI "github.com/wushuang233/MicroSegX/microsegx/share/orchestration"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const kubeWatchRetry = time.Second * 5

@@ -13,13 +13,13 @@ import (
 	rbacv1b1 "k8s.io/api/rbac/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	orchAPI "github.com/microsegx/microsegx/share/orchestration"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	orchAPI "github.com/wushuang233/MicroSegX/microsegx/share/orchestration"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const (

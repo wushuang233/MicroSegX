@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 var ErrMethodNotSupported = errors.New("Method not supported")

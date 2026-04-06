@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/microsegx/microsegx/share/system/sysinfo/cpuid"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo/cpuid"
 )
 
 // https://en.wikipedia.org/wiki/CPUID#EAX.3D0:_Get_vendor_ID

@@ -3,7 +3,7 @@ package graph
 import (
 	"reflect"
 
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type NewLinkCallback func(src, link, dst string)

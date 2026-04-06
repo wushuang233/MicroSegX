@@ -3,7 +3,7 @@ package cache
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 func TestRancherOSCVE(t *testing.T) {

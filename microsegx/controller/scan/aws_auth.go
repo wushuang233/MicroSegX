@@ -15,8 +15,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecr"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
 )
 
 const awsRetryTimes = 3

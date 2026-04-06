@@ -33,16 +33,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/microsegx/microsegx/controller/api"
-	admission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
-	nvsysadmission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
-	"github.com/microsegx/microsegx/controller/opa"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/scan/secrets"
-	"github.com/microsegx/microsegx/share/utils"
-	//"github.com/microsegx/microsegx/vendor/github.com/microsegx/k8s"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	admission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
+	nvsysadmission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/opa"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/secrets"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	//"github.com/wushuang233/MicroSegX/microsegx/vendor/github.com/wushuang233/k8s"
 )
 
 const (

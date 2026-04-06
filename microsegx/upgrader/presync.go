@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/microsegx/microsegx/share/k8sutils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/k8sutils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	batchv1 "k8s.io/api/batch/v1"

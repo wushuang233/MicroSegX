@@ -8,8 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
 )
 
 type tCustomerCspData struct {

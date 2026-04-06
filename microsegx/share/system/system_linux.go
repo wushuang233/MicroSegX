@@ -26,10 +26,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netns"
 
-	namespace "github.com/microsegx/microsegx/share/system/ns"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
-	"github.com/microsegx/microsegx/share/system/sysinfo"
-	"github.com/microsegx/microsegx/share/utils"
+	namespace "github.com/wushuang233/MicroSegX/microsegx/share/system/ns"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const defaultHostProc string = "/proc/"

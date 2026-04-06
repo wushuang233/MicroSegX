@@ -66,23 +66,37 @@ spec:
       securityContext:
         runAsUser: {{ .Values.manager.runAsUser }}
       {{- end }}
+      hostAliases:
+        - ip: "10.43.0.1"
+          hostnames:
+            - "kubernetes.default"
+            - "kubernetes.default.svc"
+            - "kubernetes.default.svc.cluster.local"
+        - ip: "{{ .Values.controller.apisvc.ctrlServerIP | default "192.168.198.128" }}"
+          hostnames:
+            - "microsegx-svc-controller.microsegx"
+            - "microsegx-svc-controller-api.microsegx"
       containers:
         - name: microsegx-manager-pod
           {{- if .Values.global.azure.enabled }}
           image: "{{ .Values.global.azure.images.manager.registry }}/{{ .Values.global.azure.images.manager.image }}:{{ .Values.global.azure.images.manager.tag }}"
-          {{- else }}
-          {{- if eq .Values.registry "registry.microsegx.com" }}
+          {{- else if eq .Values.registry "registry.microsegx.com" }}
           {{- if .Values.oem }}
           image: "{{ .Values.registry }}/{{ .Values.oem }}/manager:{{ .Values.tag }}"
           {{- else }}
           image: "{{ .Values.registry }}/manager:{{ .Values.tag }}"
           {{- end }}
-          {{- else }}
-          {{- if .Values.manager.image.hash }}
+          {{- else if .Values.manager.image.hash }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.manager.image.repository }}@{{ .Values.manager.image.hash }}"
           {{- else }}
-          image: "{{ .Values.registry }}/{{ .Values.manager.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.manager.image.repository }}@{{ .Values.manager.image.hash }}"
           {{- end }}
+          {{- else }}
+          {{- if .Values.registry }}
+          image: "{{ .Values.registry }}/{{ .Values.manager.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.manager.image.repository }}:{{ .Values.tag }}"
           {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.manager.image.imagePullPolicy }}
@@ -96,7 +110,11 @@ spec:
             - name: MANAGER_SERVER_PORT
               value: "{{ .Values.manager.svc.mgrServerPort}}"
             - name: CTRL_SERVER_IP
+              {{- if .Values.manager.ctrlServerIP }}
+              value: "{{ .Values.manager.ctrlServerIP }}"
+              {{- else }}
               value: microsegx-svc-controller.{{ .Release.Namespace }}
+              {{- end }}
             {{- if not .Values.manager.env.ssl }}
             - name: MANAGER_SSL
               value: "off"

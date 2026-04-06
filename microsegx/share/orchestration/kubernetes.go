@@ -18,11 +18,11 @@ import (
 	"github.com/hashicorp/go-version"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/system"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -133,13 +133,24 @@ type kubernetes struct {
 func getVersion(tag string, verToGet int, useToken bool) (string, error) {
 	var url string
 
+	// Use KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT if available
+	k8sHost := os.Getenv("KUBERNETES_SERVICE_HOST")
+	k8sPort := os.Getenv("KUBERNETES_SERVICE_PORT")
+	k8sEndpoint := "kubernetes.default"
+	if k8sHost != "" {
+		if k8sPort == "" {
+			k8sPort = "443"
+		}
+		k8sEndpoint = k8sHost + ":" + k8sPort
+	}
+
 	switch verToGet {
 	case K8S_VER:
-		url = "https://kubernetes.default/version"
+		url = "https://" + k8sEndpoint + "/version"
 	case OC_VER_V3:
-		url = "https://kubernetes.default/version/openshift"
+		url = "https://" + k8sEndpoint + "/version/openshift"
 	case OC_VER_V4:
-		url = "https://kubernetes.default/apis/config.openshift.io/v1/clusteroperators/openshift-apiserver"
+		url = "https://" + k8sEndpoint + "/apis/config.openshift.io/v1/clusteroperators/openshift-apiserver"
 	default:
 		return "", nil
 	}

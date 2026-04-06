@@ -5,9 +5,9 @@ import (
 
 	"net"
 
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func TestGroupPosMatch(t *testing.T) {

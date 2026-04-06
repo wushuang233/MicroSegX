@@ -11,17 +11,17 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/scheduler"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/httpclient"
-	"github.com/microsegx/microsegx/share/httptrace"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/scheduler"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var clusHelper kv.ClusterHelper

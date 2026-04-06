@@ -14,28 +14,28 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/cache"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/kv"
-	nvcrd "github.com/microsegx/microsegx/controller/nvk8sapi/microsegxcrd"
-	"github.com/microsegx/microsegx/controller/opa"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/rest"
-	"github.com/microsegx/microsegx/controller/rpc"
-	"github.com/microsegx/microsegx/controller/ruleid"
-	"github.com/microsegx/microsegx/controller/scan"
-	"github.com/microsegx/microsegx/db"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/healthz"
-	"github.com/microsegx/microsegx/share/migration"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/cache"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	nvcrd "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/microsegxcrd"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/opa"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rest"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rpc"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/ruleid"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/db"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/healthz"
+	"github.com/wushuang233/MicroSegX/microsegx/share/migration"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -420,6 +420,13 @@ func main() {
 		}
 	} else {
 		log.Info("Not running in container.")
+		// In stubRtDriver mode, get pod name from environment variable
+		if podName := os.Getenv("POD_NAME"); podName != "" {
+			Ctrler.Name = podName
+		}
+		if podNs := os.Getenv("POD_NAMESPACE"); podNs != "" {
+			Ctrler.Domain = podNs
+		}
 	}
 
 	if platform == share.PlatformKubernetes && global.RT.String() != container.StubRtName {
@@ -469,8 +476,12 @@ func main() {
 	Host.Network = network
 	Host.StorageDriver = global.RT.GetStorageDriver()
 
-	Ctrler.Domain = global.ORCH.GetDomain(Ctrler.Labels)
-	parentCtrler.Domain = global.ORCH.GetDomain(parentCtrler.Labels)
+	if domain := global.ORCH.GetDomain(Ctrler.Labels); domain != "" {
+		Ctrler.Domain = domain
+	}
+	if domain := global.ORCH.GetDomain(parentCtrler.Labels); domain != "" {
+		parentCtrler.Domain = domain
+	}
 	resource.NvAdmSvcNamespace = Ctrler.Domain
 
 	cspType, _ := common.GetMappedCspType(cspEnv, nil)

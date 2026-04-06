@@ -5,11 +5,11 @@ import (
 	"net"
 	"os"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/system"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var ErrMethodNotSupported = errors.New("Method not supported")

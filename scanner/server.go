@@ -15,12 +15,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/httpclient"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/scanner/common"
-	"github.com/microsegx/scanner/cvetools"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/cvetools"
 )
 
 const (

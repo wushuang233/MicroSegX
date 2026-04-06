@@ -1,0 +1,77 @@
+# Controller Dockerfile - simplified version using pre-built binaries
+FROM ubuntu:24.04
+
+# Clear proxy settings
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy= \
+    no_proxy=
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    jq \
+    iptables \
+    iproute2 \
+    ethtool \
+    lsof \
+    procps \
+    libpcre3 \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install OPA (Open Policy Agent)
+RUN curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && \
+    chmod +x /usr/local/bin/opa
+
+# Install Consul
+RUN curl -L -o /tmp/consul.zip https://releases.hashicorp.com/consul/1.17.0/consul_1.17.0_linux_amd64.zip && \
+    unzip /tmp/consul.zip -d /usr/local/bin/ && \
+    rm /tmp/consul.zip
+
+# Create directories
+RUN mkdir -p /etc/microsegx/certs/internal \
+    && mkdir -p /etc/microsegx/templates \
+    && mkdir -p /usr/local/bin/scripts/cis_yamls/
+
+# Copy binaries
+COPY microsegx/controller/controller /usr/local/bin/
+COPY microsegx/monitor/monitor /usr/local/bin/
+COPY microsegx/upgrader/upgrader /usr/local/bin/
+COPY microsegx/tools/nstools/nstools /usr/local/bin/
+
+# Copy templates and scripts
+COPY microsegx/templates/podTemplate.json /etc/microsegx/templates/
+COPY microsegx/scripts/sysctl.conf /etc/
+COPY microsegx/scripts/teardown.sh /usr/local/bin/scripts/
+COPY microsegx/scripts/runtime-gdb.py /usr/local/bin/scripts/
+
+# Copy CIS benchmark yamls
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.6.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.23/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.24/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-k3s-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/gke-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/aks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/eks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-rke2-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/ocp/rh-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+
+# Copy licenses script
+COPY microsegx/genlic.sh /usr/local/bin/scripts/
+
+ARG VERSION=dev
+ARG COMMIT=local
+
+LABEL name="controller" \
+      vendor="MicroSegX" \
+      version=${VERSION} \
+      microsegx.image="microsegx/controller" \
+      microsegx.role="controller"
+
+ENTRYPOINT ["/usr/local/bin/monitor", "-c"]

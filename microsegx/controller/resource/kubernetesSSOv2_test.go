@@ -8,9 +8,9 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
 )
 
 const PLATFORM_PSEUDO_K8S = "pseudo_k8s"

@@ -5,7 +5,7 @@ import (
 
 	"testing"
 
-	"github.com/microsegx/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
 )
 
 func TestVulnerabilityProfile(t *testing.T) {

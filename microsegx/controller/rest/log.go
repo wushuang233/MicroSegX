@@ -7,8 +7,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
 )
 
 func filterAndSort(data []interface{}, query *restQuery) []interface{} {

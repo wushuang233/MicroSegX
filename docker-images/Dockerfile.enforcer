@@ -1,0 +1,118 @@
+# Enforcer Dockerfile - simplified version using pre-built binaries
+FROM ubuntu:24.04
+
+# Clear proxy settings
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy= \
+    no_proxy=
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    jq \
+    iptables \
+    iproute2 \
+    ethtool \
+    lsof \
+    procps \
+    tcpdump \
+    kmod \
+    libnetfilter-queue1 \
+    liburcu8 \
+    libpcap0.8 \
+    libpcre2-8-0 \
+    libjansson4 \
+    libjemalloc2 \
+    libhyperscan5 \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Consul
+RUN curl -L -o /tmp/consul.zip https://releases.hashicorp.com/consul/1.17.0/consul_1.17.0_linux_amd64.zip && \
+    unzip /tmp/consul.zip -d /usr/local/bin/ && \
+    rm /tmp/consul.zip
+
+# Create directories
+RUN mkdir -p /etc/microsegx/certs/internal \
+    && mkdir -p /usr/local/bin/scripts/cis_yamls/ \
+    && mkdir -p /usr/local/bin/scripts/tmpl/ \
+    && mkdir -p /usr/local/bin/scripts/rem/
+
+# Copy binaries
+COPY microsegx/agent/agent /usr/local/bin/
+COPY microsegx/dp/dp /usr/local/bin/
+COPY microsegx/monitor/monitor /usr/local/bin/
+COPY microsegx/agent/workerlet/pathWalker/pathWalker /usr/local/bin/
+COPY microsegx/tools/nstools/nstools /usr/local/bin/
+
+# Copy scripts and templates
+COPY microsegx/scripts/sysctl.conf /etc/
+COPY microsegx/scripts/configure.sh /usr/local/bin/scripts/
+COPY microsegx/scripts/teardown.sh /usr/local/bin/scripts/
+COPY microsegx/scripts/runtime-gdb.py /usr/local/bin/scripts/
+
+# Make scripts executable
+RUN chmod +x /usr/local/bin/scripts/*.sh
+
+# Copy nvbench templates and scripts
+COPY microsegx/agent/nvbench/kube_runner.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/rh_runner.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/host.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/container.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/check_kube_version.sh /usr/local/bin/scripts/
+COPY microsegx/agent/nvbench/kube_master_1_0_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_1_0_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_1_2_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_1_2_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_1_4_1.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_1_4_1.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_1_5_1.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_1_5_1.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_1_6_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_1_6_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_gke_1_0_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_gke_1_0_0.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_ocp_4_3.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_ocp_4_3.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_master_ocp_4_5.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/kube_worker_ocp_4_5.tmpl /usr/local/bin/scripts/tmpl/
+COPY microsegx/agent/nvbench/journal.tmpl /usr/local/bin/scripts/
+
+# Copy rem files
+COPY microsegx/agent/nvbench/kubecis_1_0_0.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_1_2_0.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_1_4_1.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_1_5_1.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_1_6_0.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_gke_1_0_0.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_ocp_4_5.rem /usr/local/bin/scripts/rem/
+COPY microsegx/agent/nvbench/kubecis_ocp_4_3.rem /usr/local/bin/scripts/rem/
+
+# Copy utils and CIS yamls
+COPY microsegx/agent/nvbench/utils/ /usr/local/bin/scripts/utils/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.6.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.23/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.24/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-k3s-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/gke-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/aks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/eks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-rke2-1.8.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/ocp/rh-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+
+ARG VERSION=dev
+ARG COMMIT=local
+
+LABEL name="enforcer" \
+      vendor="MicroSegX" \
+      version=${VERSION} \
+      microsegx.image="microsegx/enforcer" \
+      microsegx.role="enforcer"
+
+ENTRYPOINT ["/usr/local/bin/monitor", "-r"]

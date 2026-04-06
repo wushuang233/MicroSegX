@@ -1,0 +1,36 @@
+# Scanner Dockerfile - simplified version using pre-built binaries
+FROM ubuntu:24.04
+
+# Clear proxy settings
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy= \
+    no_proxy=
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create directories
+RUN mkdir -p /usr/local/bin \
+    && mkdir -p /etc/microsegx/certs/internal
+
+# Copy scanner binary
+COPY scanner/scanner /usr/local/bin/
+COPY scanner/task/scannerTask /usr/local/bin/scannerTask
+
+ARG VERSION=dev
+ARG COMMIT=local
+
+LABEL name="scanner" \
+      vendor="MicroSegX" \
+      version=${VERSION} \
+      microsegx.image="microsegx/scanner" \
+      microsegx.role="scanner"
+
+ENTRYPOINT ["/usr/local/bin/scanner"]

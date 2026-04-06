@@ -5,10 +5,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 func getHostAddrs() map[string]sk.NetIface {

@@ -16,13 +16,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/yaml"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	admission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
-	nvsysadmission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	admission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
+	nvsysadmission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func handlerAssessAdmCtrlRules(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

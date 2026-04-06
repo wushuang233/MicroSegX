@@ -3,7 +3,7 @@ package system
 import (
 	"time"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func calculateCPU(prevCPU, prevCPUSystem uint64, cpu, cpuSystem uint64) float64 {

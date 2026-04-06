@@ -20,10 +20,10 @@ import (
 	"github.com/containerd/containerd/v2/core/runtime"
 	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/containerd/typeurl/v2"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/system/sysinfo"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	"google.golang.org/grpc"
 )
 

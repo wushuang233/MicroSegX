@@ -5,9 +5,9 @@ import (
 	//"strings"
 	//"github.com/codeskyblue/go-sh"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	sk "github.com/microsegx/microsegx/share/system/sidekick"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	sk "github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick"
 )
 
 /*

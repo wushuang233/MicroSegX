@@ -1,0 +1,79 @@
+# Custom values for MicroSegX deployment
+# Using local images (no registry prefix for k3s)
+
+openshift: false
+
+registry: ""
+tag: test-1775467413
+
+# Disable Azure/AWS marketplace features
+global:
+  azure:
+    enabled: false
+  aws:
+    enabled: false
+
+# Controller configuration
+controller:
+  enabled: true
+  replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  image:
+    repository: local/controller
+    imagePullPolicy: Never
+  apisvc:
+    type: NodePort
+    ctrlServerPort: 10443
+    nodePort: 30443
+  disruptionbudget: 0
+
+# Enforcer configuration
+enforcer:
+  enabled: true
+  image:
+    repository: microsegx/enforcer
+    imagePullPolicy: Never
+  securityContext:
+    privileged: true
+
+# Manager configuration
+manager:
+  enabled: true
+  image:
+    repository: microsegx/manager
+    imagePullPolicy: Never
+  env:
+    ssl: false
+  svc:
+    type: NodePort
+    mgrServerPort: 8443
+    nodePort: 30084
+  # Controller server IP (required when Ziti intercepts DNS)
+  ctrlServerIP: "192.168.198.128"
+
+# CVE Scanner configuration
+cve:
+  scanner:
+    enabled: true
+    replicas: 1
+    image:
+      repository: microsegx/scanner
+      tag: dev
+      imagePullPolicy: Never
+  updater:
+    enabled: false
+
+# Service account
+serviceAccount: default
+rbac: true
+
+# Auto generate certificates
+autoGenerateCert: true
+
+# Runtime path for containerd (k3s default)
+runtimePath: /run/k3s/containerd/containerd.sock
+
+# Namespace for deployment
+namespace: microsegx

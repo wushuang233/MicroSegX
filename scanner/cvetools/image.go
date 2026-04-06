@@ -18,12 +18,12 @@ import (
 	goDigest "github.com/opencontainers/go-digest"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/scan/registry"
-	"github.com/microsegx/microsegx/share/scan/secrets"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/registry"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/secrets"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	"github.com/quay/clair/v2/pkg/tarutil"
 )
 

@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
 	log "github.com/sirupsen/logrus"
 )
 

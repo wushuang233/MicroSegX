@@ -4,8 +4,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 )
 
 func TestRancherIPScopeWithLabel(t *testing.T) {

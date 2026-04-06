@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	consulapi "github.com/microsegx/microsegx/share/cluster/api"
+	consulapi "github.com/wushuang233/MicroSegX/microsegx/share/cluster/api"
 	log "github.com/sirupsen/logrus"
 )
 

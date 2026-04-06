@@ -13,12 +13,12 @@ import (
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/rpc"
-	"github.com/microsegx/microsegx/controller/scan"
-	"github.com/microsegx/microsegx/share"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rpc"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
 )
 
 const (

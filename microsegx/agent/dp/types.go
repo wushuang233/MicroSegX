@@ -3,7 +3,7 @@ package dp
 import (
 	"net"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 type DPCallback func(buf []byte, param interface{}) bool

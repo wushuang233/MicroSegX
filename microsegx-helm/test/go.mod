@@ -1,4 +1,4 @@
-module github.com/microsegx/microsegx-helm/test
+module github.com/wushuang233/MicroSegX/microsegx-helm/test
 
 go 1.23.0
 

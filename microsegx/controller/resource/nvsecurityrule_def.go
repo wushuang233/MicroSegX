@@ -1,9 +1,9 @@
 package resource
 
 import (
-	//	"github.com/microsegx/k8s"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share"
+	//	"github.com/wushuang233/k8s"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

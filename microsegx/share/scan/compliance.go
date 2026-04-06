@@ -12,9 +12,9 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/hashicorp/go-version"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
 	log "github.com/sirupsen/logrus"
 )
 

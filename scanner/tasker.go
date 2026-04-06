@@ -16,9 +16,9 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/scanner/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/scanner/common"
 )
 
 const reqTemplate = "/tmp/%s_i.json"

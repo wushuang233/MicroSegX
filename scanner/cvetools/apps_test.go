@@ -3,8 +3,8 @@ package cvetools
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/share/utils"
-	"github.com/microsegx/scanner/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/scanner/common"
 )
 
 type versionTestCase struct {

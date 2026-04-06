@@ -6,11 +6,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/utils"
-	"github.com/microsegx/scanner/common"
-	"github.com/microsegx/scanner/detectors"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/detectors"
 )
 
 const log4jModName = "org.apache.logging.log4j.log4j"

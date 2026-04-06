@@ -40,8 +40,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/simpleuuid"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 var IPv4Loopback = net.IPv4(127, 0, 0, 1)

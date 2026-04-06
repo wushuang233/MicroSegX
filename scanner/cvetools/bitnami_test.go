@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/microsegx/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan"
 	"github.com/stretchr/testify/require"
 )
 

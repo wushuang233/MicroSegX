@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
-	orchAPI "github.com/microsegx/microsegx/share/orchestration"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	orchAPI "github.com/wushuang233/MicroSegX/microsegx/share/orchestration"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type orchHub struct {

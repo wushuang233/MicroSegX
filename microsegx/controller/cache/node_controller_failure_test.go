@@ -3,8 +3,8 @@ package cache
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"github.com/stretchr/testify/require"
 )
 

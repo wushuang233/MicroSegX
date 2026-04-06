@@ -35,17 +35,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/yaml"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/rpc"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/global"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rpc"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const hostSessionIDBase uint64 = 0x100000000

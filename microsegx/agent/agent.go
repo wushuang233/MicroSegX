@@ -15,19 +15,19 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/agent/dp"
-	"github.com/microsegx/microsegx/agent/pipe"
-	"github.com/microsegx/microsegx/agent/probe"
-	"github.com/microsegx/microsegx/agent/resource"
-	"github.com/microsegx/microsegx/agent/workerlet"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/fsmon"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/healthz"
-	"github.com/microsegx/microsegx/share/migration"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/dp"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/pipe"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/probe"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/workerlet"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/fsmon"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/healthz"
+	"github.com/wushuang233/MicroSegX/microsegx/share/migration"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const goroutineStackSize = 1024 * 1024

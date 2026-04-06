@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 
-	"github.com/microsegx/microsegx/share/libovsdb"
+	"github.com/wushuang233/MicroSegX/microsegx/share/libovsdb"
 )
 
 const defaultOVSSocket string = "/var/run/openvswitch/db.sock"

@@ -16,12 +16,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httpclient"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
-	"github.com/microsegx/scanner/common"
-	"github.com/microsegx/scanner/cvetools"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/cvetools"
 )
 
 func usage() {

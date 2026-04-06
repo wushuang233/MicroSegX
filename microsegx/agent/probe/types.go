@@ -1,12 +1,12 @@
 package probe
 
 import (
-	"github.com/microsegx/microsegx/agent/dp"
-	"github.com/microsegx/microsegx/agent/workerlet"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/fsmon"
-	"github.com/microsegx/microsegx/share/osutil"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/dp"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/workerlet"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/fsmon"
+	"github.com/wushuang233/MicroSegX/microsegx/share/osutil"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	"time"
 )
 

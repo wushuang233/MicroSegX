@@ -572,9 +572,9 @@ github.com/munnerz/goautoneg
 # github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f
 ## explicit
 github.com/mxk/go-flowrate/flowrate
-# github.com/neuvector/k8s v1.4.1-0.20240927235747-43bcf20a80a3
+# github.com/wushuang233/k8s v1.4.1-0.20240927235747-43bcf20a80a3
 ## explicit; go 1.20
-github.com/neuvector/k8s
+github.com/wushuang233/k8s
 # github.com/opencontainers/go-digest v1.0.0
 ## explicit; go 1.13
 github.com/opencontainers/go-digest

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 )
 
 func TestKubeProxy(t *testing.T) {

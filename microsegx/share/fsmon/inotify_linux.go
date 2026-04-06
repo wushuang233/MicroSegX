@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 
-	"github.com/microsegx/microsegx/share/osutil"
+	"github.com/wushuang233/MicroSegX/microsegx/share/osutil"
 )
 
 const (

@@ -20,9 +20,9 @@ import (
 	rpmdb "github.com/knqyf263/go-rpmdb/pkg"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	"github.com/quay/clair/v2/pkg/tarutil"
 )
 

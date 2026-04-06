@@ -74,19 +74,23 @@ spec:
         - name: microsegx-enforcer-pod
           {{- if .Values.global.azure.enabled }}
           image: "{{ .Values.global.azure.images.enforcer.registry }}/{{ .Values.global.azure.images.enforcer.image }}:{{ .Values.global.azure.images.enforcer.tag }}"
-          {{- else }}
-          {{- if eq .Values.registry "registry.microsegx.com" }}
+          {{- else if eq .Values.registry "registry.microsegx.com" }}
           {{- if .Values.oem }}
           image: "{{ .Values.registry }}/{{ .Values.oem }}/enforcer:{{ .Values.tag }}"
           {{- else }}
           image: "{{ .Values.registry }}/enforcer:{{ .Values.tag }}"
           {{- end }}
-          {{- else }}
-          {{- if .Values.enforcer.image.hash }}
+          {{- else if .Values.enforcer.image.hash }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}@{{ .Values.enforcer.image.hash }}"
           {{- else }}
-          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.enforcer.image.repository }}@{{ .Values.enforcer.image.hash }}"
           {{- end }}
+          {{- else }}
+          {{- if .Values.registry }}
+          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
+          {{- else }}
+          image: "{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
           {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.enforcer.image.imagePullPolicy }}

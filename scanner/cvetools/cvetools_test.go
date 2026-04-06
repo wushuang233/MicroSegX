@@ -3,10 +3,10 @@ package cvetools
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/utils"
-	"github.com/microsegx/scanner/common"
-	"github.com/microsegx/scanner/detectors"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/detectors"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -14,18 +14,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/microsegx/k8s"
+	"github.com/wushuang233/k8s"
 	log "github.com/sirupsen/logrus"
 	admregv1 "k8s.io/api/admissionregistration/v1"
 	admregv1b1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type ValidateWebhookSvcInfo struct {

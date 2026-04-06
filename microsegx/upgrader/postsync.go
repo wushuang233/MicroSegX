@@ -17,8 +17,8 @@ import (
 
 	"errors"
 
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/share/k8sutils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/share/k8sutils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	appv1 "k8s.io/api/apps/v1"

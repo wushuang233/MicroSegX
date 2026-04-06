@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
-	"github.com/microsegx/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
 	log "github.com/sirupsen/logrus"
 )
 

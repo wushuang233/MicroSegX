@@ -7,9 +7,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share/container"
-	"github.com/microsegx/microsegx/share/global"
-	orchAPI "github.com/microsegx/microsegx/share/orchestration"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	orchAPI "github.com/wushuang233/MicroSegX/microsegx/share/orchestration"
 )
 
 type swarmWatcher struct {

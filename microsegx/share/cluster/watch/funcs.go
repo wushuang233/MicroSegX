@@ -3,7 +3,7 @@ package watch
 import (
 	"fmt"
 
-	consulapi "github.com/microsegx/microsegx/share/cluster/api"
+	consulapi "github.com/wushuang233/MicroSegX/microsegx/share/cluster/api"
 )
 
 // watchFactory is a function that can create a new WatchFunc

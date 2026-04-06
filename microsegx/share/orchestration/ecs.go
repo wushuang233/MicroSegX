@@ -3,8 +3,8 @@ package orchestration
 import (
 	"strings"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 )
 
 type ecs struct {

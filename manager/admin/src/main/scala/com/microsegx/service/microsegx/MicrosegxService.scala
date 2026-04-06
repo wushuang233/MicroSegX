@@ -96,6 +96,12 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
     toPekkoResponse(send(method = request.method.value, path = upstreamPath))
   }
 
+  def proxyPortExposureStatic(request: HttpRequest, path: String): HttpResponse =
+    toPekkoResponse(send(method = request.method.value, path = path))
+
+  def proxyZitiStatic(request: HttpRequest, path: String): HttpResponse =
+    toPekkoResponse(send(method = request.method.value, path = path))
+
   private def buildPortExposureSummary(payload: JsObject): JsObject = {
     val serviceControls = objectField(payload, "service_controls")
     val externalSummary = objectField(payload, "external_exposure_summary")

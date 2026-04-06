@@ -4,9 +4,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/microsegx/microsegx/agent/dp"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/dp"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var polAppDir int

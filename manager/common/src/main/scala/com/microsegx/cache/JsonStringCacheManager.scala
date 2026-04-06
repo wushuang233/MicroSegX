@@ -3,8 +3,8 @@ import net.sf.ehcache.CacheManager
 
 /**
  * Created by bxu on 2/2/18. Manager graph layout for node and group view.
- * [[com.microsegx.model.Position]] saved in cache which is disk backed, check the ehcache.xml for disk
- * store.
+ * [[com.microsegx.model.Position]] saved in cache which is disk backed, check the ehcache.xml for
+ * disk store.
  */
 object JsonStringCacheManager {
   given cacheKeyGenerator: ToStringCacheKeyGenerator.type = ToStringCacheKeyGenerator

@@ -15,10 +15,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/osutil"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/osutil"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const procSelfFd = "/proc/self/fd/%d"

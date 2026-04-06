@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
 )
 
 // const defaultContainerLogPath = "/var/lib/docker/containers/%s/%s-json.log"

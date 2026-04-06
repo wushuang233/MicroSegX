@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var ErrQueueFull = errors.New("Queue full")

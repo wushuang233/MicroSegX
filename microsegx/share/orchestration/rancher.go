@@ -3,8 +3,8 @@ package orchestration
 import (
 	"strconv"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 )
 
 /* Container labels - Rancher 1.5

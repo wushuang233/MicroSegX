@@ -9,14 +9,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/agent/dp"
-	"github.com/microsegx/microsegx/agent/probe/netlink"
-	"github.com/microsegx/microsegx/agent/workerlet"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/fsmon"
-	"github.com/microsegx/microsegx/share/global"
-	"github.com/microsegx/microsegx/share/osutil"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/dp"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/probe/netlink"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/workerlet"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/fsmon"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
+	"github.com/wushuang233/MicroSegX/microsegx/share/osutil"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 // //

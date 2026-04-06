@@ -3,9 +3,9 @@ package cache
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/graph"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/graph"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func TestGetAllEndpoints(t *testing.T) {

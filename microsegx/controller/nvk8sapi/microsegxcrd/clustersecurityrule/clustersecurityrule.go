@@ -4,11 +4,11 @@ package nvclustersecurityrule
 // see controller/nvk8sapi/microsegxcrd/crd.go
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/rest"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rest"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"strings"
 	"time"
 )

@@ -3,7 +3,7 @@ package cache
 import (
 	"strings"
 
-	nvsysadmission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
+	nvsysadmission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
 	corev1 "k8s.io/api/core/v1"
 )
 

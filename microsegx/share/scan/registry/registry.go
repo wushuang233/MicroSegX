@@ -8,8 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share/httpclient"
-	"github.com/microsegx/microsegx/share/httptrace"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httpclient"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
 )
 
 const (

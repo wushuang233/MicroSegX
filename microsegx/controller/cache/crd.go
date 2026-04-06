@@ -5,11 +5,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	admission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/global"
+	admission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/global"
 )
 
 var crdStateCache share.CLUSAdmissionState

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

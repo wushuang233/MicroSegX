@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httptrace"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
 )
 
 func TestGithubApiGetAllRepos(t *testing.T) {

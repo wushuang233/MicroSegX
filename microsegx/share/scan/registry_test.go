@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/distribution"
 	manifestV2 "github.com/docker/distribution/manifest/schema2"
-	"github.com/microsegx/microsegx/share/scan/registry"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/registry"
 )
 
 func printLayers(t *testing.T, imageInfo *ImageInfo) {

@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/agent/probe/netlink"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/probe/netlink"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const inetMonitorSocketSize uint = 1024 * 5

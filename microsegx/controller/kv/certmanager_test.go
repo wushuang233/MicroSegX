@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func (o *RESTLicenseInfo) GetDomain(f share.GetAccessObjectFunc) ([]string, []string) {

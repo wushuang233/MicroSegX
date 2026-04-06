@@ -11,15 +11,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/controller/resource"
-	"github.com/microsegx/microsegx/controller/rpc"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httptrace"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	registryUtils "github.com/microsegx/microsegx/share/scan/registry"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/resource"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/rpc"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	registryUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan/registry"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type imageMeta struct {

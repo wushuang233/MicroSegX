@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
 )
 
 func TestRoles(t *testing.T) {

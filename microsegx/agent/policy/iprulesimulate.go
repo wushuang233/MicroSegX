@@ -8,8 +8,8 @@ import (
 	"net"
 	"syscall"
 
-	"github.com/microsegx/microsegx/agent/dp"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/dp"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	log "github.com/sirupsen/logrus"
 )
 

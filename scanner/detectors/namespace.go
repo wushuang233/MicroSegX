@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/microsegx/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/common"
 )
 
 // DetectNamespace finds the OS of the layer by using every registered NamespaceDetector.

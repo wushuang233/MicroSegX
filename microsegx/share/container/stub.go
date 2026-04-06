@@ -9,10 +9,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/system/sysinfo"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 // This is a virtual runtime device driver.

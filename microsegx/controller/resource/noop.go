@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/share"
-	orchAPI "github.com/microsegx/microsegx/share/orchestration"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	orchAPI "github.com/wushuang233/MicroSegX/microsegx/share/orchestration"
 )
 
 type resourceCache map[string]interface{}

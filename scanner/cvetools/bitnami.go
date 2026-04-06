@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan"
 )
 
 type bitnamiComponent struct {

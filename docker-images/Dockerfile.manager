@@ -1,0 +1,57 @@
+# Manager Dockerfile - simplified version using pre-built JAR
+FROM ubuntu:24.04
+
+# Clear proxy settings
+ENV HTTP_PROXY= \
+    HTTPS_PROXY= \
+    ALL_PROXY= \
+    http_proxy= \
+    https_proxy= \
+    all_proxy= \
+    no_proxy=
+
+# Install Java, Python, and runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-17-jre-headless \
+    python3 \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create directories
+RUN mkdir -p /usr/local/bin \
+    && mkdir -p /etc/microsegx/certs \
+    && mkdir -p /licenses
+
+# Copy JAR file
+COPY manager/admin/target/scala-3.3.5/admin-assembly-1.0.jar /usr/local/bin/admin.jar
+
+# Copy CLI and scripts
+COPY manager/cli/cli /usr/local/bin/
+COPY manager/cli/cli.py /usr/local/bin/
+COPY manager/cli/prog /usr/local/bin/prog
+COPY manager/scripts/support /usr/local/bin/
+COPY manager/scripts/support.py /usr/local/bin/
+
+# Copy licenses
+COPY manager/licenses/* /licenses/
+
+# Copy Java security config (if needed for FIPS)
+COPY manager/java.security /usr/lib/jvm/java-17-openjdk-amd64/conf/security/java.security.fips
+
+ARG VERSION=dev
+ARG COMMIT=local
+
+# Create non-root user
+ARG user=manager
+RUN echo "$user:x:1000:1000::/nonexistent:/bin/bash" >> /etc/passwd && \
+    echo "$user:x:1000:" >> /etc/group
+USER $user
+
+LABEL name="manager" \
+      vendor="MicroSegX" \
+      version=${VERSION} \
+      microsegx.image="microsegx/manager" \
+      microsegx.role="manager"
+
+ENTRYPOINT ["java", "-jar", "/usr/local/bin/admin.jar"]

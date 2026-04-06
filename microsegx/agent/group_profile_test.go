@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/microsegx/microsegx/agent/policy"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/policy"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 type appSample struct {

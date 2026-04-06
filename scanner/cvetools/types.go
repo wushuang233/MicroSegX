@@ -1,10 +1,10 @@
 package cvetools
 
 import (
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
-	"github.com/microsegx/scanner/common"
-	"github.com/microsegx/scanner/detectors"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/scanner/common"
+	"github.com/wushuang233/MicroSegX/scanner/detectors"
 )
 
 /* removd by golint

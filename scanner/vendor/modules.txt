@@ -394,31 +394,31 @@ github.com/modern-go/reflect2
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
-# github.com/neuvector/neuvector v0.0.0-20260402011127-8c425a9eb845
+# github.com/wushuang233/MicroSegX/microsegx v0.0.0-20260402011127-8c425a9eb845
 ## explicit; go 1.25.0
-github.com/neuvector/neuvector/controller/api
-github.com/neuvector/neuvector/share
-github.com/neuvector/neuvector/share/cluster
-github.com/neuvector/neuvector/share/cluster/api
-github.com/neuvector/neuvector/share/cluster/watch
-github.com/neuvector/neuvector/share/container
-github.com/neuvector/neuvector/share/global
-github.com/neuvector/neuvector/share/healthz
-github.com/neuvector/neuvector/share/httpclient
-github.com/neuvector/neuvector/share/httptrace
-github.com/neuvector/neuvector/share/k8sutils
-github.com/neuvector/neuvector/share/migration
-github.com/neuvector/neuvector/share/orchestration
-github.com/neuvector/neuvector/share/osutil
-github.com/neuvector/neuvector/share/scan
-github.com/neuvector/neuvector/share/scan/registry
-github.com/neuvector/neuvector/share/scan/secrets
-github.com/neuvector/neuvector/share/system
-github.com/neuvector/neuvector/share/system/ns
-github.com/neuvector/neuvector/share/system/sidekick
-github.com/neuvector/neuvector/share/system/sysinfo
-github.com/neuvector/neuvector/share/system/sysinfo/cpuid
-github.com/neuvector/neuvector/share/utils
+github.com/wushuang233/MicroSegX/microsegx/controller/api
+github.com/wushuang233/MicroSegX/microsegx/share
+github.com/wushuang233/MicroSegX/microsegx/share/cluster
+github.com/wushuang233/MicroSegX/microsegx/share/cluster/api
+github.com/wushuang233/MicroSegX/microsegx/share/cluster/watch
+github.com/wushuang233/MicroSegX/microsegx/share/container
+github.com/wushuang233/MicroSegX/microsegx/share/global
+github.com/wushuang233/MicroSegX/microsegx/share/healthz
+github.com/wushuang233/MicroSegX/microsegx/share/httpclient
+github.com/wushuang233/MicroSegX/microsegx/share/httptrace
+github.com/wushuang233/MicroSegX/microsegx/share/k8sutils
+github.com/wushuang233/MicroSegX/microsegx/share/migration
+github.com/wushuang233/MicroSegX/microsegx/share/orchestration
+github.com/wushuang233/MicroSegX/microsegx/share/osutil
+github.com/wushuang233/MicroSegX/microsegx/share/scan
+github.com/wushuang233/MicroSegX/microsegx/share/scan/registry
+github.com/wushuang233/MicroSegX/microsegx/share/scan/secrets
+github.com/wushuang233/MicroSegX/microsegx/share/system
+github.com/wushuang233/MicroSegX/microsegx/share/system/ns
+github.com/wushuang233/MicroSegX/microsegx/share/system/sidekick
+github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo
+github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo/cpuid
+github.com/wushuang233/MicroSegX/microsegx/share/utils
 # github.com/opencontainers/go-digest v1.0.0
 ## explicit; go 1.13
 github.com/opencontainers/go-digest

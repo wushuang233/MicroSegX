@@ -1,4 +1,4 @@
-module github.com/microsegx/microsegx
+module github.com/wushuang233/MicroSegX/microsegx
 
 go 1.25.0
 
@@ -34,7 +34,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/microsegx/k8s v1.4.1-0.20240927235747-43bcf20a80a3
+	github.com/wushuang233/k8s v1.4.1-0.20240927235747-43bcf20a80a3
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/runtime-spec v1.2.1
 	github.com/pquerna/cachecontrol v0.2.0

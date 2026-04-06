@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 func TestUsageKey(t *testing.T) {

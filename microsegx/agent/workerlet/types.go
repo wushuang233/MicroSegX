@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 const WalkerApp = "/usr/local/bin/pathWalker"

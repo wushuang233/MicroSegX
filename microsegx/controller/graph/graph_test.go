@@ -3,7 +3,7 @@ package graph
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 // This is a simple test graph.

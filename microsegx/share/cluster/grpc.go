@@ -18,8 +18,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 
 	"google.golang.org/grpc/security/advancedtls"
 )

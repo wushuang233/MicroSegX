@@ -1,0 +1,2 @@
+FROM local/controller:test-1775467413
+COPY microsegx/controller/controller /usr/local/bin/

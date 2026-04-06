@@ -1,4 +1,4 @@
-module github.com/microsegx/scanner
+module github.com/wushuang233/MicroSegX/scanner
 
 go 1.25.0
 
@@ -10,7 +10,7 @@ require (
 	github.com/docker/docker v28.1.1+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.6.7
-	github.com/microsegx/microsegx v0.0.0-20260402011127-8c425a9eb845
+	github.com/wushuang233/MicroSegX/microsegx v0.0.0-20260402011127-8c425a9eb845
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/quay/clair/v2 v2.1.8
 	github.com/sirupsen/logrus v1.9.3
@@ -132,3 +132,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.2 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/wushuang233/MicroSegX/microsegx => ../microsegx

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/microsegx/k8s"
+	"github.com/wushuang233/k8s"
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

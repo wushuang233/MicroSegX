@@ -3,7 +3,7 @@ package orchestration
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/share/container"
+	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 )
 
 func TestServiceName(t *testing.T) {

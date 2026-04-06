@@ -13,9 +13,9 @@ import (
 	manifestV2 "github.com/docker/distribution/manifest/schema2"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httptrace"
-	"github.com/microsegx/microsegx/share/scan/registry"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/registry"
 )
 
 const mediaTypeCosign = "application/vnd.dev.cosign.simplesigning.v1+json"

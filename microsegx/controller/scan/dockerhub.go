@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 type dockerhubRegistryQuery struct {

@@ -17,12 +17,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/agent/workerlet"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/scan/secrets"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/agent/workerlet"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/scan/secrets"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const procRootMountPoint = "/proc/%d/root"

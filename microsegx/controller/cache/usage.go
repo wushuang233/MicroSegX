@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/scan"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
 )
 
 const usageReportPeriod = time.Duration(time.Hour * 12)

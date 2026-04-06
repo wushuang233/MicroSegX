@@ -11,8 +11,8 @@ import (
 
 	"errors"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
 	log "github.com/sirupsen/logrus"
 )
 

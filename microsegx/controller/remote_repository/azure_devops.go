@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 var ErrBranchDoesNotExist = errors.New("branch does not exist")

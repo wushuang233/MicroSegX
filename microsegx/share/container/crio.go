@@ -16,10 +16,10 @@ import (
 	"google.golang.org/grpc"
 	criRT "k8s.io/cri-api/pkg/apis/runtime/v1"
 
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/system"
-	"github.com/microsegx/microsegx/share/system/sysinfo"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system"
+	"github.com/wushuang233/MicroSegX/microsegx/share/system/sysinfo"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 const defaultCriOSock = "/var/run/crio/crio.sock"

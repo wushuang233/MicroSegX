@@ -36,10 +36,9 @@ lazy val buildSettings = Seq(
 
 lazy val commonDependencies = Seq(
   scalaTest,
-  "javax.activation"   % "activation"         % "1.1.1",
   "org.glassfish.jaxb" % "jaxb-runtime"       % "4.0.5",
   "javax.xml.bind"     % "jaxb-api"           % "2.3.1",
-  "com.sun.xml.ws"     % "jaxws-ri"           % "4.0.3",
+  "com.sun.xml.ws"     % "jaxws-ri"           % "4.0.3" exclude("javax.activation", "activation"),
   "javax.xml.soap"     % "javax.xml.soap-api" % "1.4.0",
   "org.json4s"        %% "json4s-native"      % "4.0.7",
   "org.bouncycastle"   % "bcprov-jdk18on"     % "1.79",
@@ -141,8 +140,17 @@ assembly / test := {}
 Revolver.settings: Seq[sbt.Def.Setting[_]]
 
 assembly / assemblyMergeStrategy := {
-  case PathList(ps @ _*) if ps.last.endsWith("io.netty.versions.properties") => MergeStrategy.first
-  case x                                                                     =>
+  case PathList("META-INF", "versions", "9", "module-info.class") => MergeStrategy.discard
+  case PathList("META-INF", "versions", xs @ _*) => MergeStrategy.first
+  case PathList("META-INF", "hk2-locator", xs @ _*) => MergeStrategy.first
+  case PathList("META-INF", "OSGI-INF", xs @ _*) => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+  case PathList(ps @ _*) if ps.last == "io.netty.versions.properties" => MergeStrategy.first
+  case PathList("META-INF", xs @ _*) if xs.contains("mailcap.default") => MergeStrategy.first
+  case PathList("META-INF", xs @ _*) if xs.contains("mimetypes.default") => MergeStrategy.first
+  case PathList("javax", "activation", xs @ _*) => MergeStrategy.first
+  case PathList("javax", xs @ _*) => MergeStrategy.first
+  case x =>
     val oldStrategy = (assembly / assemblyMergeStrategy).value
     oldStrategy(x)
 }

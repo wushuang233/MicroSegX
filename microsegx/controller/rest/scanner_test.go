@@ -3,10 +3,10 @@ package rest
 import (
 	"testing"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/cache"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/cache"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 	"github.com/stretchr/testify/assert"
 )
 

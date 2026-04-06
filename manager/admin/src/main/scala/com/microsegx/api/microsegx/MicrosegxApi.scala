@@ -39,7 +39,47 @@ class MicrosegxApi(resourceService: MicrosegxService) extends BaseApi {
         }
       }
     }
-  }
+  } ~
+    // Public static resources for port-audit embedded UIs
+    // These are requested by the iframe pages at /microsegx/ui/port-exposure/ and /microsegx/ui/ziti/
+    path("styles.css") {
+      get {
+        extractRequest { request =>
+          Utils.respondWithWebServerHeaders(isStaticResource = true) {
+            complete(resourceService.proxyPortExposureStatic(request, "/styles.css"))
+          }
+        }
+      }
+    } ~
+    path("app.js") {
+      get {
+        extractRequest { request =>
+          Utils.respondWithWebServerHeaders(isStaticResource = true, isJs = true) {
+            complete(resourceService.proxyPortExposureStatic(request, "/app.js"))
+          }
+        }
+      }
+    } ~
+    pathPrefix("ziti") {
+      path("styles.css") {
+        get {
+          extractRequest { request =>
+            Utils.respondWithWebServerHeaders(isStaticResource = true) {
+              complete(resourceService.proxyZitiStatic(request, "/ziti/styles.css"))
+            }
+          }
+        }
+      } ~
+      path("app.js") {
+        get {
+          extractRequest { request =>
+            Utils.respondWithWebServerHeaders(isStaticResource = true, isJs = true) {
+              complete(resourceService.proxyZitiStatic(request, "/ziti/app.js"))
+            }
+          }
+        }
+      }
+    }
 
   val route: Route = headerValueByName("Token") { _ =>
     pathPrefix("microsegx") {

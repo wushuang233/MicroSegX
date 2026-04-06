@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/kv"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/auth"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/kv"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/auth"
 	"github.com/stretchr/testify/assert"
 )
 

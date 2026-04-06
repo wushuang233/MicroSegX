@@ -14,9 +14,9 @@ import (
 
 	"errors"
 
-	"github.com/microsegx/microsegx/share/cluster"
-	"github.com/microsegx/microsegx/share/healthz"
-	"github.com/microsegx/microsegx/share/k8sutils"
+	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
+	"github.com/wushuang233/MicroSegX/microsegx/share/healthz"
+	"github.com/wushuang233/MicroSegX/microsegx/share/k8sutils"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/informers"

@@ -1,7 +1,7 @@
 package scan
 
 import (
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 )
 
 const gcrDefaultUsername = "_json_key"

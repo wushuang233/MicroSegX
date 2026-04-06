@@ -9,15 +9,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/microsegx/microsegx/controller/access"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	nvsysadmission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
-	"github.com/microsegx/microsegx/db"
-	"github.com/microsegx/microsegx/share"
-	"github.com/microsegx/microsegx/share/httptrace"
-	scanUtils "github.com/microsegx/microsegx/share/scan"
-	"github.com/microsegx/microsegx/share/utils"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	nvsysadmission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
+	"github.com/wushuang233/MicroSegX/microsegx/db"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/share/httptrace"
+	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 )
 
 type ScanInterface interface {

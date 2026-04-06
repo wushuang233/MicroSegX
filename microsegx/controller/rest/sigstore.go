@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/microsegx/microsegx/controller/api"
-	"github.com/microsegx/microsegx/controller/common"
-	"github.com/microsegx/microsegx/share"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
+	"github.com/wushuang233/MicroSegX/microsegx/controller/common"
+	"github.com/wushuang233/MicroSegX/microsegx/share"
 	log "github.com/sirupsen/logrus"
 )
 

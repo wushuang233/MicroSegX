@@ -1,8 +1,8 @@
 package rest
 
 import (
-	nvsysadmission "github.com/microsegx/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
-	"github.com/microsegx/microsegx/share/utils"
+	nvsysadmission "github.com/wushuang233/MicroSegX/microsegx/controller/nvk8sapi/nvvalidatewebhookcfg/admission"
+	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
 
 	"testing"
 )
