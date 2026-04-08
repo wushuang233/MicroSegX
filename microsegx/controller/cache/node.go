@@ -156,16 +156,18 @@ func cancelHostRemoval(cache *hostCache) {
 func memberStateUpdateHandler(nType cluster.ClusterNotifyType, member string, agentId string, flag int) {
 	var ac *agentCache
 	var cc *ctrlCache
+	memberAddr := cluster.GetConsulNodeAddress(member)
+	memberRole, roleKnown := cluster.GetConsulNodeRole(member)
 
 	log.WithFields(log.Fields{
-		"member": member, "agentID": agentId, "notify": cluster.ClusterNotifyName[nType], "flag": flag,
+		"member": member, "memberAddr": memberAddr, "agentID": agentId, "notify": cluster.ClusterNotifyName[nType], "flag": flag,
 	}).Info()
 
 	cacheMutexLock()
 	if (flag & updateAgent) > 0 {
 		if agentId == "" {
 			for _, cache := range agentCacheMap {
-				if cache.agent.ClusterIP == member {
+				if cache.agent.ClusterIP == memberAddr && (!roleKnown || memberRole == cluster.NodeRoleClient) {
 					ac = cache
 					break
 				}
@@ -178,7 +180,7 @@ func memberStateUpdateHandler(nType cluster.ClusterNotifyType, member string, ag
 	if (flag & updateCtrl) > 0 {
 		if agentId == "" {
 			for _, cache := range ctrlCacheMap {
-				if cache.ctrl.ClusterIP == member {
+				if cache.ctrl.ClusterIP == memberAddr && (!roleKnown || memberRole == cluster.NodeRoleServer) {
 					cc = cache
 					break
 				}
@@ -468,14 +470,14 @@ func syncMemberStateFromCluster() []*share.CLUSController {
 
 	memberStateMap := make(map[string]cluster.ClusterMemberInfo)
 	for _, node := range nodes {
-		memberStateMap[node.Name] = node
+		memberStateMap[fmt.Sprintf("%s:%d", node.Name, node.Role)] = node
 	}
 
 	cs := make([]*share.CLUSController, 0)
 	cids := utils.NewSet()
 	controllers, _ := clusHelper.GetAllControllers()
 	for _, c := range controllers {
-		if n, ok := memberStateMap[c.ClusterIP]; !ok || n.Role != cluster.NodeRoleServer {
+		if n, ok := memberStateMap[fmt.Sprintf("%s:%d", c.ClusterIP, cluster.NodeRoleServer)]; !ok {
 			log.WithFields(log.Fields{"node": c.ClusterIP}).Debug("ctrl is missing")
 			memberStateUpdateHandler(cluster.ClusterNotifyDelete, c.ClusterIP, c.ID, updateCtrl)
 		} else if n.State == cluster.NodeStateLeft || n.State == cluster.NodeStateFail {
@@ -494,7 +496,7 @@ func syncMemberStateFromCluster() []*share.CLUSController {
 			continue
 		}
 
-		if n, ok := memberStateMap[a.ClusterIP]; !ok || n.Role != cluster.NodeRoleClient {
+		if n, ok := memberStateMap[fmt.Sprintf("%s:%d", a.ClusterIP, cluster.NodeRoleClient)]; !ok {
 			log.WithFields(log.Fields{"node": a.ClusterIP}).Debug("agent is missing")
 			memberStateUpdateHandler(cluster.ClusterNotifyDelete, a.ClusterIP, a.ID, updateAgent)
 		} else if n.State == cluster.NodeStateLeft || n.State == cluster.NodeStateFail {

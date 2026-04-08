@@ -204,13 +204,16 @@ func ctlrMemberUpdateHandler(nType cluster.ClusterNotifyType, memberAddr string,
 		"type": cluster.ClusterNotifyName[nType], "member": memberAddr,
 	}).Info()
 
+	memberRole, roleKnown := cluster.GetConsulNodeRole(member)
+	isSelf := Ctrler.ClusterIP == memberAddr && (!roleKnown || memberRole == cluster.NodeRoleServer)
+
 	switch nType {
 	case cluster.ClusterNotifyAdd:
 		if !ClusterConnected {
 			ClusterConnected = true
 		}
 
-		if selfRejoin && Ctrler.ClusterIP == memberAddr {
+		if selfRejoin && isSelf {
 			log.Info("Rejoin")
 
 			time.Sleep(time.Second)
@@ -220,7 +223,7 @@ func ctlrMemberUpdateHandler(nType cluster.ClusterNotifyType, memberAddr string,
 			logController(share.CLUSEvControllerJoin, "")
 		}
 	case cluster.ClusterNotifyDelete:
-		if Ctrler.ClusterIP == memberAddr {
+		if isSelf {
 			log.Info("Left")
 
 			ClusterConnected = false

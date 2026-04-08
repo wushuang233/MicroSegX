@@ -66,11 +66,19 @@ spec:
               {{- end }}
               {{- else }}
               {{- if .Values.cve.updater.image.hash }}
+              {{- if .Values.registry }}
               image: "{{ .Values.registry }}/{{ .Values.cve.updater.image.repository }}@{{ .Values.cve.updater.image.hash }}"
+              {{- else }}
+              image: "{{ .Values.cve.updater.image.repository }}@{{ .Values.cve.updater.image.hash }}"
+              {{- end }}
               {{- else if .Values.cve.updater.image.registry }}
               image: "{{ .Values.cve.updater.image.registry }}/{{ .Values.cve.updater.image.repository }}:{{ .Values.cve.updater.image.tag }}"
               {{- else }}
+              {{- if .Values.registry }}
               image: "{{ .Values.registry }}/{{ .Values.cve.updater.image.repository }}:{{ .Values.cve.updater.image.tag }}"
+              {{- else }}
+              image: "{{ .Values.cve.updater.image.repository }}:{{ .Values.cve.updater.image.tag }}"
+              {{- end }}
               {{- end }}
               {{- end }}
               imagePullPolicy: {{ .Values.cve.updater.image.imagePullPolicy }}

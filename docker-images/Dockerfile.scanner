@@ -18,11 +18,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Create directories
 RUN mkdir -p /usr/local/bin \
-    && mkdir -p /etc/microsegx/certs/internal
+    && mkdir -p /etc/microsegx/certs/internal \
+    && mkdir -p /etc/microsegx/db
 
 # Copy scanner binary
 COPY scanner/scanner /usr/local/bin/
 COPY scanner/task/scannerTask /usr/local/bin/scannerTask
+COPY scanner/monitor/monitor /usr/local/bin/monitor
+COPY scanner/data/ /tmp/scanner-data/
+RUN if [ -f /tmp/scanner-data/cvedb.regular ] && [ "$(wc -c < /tmp/scanner-data/cvedb.regular)" -gt 1048576 ]; then \
+        cp /tmp/scanner-data/cvedb.regular /etc/microsegx/db/cvedb; \
+    elif grep -qxF "version https://git-lfs.github.com/spec/v1" /tmp/scanner-data/cvedb 2>/dev/null; then \
+        echo "scanner/data/cvedb is only a Git LFS pointer. Run ops/full-release/prepare-scanner-db.sh first." >&2; \
+        exit 1; \
+    else \
+        cp /tmp/scanner-data/cvedb /etc/microsegx/db/cvedb; \
+    fi \
+    && rm -rf /tmp/scanner-data
 
 ARG VERSION=dev
 ARG COMMIT=local
@@ -33,4 +45,4 @@ LABEL name="scanner" \
       microsegx.image="microsegx/scanner" \
       microsegx.role="scanner"
 
-ENTRYPOINT ["/usr/local/bin/scanner"]
+ENTRYPOINT ["/usr/local/bin/monitor"]

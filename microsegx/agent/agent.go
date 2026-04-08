@@ -281,6 +281,7 @@ func main() {
 	bind := flag.String("b", "", "Cluster bind address")
 	rtSock := flag.String("u", "", "Container socket URL")
 	lanPort := flag.Uint("lan_port", 0, "Cluster Serf LAN port")
+	httpPort := flag.Uint("http_port", 0, "Consul HTTP API port")
 	grpcPort := flag.Uint("grpc_port", 0, "Cluster GRPC port")
 	pipeType := flag.String("p", "", "Pipe driver")
 	cnet_type := flag.String("n", "", "Container Network type")
@@ -634,6 +635,7 @@ func main() {
 	clusterCfg.AdvertiseAddr = advAddr
 	clusterCfg.BindAddr = bindAddr
 	clusterCfg.LANPort = *lanPort
+	clusterCfg.HTTPPort = *httpPort
 	clusterCfg.DataCenter = cluster.DefaultDataCenter
 	clusterCfg.EnableDebug = debug
 

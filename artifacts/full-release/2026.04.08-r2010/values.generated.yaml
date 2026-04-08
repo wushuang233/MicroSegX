@@ -1,0 +1,83 @@
+openshift: false
+registry: local.microsegx
+tag: 2026.04.08-r2010
+bootstrapPassword: "MicroSegX@2026#Reset"
+autoGenerateCert: true
+internal:
+  autoRotateCert: true
+
+controller:
+  replicas: 1
+  image:
+    repository: microsegx/controller
+    imagePullPolicy: Never
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  pvc:
+    enabled: true
+    existingClaim: false
+    accessModes:
+      - ReadWriteOnce
+    storageClass: local-path
+    capacity: 2Gi
+  prime:
+    enabled: false
+    image:
+      repository: microsegx/compliance-config
+      imagePullPolicy: Never
+      tag: 1.0.11
+
+manager:
+  route:
+    enabled: false
+  image:
+    repository: microsegx/manager
+    imagePullPolicy: Never
+  svc:
+    type: ClusterIP
+    nodePort: 
+  ingress:
+    enabled: false
+    host: 
+    ingressClassName: "nginx"
+    tls: false
+    secretName: ""
+
+enforcer:
+  image:
+    repository: microsegx/enforcer
+    imagePullPolicy: Never
+
+cve:
+  adapter:
+    enabled: false
+    route:
+      enabled: false
+    image:
+      repository: microsegx/registry-adapter
+      imagePullPolicy: Never
+      tag: 0.2.4
+  updater:
+    enabled: true
+    image:
+      registry: local.microsegx
+      repository: microsegx/updater
+      imagePullPolicy: Never
+      tag: 2026.04.08-updater-r2010
+  scanner:
+    replicas: 3
+    image:
+      registry: local.microsegx
+      repository: microsegx/scanner
+      imagePullPolicy: Never
+      tag: "2026.04.08-scanner-r2010"
+
+crdwebhook:
+  enabled: false
+runtimePath: /run/k3s/containerd/containerd.sock
+k3s:
+  enabled: true
+
+containerd:
+  enabled: false

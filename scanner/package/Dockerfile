@@ -1,12 +1,10 @@
 ARG VULNDB_VERSION=4.122
-ARG VULNDB_CHECKSUM=ae6e64d9a9f151ab301d52d805bf215841561dc8475dd45a755d68b8040ef1fb
 ARG SIGSTORE_VERSION=fe81b963bb01c53cc7664d4b6cb04afa2a9ed748
 #
 # Builder
 #
 FROM registry.suse.com/bci/golang:1.25 AS builder
 ARG VERSION
-ARG VULNDB_CHECKSUM
 ARG SIGSTORE_VERSION
 
 ENV HTTP_PROXY= \
@@ -31,7 +29,25 @@ COPY Makefile go.mod go.sum *.go genlic.sh /src/
 
 WORKDIR /src
 RUN git clone https://github.com/microsegx/sigstore-interface --single-branch sigstore-interface && cd sigstore-interface && git checkout ${SIGSTORE_VERSION} && make
-RUN if [ -f "data/cvedb.regular" ]; then echo "using cvedb.regular"; echo "$VULNDB_CHECKSUM data/cvedb.regular" | sha256sum --check --status; else echo "using cvedb"; cp "data/cvedb" "data/cvedb.regular"; fi
+RUN set -eu; \
+    if [ -f "data/cvedb.regular" ] && [ "$(wc -c < data/cvedb.regular)" -gt 1048576 ]; then \
+      echo "using cvedb.regular"; \
+      if grep -qxF "version https://git-lfs.github.com/spec/v1" data/cvedb 2>/dev/null; then \
+        expected_sha="$(sed -n 's/^oid sha256://p' data/cvedb)"; \
+        expected_size="$(sed -n 's/^size //p' data/cvedb)"; \
+        actual_sha="$(sha256sum data/cvedb.regular | awk '{print $1}')"; \
+        actual_size="$(wc -c < data/cvedb.regular)"; \
+        test -n "${expected_sha}" && test -n "${expected_size}"; \
+        test "${actual_sha}" = "${expected_sha}"; \
+        test "${actual_size}" = "${expected_size}"; \
+      fi; \
+    elif grep -qxF "version https://git-lfs.github.com/spec/v1" data/cvedb 2>/dev/null; then \
+      echo "scanner/data/cvedb is only a Git LFS pointer. Run ops/full-release/prepare-scanner-db.sh first." >&2; \
+      exit 1; \
+    else \
+      echo "using cvedb"; \
+      cp "data/cvedb" "data/cvedb.regular"; \
+    fi
 RUN make slsa_all
 
 #

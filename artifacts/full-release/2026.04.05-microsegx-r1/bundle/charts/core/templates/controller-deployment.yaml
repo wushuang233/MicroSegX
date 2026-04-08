@@ -53,6 +53,24 @@ spec:
         {{- toYaml .Values.controller.podAnnotations | nindent 8 }}
         {{- end }}
     spec:
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      hostAliases:
+        - ip: "10.43.0.1"
+          hostnames:
+            - "kubernetes.default"
+            - "kubernetes.default.svc"
+            - "kubernetes.default.svc.cluster.local"
+      dnsConfig:
+        nameservers:
+          - 10.43.0.10
+        searches:
+          - microsegx.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - name: ndots
+            value: "5"
       {{- if .Values.controller.affinity }}
       affinity:
 {{ toYaml .Values.controller.affinity | indent 8 }}
@@ -105,9 +123,17 @@ spec:
       {{- if  .Values.controller.prime.enabled }}
         - name: prime-config-container
           {{- if .Values.controller.prime.image.hash }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.controller.prime.image.repository }}@{{ .Values.controller.prime.image.hash }}"
           {{- else }}
+          image: "{{ .Values.controller.prime.image.repository }}@{{ .Values.controller.prime.image.hash }}"
+          {{- end }}
+          {{- else }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.controller.prime.image.repository }}:{{ .Values.controller.prime.image.tag }}"
+          {{- else }}
+          image: "{{ .Values.controller.prime.image.repository }}:{{ .Values.controller.prime.image.tag }}"
+          {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.controller.prime.image.imagePullPolicy }}
           resources: {}
@@ -142,10 +168,31 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           env:
+            - name: NV_PLATFORM_INFO
+              value: "platform=kubernetes"
+            - name: KUBERNETES_SERVICE_HOST
+              value: "10.43.0.1"
+            - name: KUBERNETES_SERVICE_PORT
+              value: "443"
             - name: CTRL_SERVER_PORT
               value: "{{ .Values.controller.apisvc.ctrlServerPort}}"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if eq (int .Values.controller.replicas) 1 }}
+            - name: CLUSTER_JOIN_ADDR
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            {{- else }}
             - name: CLUSTER_JOIN_ADDR
               value: microsegx-svc-controller.{{ .Release.Namespace }}
+            {{- end }}
             - name: CLUSTER_ADVERTISED_ADDR
               valueFrom:
                 fieldRef:

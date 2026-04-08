@@ -1,0 +1,11 @@
+name: crd
+apiVersion: v1
+version: 2.8.12
+appVersion: 5.5.0
+description: Helm chart for MicroSegX's CRD services
+home: https://microsegx.com
+icon: https://microsegx.com/icon.png
+maintainers:
+  - name: microsegx-team
+    email: support@microsegx.com
+engine: gotpl

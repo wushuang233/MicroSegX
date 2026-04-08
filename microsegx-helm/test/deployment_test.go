@@ -170,6 +170,49 @@ func TestControllerDeploymentDisrupt(t *testing.T) {
 	}
 }
 
+func TestControllerDeploymentPersistence(t *testing.T) {
+	helmChartPath := "../charts/core"
+
+	options := &helm.Options{
+		SetValues: map[string]string{
+			"controller.pvc.enabled": "true",
+			"autoGenerateCert":       "false",
+		},
+	}
+
+	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-deployment.yaml"})
+	outs := splitYaml(out)
+
+	if len(outs) != 1 {
+		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
+	}
+
+	var dep appsv1.Deployment
+	helm.UnmarshalK8SYaml(t, outs[0], &dep)
+
+	foundEnv := false
+	for _, env := range dep.Spec.Template.Spec.Containers[0].Env {
+		if env.Name == "CTRL_PERSIST_CONFIG" && env.Value == "1" {
+			foundEnv = true
+			break
+		}
+	}
+	if !foundEnv {
+		t.Errorf("CTRL_PERSIST_CONFIG env is missing. env=%+v\n", dep.Spec.Template.Spec.Containers[0].Env)
+	}
+
+	foundMount := false
+	for _, mount := range dep.Spec.Template.Spec.Containers[0].VolumeMounts {
+		if mount.Name == "nv-share" && mount.MountPath == "/var/microsegx" {
+			foundMount = true
+			break
+		}
+	}
+	if !foundMount {
+		t.Errorf("nv-share mount is missing. volumeMounts=%+v\n", dep.Spec.Template.Spec.Containers[0].VolumeMounts)
+	}
+}
+
 // --
 
 func checkManagerDeployment(t *testing.T, dep appsv1.Deployment, ssl bool) {

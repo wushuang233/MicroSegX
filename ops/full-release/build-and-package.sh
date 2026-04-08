@@ -48,6 +48,7 @@ require_cmd docker
 require_cmd git
 require_cmd gzip
 require_cmd tar
+require_cmd bash
 
 mkdir -p "${ARTIFACT_DIR}" "${BUNDLE_DIR}"
 rm -f "${IMAGES_FILE}" "${METADATA_FILE}" "${IMAGE_TAR}"
@@ -112,19 +113,74 @@ mirror_upstream_image() {
   } >>"${METADATA_FILE}"
 }
 
+build_microsegx_binaries() {
+  require_cmd make
+
+  echo "==> Building controller/enforcer binaries from source"
+  make -C "${MICROSEGX_DIR}/controller"
+  make -C "${MICROSEGX_DIR}/agent"
+  make -C "${MICROSEGX_DIR}/upgrader"
+  make -C "${MICROSEGX_DIR}/tools/nstools"
+  make -C "${MICROSEGX_DIR}/monitor"
+  make -C "${MICROSEGX_DIR}/agent/workerlet/pathWalker"
+  make -C "${MICROSEGX_DIR}/dp"
+}
+
+build_scanner_binaries() {
+  require_cmd make
+  require_cmd go
+
+  echo "==> Building scanner binaries from source"
+  (
+    cd "${SCANNER_DIR}"
+    GOFLAGS=-mod=mod go build -ldflags='-s -w' -buildvcs=false -o scanner .
+    GOFLAGS=-mod=mod make -C task
+    GOFLAGS=-mod=mod make -C monitor
+  )
+}
+
+build_manager_artifacts() {
+  echo "==> Building manager artifacts from source"
+  (
+    cd "${MANAGER_DIR}"
+    bash package/build_manager.sh
+  )
+}
+
 cp -R "${HELM_DIR}/charts" "${BUNDLE_DIR}/"
 cp "${SCRIPT_DIR}/deploy-core.sh" "${BUNDLE_DIR}/deploy-core.sh"
 cp "${SCRIPT_DIR}/load-and-push.sh" "${BUNDLE_DIR}/load-and-push.sh"
 cp "${SCRIPT_DIR}/load-local-images.sh" "${BUNDLE_DIR}/load-local-images.sh"
+cp "${SCRIPT_DIR}/reset-microsegx.sh" "${BUNDLE_DIR}/reset-microsegx.sh"
 cp "${SCRIPT_DIR}/full-release.env.example" "${BUNDLE_DIR}/full-release.env.example"
 cp "${ENV_FILE}" "${BUNDLE_DIR}/full-release.env"
 
-build_local_image controller "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.controller" "${CORE_TAG}"
-build_local_image enforcer "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.enforcer" "${CORE_TAG}"
-build_local_image manager "${MANAGER_DIR}" "${MANAGER_DIR}/package/Dockerfile" "${CORE_TAG}"
-build_local_image scanner "${SCANNER_DIR}" "${SCANNER_DIR}/package/Dockerfile" "${SCANNER_TAG}"
+bash "${SCRIPT_DIR}/prepare-scanner-db.sh"
 
-if [[ "${MIRROR_UPDATER:-true}" == "true" ]]; then
+USE_LOCAL_DOCKERFILES=${USE_LOCAL_DOCKERFILES:-true}
+BUILD_FROM_SOURCE=${BUILD_FROM_SOURCE:-true}
+
+if [[ "${USE_LOCAL_DOCKERFILES}" == "true" ]]; then
+  if [[ "${BUILD_FROM_SOURCE}" == "true" ]]; then
+    build_microsegx_binaries
+    build_scanner_binaries
+    build_manager_artifacts
+  fi
+
+  build_local_image controller "${NV_ROOT}" "${NV_ROOT}/docker-images/Dockerfile.controller" "${CORE_TAG}"
+  build_local_image enforcer "${NV_ROOT}" "${NV_ROOT}/docker-images/Dockerfile.enforcer" "${CORE_TAG}"
+  build_local_image manager "${NV_ROOT}" "${NV_ROOT}/docker-images/Dockerfile.manager" "${CORE_TAG}"
+  build_local_image scanner "${NV_ROOT}" "${NV_ROOT}/docker-images/Dockerfile.scanner" "${SCANNER_TAG}"
+else
+  build_local_image controller "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.controller" "${CORE_TAG}"
+  build_local_image enforcer "${MICROSEGX_DIR}" "${MICROSEGX_DIR}/package/Dockerfile.enforcer" "${CORE_TAG}"
+  build_local_image manager "${MANAGER_DIR}" "${MANAGER_DIR}/package/Dockerfile" "${CORE_TAG}"
+  build_local_image scanner "${SCANNER_DIR}" "${SCANNER_DIR}/package/Dockerfile" "${SCANNER_TAG}"
+fi
+
+if [[ "${BUILD_UPDATER_FROM_SOURCE:-true}" == "true" ]]; then
+  build_local_image updater "${NV_ROOT}" "${NV_ROOT}/docker-images/Dockerfile.updater" "${UPDATER_TAG:-0.0.9}"
+elif [[ "${MIRROR_UPDATER:-true}" == "true" ]]; then
   mirror_upstream_image "${UPSTREAM_UPDATER_IMAGE:-microsegx/updater:0.0.9}" updater "${UPDATER_TAG:-0.0.9}"
 fi
 
@@ -161,5 +217,10 @@ echo "  Charts copy:    ${BUNDLE_DIR}/charts"
 echo
 echo "Next step on the target server:"
 echo "  1. Copy ${ARTIFACT_DIR} to the target server"
-echo "  2. Run load-and-push.sh"
-echo "  3. Run deploy-core.sh"
+if [[ "${DEPLOY_MODE}" == "local" ]]; then
+  echo "  2. Run load-local-images.sh"
+  echo "  3. Run deploy-core.sh"
+else
+  echo "  2. Run load-and-push.sh"
+  echo "  3. Run deploy-core.sh"
+fi

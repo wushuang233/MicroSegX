@@ -143,8 +143,8 @@ var regAdapterSubjectWanted string = "registry-adapter"
 var certUpgraderSubjectWanted string = "cert-upgrader"
 var ctrlerSubjectsWanted []string = []string{"controller"}
 var scannerSubjectsWanted []string = []string{"updater", "controller"}
-var secretSubjectsWanted []string = []string{"enforcer", "controller", "scanner", "registry-adapter"}
-var secretControllerSubjectsWanted []string = []string{"controller"}
+var secretSubjectsWanted []string = []string{"enforcer", "controller", "scanner", "registry-adapter", "default"}
+var secretControllerSubjectsWanted []string = []string{"controller", "default"}
 var enforcerSubjectsWanted []string = []string{"enforcer", "controller"}
 var jobCreationSubjectsWanted []string = []string{"controller"}
 var certUpgraderSubjectsWanted []string = []string{"cert-upgrader"}
@@ -296,7 +296,7 @@ var rbacRolesWanted map[string]*k8sRbacRoleInfo = map[string]*k8sRbacRoleInfo{ /
 	},
 	NvSecretRole: {
 		name:      NvSecretRole,
-		namespace: constNvNamespace,
+		namespace: "",
 		rules: []*k8sRbacRoleRuleInfo{
 			{
 				apiGroup:  "",
@@ -307,7 +307,7 @@ var rbacRolesWanted map[string]*k8sRbacRoleInfo = map[string]*k8sRbacRoleInfo{ /
 	},
 	NvSecretControllerRole: {
 		name:      NvSecretControllerRole,
-		namespace: constNvNamespace,
+		namespace: "",
 		rules: []*k8sRbacRoleRuleInfo{
 			{
 				apiGroup:  "",
@@ -423,12 +423,12 @@ var rbacRoleBindingsWanted map[string]*k8sRbacBindingInfo = map[string]*k8sRbacB
 		rbacRole:  rbacRolesWanted[NvScannerRole],
 	},
 	nvSecretRoleBinding: {
-		namespace: constNvNamespace,
+		namespace: "",
 		subjects:  secretSubjectsWanted,
 		rbacRole:  rbacRolesWanted[NvSecretRole],
 	},
 	nvSecretControllerRoleBinding: {
-		namespace: constNvNamespace,
+		namespace: "",
 		subjects:  secretControllerSubjectsWanted,
 		rbacRole:  rbacRolesWanted[NvSecretControllerRole],
 	},

@@ -1,0 +1,5 @@
+local.microsegx/microsegx/controller:2026.04.08-r2010
+local.microsegx/microsegx/enforcer:2026.04.08-r2010
+local.microsegx/microsegx/manager:2026.04.08-r2010
+local.microsegx/microsegx/scanner:2026.04.08-scanner-r2010
+local.microsegx/microsegx/updater:2026.04.08-updater-r2010

@@ -2,15 +2,16 @@ package cluster
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wushuang233/MicroSegX/microsegx/share"
 	consulapi "github.com/wushuang233/MicroSegX/microsegx/share/cluster/api"
 	"github.com/wushuang233/MicroSegX/microsegx/share/system"
 	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 const InternalCertDir = "/etc/microsegx/certs/internal/"
@@ -38,19 +39,21 @@ const putRetryInterval time.Duration = time.Millisecond * 500
 var errorRestart bool
 
 type ClusterConfig struct {
-	ID            string
-	Server        bool
-	Debug         bool
-	Ifaces        map[string][]share.CLUSIPAddr
-	JoinAddr      string
-	joinAddrList  []string
-	BindAddr      string
-	AdvertiseAddr string
-	DataCenter    string
-	RPCPort       uint
-	LANPort       uint
-	WANPort       uint
-	EnableDebug   bool
+	ID             string
+	Server         bool
+	Debug          bool
+	Ifaces         map[string][]share.CLUSIPAddr
+	JoinAddr       string
+	joinAddrList   []string
+	joinTargetList []string
+	BindAddr       string
+	AdvertiseAddr  string
+	DataCenter     string
+	RPCPort        uint
+	LANPort        uint
+	WANPort        uint
+	HTTPPort       uint
+	EnableDebug    bool
 }
 
 var clusterCfg ClusterConfig
@@ -90,12 +93,241 @@ type ClusterMemberInfo struct {
 	State int
 }
 
+const (
+	consulNodeServerSuffix = "-server"
+	consulNodeClientSuffix = "-client"
+)
+
+func BuildConsulNodeName(addr string, server bool) string {
+	if server {
+		return addr + consulNodeServerSuffix
+	}
+	return addr + consulNodeClientSuffix
+}
+
+func GetConsulNodeAddress(name string) string {
+	switch {
+	case strings.HasSuffix(name, consulNodeServerSuffix):
+		return strings.TrimSuffix(name, consulNodeServerSuffix)
+	case strings.HasSuffix(name, consulNodeClientSuffix):
+		return strings.TrimSuffix(name, consulNodeClientSuffix)
+	default:
+		return name
+	}
+}
+
+func GetConsulNodeRole(name string) (int, bool) {
+	switch {
+	case strings.HasSuffix(name, consulNodeServerSuffix):
+		return NodeRoleServer, true
+	case strings.HasSuffix(name, consulNodeClientSuffix):
+		return NodeRoleClient, true
+	default:
+		return 0, false
+	}
+}
+
+func splitClusterJoinAddr(addr string) (string, string) {
+	addr = strings.TrimSpace(addr)
+	if host, port, err := net.SplitHostPort(addr); err == nil {
+		return host, port
+	}
+	return addr, ""
+}
+
+func resolveJoinAddrs(addrStr string, skipLoopback bool) ([]string, bool) {
+	var resolved bool
+
+	addrList := strings.Split(addrStr, ",")
+	ipList := make([]string, 0)
+	seen := make(map[string]struct{})
+
+	for _, addr := range addrList {
+		host, _ := splitClusterJoinAddr(addr)
+		if host == "" {
+			continue
+		}
+
+		if ip := net.ParseIP(host); ip != nil {
+			if skipLoopback && ip.IsLoopback() {
+				continue
+			}
+			ipStr := ip.String()
+			if _, ok := seen[ipStr]; ok {
+				log.WithFields(log.Fields{"addr": addr}).Error("duplicate addr")
+				continue
+			}
+			seen[ipStr] = struct{}{}
+			ipList = append(ipList, ipStr)
+			continue
+		}
+
+		resolved = true
+
+		ips, err := utils.ResolveIP(host)
+		if err != nil || len(ips) == 0 {
+			log.WithFields(log.Fields{"addr": addr}).Error("cannot resolve")
+			time.Sleep(time.Second)
+			continue
+		}
+
+		for _, ip := range ips {
+			if skipLoopback && ip.IsLoopback() {
+				continue
+			}
+			ipStr := ip.String()
+			if _, ok := seen[ipStr]; ok {
+				log.WithFields(log.Fields{"addr": addr}).Error("duplicate addr")
+				continue
+			}
+			seen[ipStr] = struct{}{}
+			ipList = append(ipList, ipStr)
+		}
+	}
+
+	return ipList, resolved
+}
+
+func resolveJoinTargets(addrStr string, defaultPort uint, skipLoopback bool) ([]string, bool) {
+	var resolved bool
+
+	addrList := strings.Split(addrStr, ",")
+	targets := make([]string, 0)
+	seen := make(map[string]struct{})
+
+	for _, addr := range addrList {
+		host, port := splitClusterJoinAddr(addr)
+		if host == "" {
+			continue
+		}
+		if port == "" && defaultPort != 0 {
+			port = fmt.Sprintf("%d", defaultPort)
+		}
+
+		appendTarget := func(ip net.IP) {
+			if skipLoopback && ip.IsLoopback() {
+				return
+			}
+			ipStr := ip.String()
+			target := ipStr
+			if port != "" {
+				target = net.JoinHostPort(ipStr, port)
+			}
+			if _, ok := seen[target]; ok {
+				log.WithFields(log.Fields{"addr": addr}).Error("duplicate addr")
+				return
+			}
+			seen[target] = struct{}{}
+			targets = append(targets, target)
+		}
+
+		if ip := net.ParseIP(host); ip != nil {
+			appendTarget(ip)
+			continue
+		}
+
+		resolved = true
+
+		ips, err := utils.ResolveIP(host)
+		if err != nil || len(ips) == 0 {
+			log.WithFields(log.Fields{"addr": addr}).Error("cannot resolve")
+			time.Sleep(time.Second)
+			continue
+		}
+
+		for _, ip := range ips {
+			appendTarget(ip)
+		}
+	}
+
+	return targets, resolved
+}
+
 // cluster operations
 
 const startWaitTime time.Duration = time.Second * 10
-const leadCheckInterval time.Duration = time.Second * 60
+const initialLeadCheckDelay time.Duration = time.Second * 20
+const leadCheckInterval time.Duration = time.Second * 20
 const retryLimitJoin = 3
 const retryLimitRestart = 3
+
+func shouldRetryJoin(cc *ClusterConfig, lead string, serverAlive bool, serverAliveErr error) bool {
+	if cc == nil || cc.Server {
+		return lead == ""
+	}
+
+	if lead != "" && serverAliveErr == nil && serverAlive {
+		return false
+	}
+
+	if lead == "" && serverAliveErr == nil && serverAlive {
+		return false
+	}
+
+	return serverAliveErr != nil || !serverAlive
+}
+
+func buildJoinTargetsFromAddrs(addrs []string, defaultPort uint) []string {
+	targets := make([]string, 0, len(addrs))
+	seen := make(map[string]struct{}, len(addrs))
+
+	for _, addr := range addrs {
+		addr = strings.TrimSpace(addr)
+		if addr == "" {
+			continue
+		}
+
+		target := addr
+		if defaultPort != 0 {
+			target = net.JoinHostPort(addr, fmt.Sprintf("%d", defaultPort))
+		}
+
+		if _, ok := seen[target]; ok {
+			continue
+		}
+		seen[target] = struct{}{}
+		targets = append(targets, target)
+	}
+
+	return targets
+}
+
+func joinDefaultPort(cc *ClusterConfig) uint {
+	if cc != nil && !cc.Server {
+		return defaultLANPort
+	}
+	return 0
+}
+
+func refreshJoinTargets(cc *ClusterConfig) bool {
+	if cc == nil {
+		return false
+	}
+
+	defaultPort := joinDefaultPort(cc)
+	addrs, _ := resolveJoinAddrs(cc.JoinAddr, true)
+	targets, _ := resolveJoinTargets(cc.JoinAddr, defaultPort, true)
+	if len(addrs) > 0 && len(targets) > 0 {
+		cc.joinAddrList = addrs
+		cc.joinTargetList = targets
+		return true
+	}
+
+	if len(cc.joinTargetList) == 0 && len(cc.joinAddrList) > 0 {
+		cc.joinTargetList = buildJoinTargetsFromAddrs(cc.joinAddrList, defaultPort)
+	}
+
+	if len(cc.joinAddrList) > 0 && len(cc.joinTargetList) > 0 {
+		log.WithFields(log.Fields{
+			"join":    cc.JoinAddr,
+			"addrs":   cc.joinAddrList,
+			"targets": cc.joinTargetList,
+		}).Warn("Falling back to cached join targets")
+		return true
+	}
+
+	return false
+}
 
 func StartCluster(cc *ClusterConfig) (string, error) {
 	log.Debug("")
@@ -156,7 +388,10 @@ func StartCluster(cc *ClusterConfig) (string, error) {
 		errorRestart = true
 		retryCluster := 0
 		retryLimit := retryLimitJoin
-		leadCheckTimer := time.NewTimer(time.Second * 20)
+		initialLeadCheck := time.NewTimer(initialLeadCheckDelay)
+		defer initialLeadCheck.Stop()
+		periodicLeadCheck := time.NewTicker(leadCheckInterval)
+		defer periodicLeadCheck.Stop()
 
 		for {
 			select {
@@ -164,51 +399,59 @@ func StartCluster(cc *ClusterConfig) (string, error) {
 				if errorRestart {
 					log.WithFields(log.Fields{"error": err}).Error("Cluster stopped - will restart")
 
-					addrs, _ := utils.ResolveAddrList(cc.JoinAddr, true)
-					for len(addrs) == 0 {
+					for !refreshJoinTargets(cc) {
 						time.Sleep(time.Second * 5)
-						addrs, _ = utils.ResolveAddrList(cc.JoinAddr, true)
 					}
-					cc.joinAddrList = addrs
 
 					time.Sleep(time.Second * 2)
 					go driver.Start(cc, errCh, true)
 					retryCluster = 0
 					retryLimit = retryLimitRestart
-					leadCheckTimer.Reset(leadCheckInterval)
 				}
 				continue
 			case <-noLeadChan:
 				log.Info("Lead loss detected")
 				retryCluster = 0
 				retryLimit = retryLimitJoin
-			case <-leadCheckTimer.C:
-				log.Info("Lead check timer expired")
-				leadCheckTimer.Stop()
+			case <-initialLeadCheck.C:
+				log.Info("Initial lead check timer expired")
+			case <-periodicLeadCheck.C:
+				log.Debug("Periodic lead check timer expired")
 			}
 
-			// If cluster cannot elect lead due to dns resolve issue, redo the resolve and
-			// restart cluster
-			lead, _ := driver.GetLead()
-			if lead != "" {
-				log.WithFields(log.Fields{"lead": lead}).Info("Lead elected")
+			lead, leadErr := driver.GetLead()
+			if leadErr != nil {
+				log.WithFields(log.Fields{"error": leadErr}).Debug("Failed to query cluster lead")
+			}
+
+			serverAlive := false
+			var serverAliveErr error
+			if !cc.Server {
+				serverAlive, serverAliveErr = driver.ServerAlive()
+				if serverAliveErr != nil {
+					log.WithFields(log.Fields{"error": serverAliveErr}).Debug("Failed to query cluster server state")
+				}
+			}
+
+			if !shouldRetryJoin(cc, lead, serverAlive, serverAliveErr) {
+				if lead != "" {
+					log.WithFields(log.Fields{"lead": lead, "serverAlive": serverAlive}).Debug("Lead elected")
+				} else {
+					log.Info("Server is reachable, waiting for leader election")
+				}
 				retryCluster = 0
 			} else {
 				log.WithFields(log.Fields{"join": cc.JoinAddr}).Info("Cannot locate lead")
 
-				addrs, _ := utils.ResolveAddrList(cc.JoinAddr, true)
-				for len(addrs) == 0 {
+				for !refreshJoinTargets(cc) {
 					time.Sleep(time.Second * 5)
-					addrs, _ = utils.ResolveAddrList(cc.JoinAddr, true)
 				}
-				cc.joinAddrList = addrs
 
 				if retryCluster < retryLimit {
-					log.WithFields(log.Fields{"JoinAddr": cc.joinAddrList}).Info("Retry join")
+					log.WithFields(log.Fields{"JoinAddr": cc.joinTargetList}).Info("Retry join")
 					if err := driver.Join(cc); err != nil {
 						log.WithFields(log.Fields{"error": err}).Error("Join")
 					}
-					leadCheckTimer.Reset(time.Second * 30)
 					retryCluster++
 				} else {
 					log.WithFields(log.Fields{"JoinAddr": cc.JoinAddr}).Info("Leave cluster")
@@ -354,9 +597,15 @@ func RegisterLeadChangeWatcher(fn LeadChangeCallback, lead string) {
 	var leaveChan = make(chan string, 1)
 
 	RegisterNodeWatcher(func(nType ClusterNotifyType, memberAddr string, member string) {
-		if nType == ClusterNotifyDelete {
-			leaveChan <- member
+		if nType != ClusterNotifyDelete {
+			return
 		}
+
+		if role, ok := GetConsulNodeRole(member); ok && role != NodeRoleServer {
+			return
+		}
+
+		leaveChan <- GetConsulNodeAddress(member)
 	})
 
 	go func() {
@@ -934,7 +1183,8 @@ func GetSelfAddress() string {
 func getFirstResolvableAddr(addrStr string) net.IP {
 	list := strings.Split(addrStr, ",")
 	for _, a := range list {
-		if ips, err := utils.ResolveIP(a); err == nil {
+		host, _ := splitClusterJoinAddr(a)
+		if ips, err := utils.ResolveIP(host); err == nil {
 			for _, ip := range ips {
 				if !ip.IsLoopback() {
 					return ip
@@ -1044,12 +1294,9 @@ func FillClusterAddrs(cfg *ClusterConfig, sys *system.SystemTools) error {
 			cfg.AdvertiseAddr = advIP.String()
 		}
 
-		addrs, _ := utils.ResolveAddrList(cfg.JoinAddr, true)
-		for len(addrs) == 0 {
+		for !refreshJoinTargets(cfg) {
 			time.Sleep(time.Second * 5)
-			addrs, _ = utils.ResolveAddrList(cfg.JoinAddr, true)
 		}
-		cfg.joinAddrList = addrs
 
 		log.WithFields(log.Fields{"bind": cfg.BindAddr, "advertise": cfg.AdvertiseAddr}).Debug()
 		return nil
@@ -1071,6 +1318,7 @@ func FillClusterAddrs(cfg *ClusterConfig, sys *system.SystemTools) error {
 			// its JoinAddr to be the same with AdvertiseAddr
 			cfg.JoinAddr = cfg.AdvertiseAddr
 			cfg.joinAddrList = []string{cfg.AdvertiseAddr}
+			cfg.joinTargetList = []string{cfg.AdvertiseAddr}
 			return nil
 		} else {
 			// Not NAT. Locate a unique phyical port to bind
@@ -1082,6 +1330,7 @@ func FillClusterAddrs(cfg *ClusterConfig, sys *system.SystemTools) error {
 						cfg.BindAddr = ipnets[0].IP.String()
 						cfg.JoinAddr = cfg.BindAddr
 						cfg.joinAddrList = []string{cfg.BindAddr}
+						cfg.joinTargetList = []string{cfg.BindAddr}
 						cfg.AdvertiseAddr = cfg.BindAddr
 						log.WithFields(log.Fields{"bind": cfg.BindAddr}).Debug()
 						return nil
@@ -1093,6 +1342,7 @@ func FillClusterAddrs(cfg *ClusterConfig, sys *system.SystemTools) error {
 
 			cfg.JoinAddr = cfg.BindAddr
 			cfg.joinAddrList = []string{cfg.BindAddr}
+			cfg.joinTargetList = []string{cfg.BindAddr}
 			cfg.AdvertiseAddr = cfg.BindAddr
 			return nil
 		}

@@ -1361,7 +1361,13 @@ func (m clusterHelper) PutUserRev(user *share.CLUSUser, rev uint64) error {
 	if err != nil {
 		return err
 	}
-	return cluster.PutRev(key, value, rev)
+	if err := cluster.PutRev(key, value, rev); err != nil {
+		return err
+	}
+	if m.persist {
+		cfgHelper.NotifyConfigChange(share.CFGEndpointUser)
+	}
+	return nil
 }
 
 func (m clusterHelper) PutUser(user *share.CLUSUser) error {
@@ -1370,7 +1376,13 @@ func (m clusterHelper) PutUser(user *share.CLUSUser) error {
 	if err != nil {
 		return err
 	}
-	return cluster.Put(key, value)
+	if err := cluster.Put(key, value); err != nil {
+		return err
+	}
+	if m.persist {
+		cfgHelper.NotifyConfigChange(share.CFGEndpointUser)
+	}
+	return nil
 }
 
 func (m clusterHelper) CreateUser(user *share.CLUSUser) error {
@@ -1380,12 +1392,24 @@ func (m clusterHelper) CreateUser(user *share.CLUSUser) error {
 		return err
 	}
 	// User password is already hashed
-	return cluster.PutIfNotExist(key, value, false)
+	if err := cluster.PutIfNotExist(key, value, false); err != nil {
+		return err
+	}
+	if m.persist {
+		cfgHelper.NotifyConfigChange(share.CFGEndpointUser)
+	}
+	return nil
 }
 
 func (m clusterHelper) DeleteUser(fullname string) error {
 	key := share.CLUSUserKey(url.QueryEscape(fullname))
-	return cluster.Delete(key)
+	if err := cluster.Delete(key); err != nil {
+		return err
+	}
+	if m.persist {
+		cfgHelper.NotifyConfigChange(share.CFGEndpointUser)
+	}
+	return nil
 }
 
 func (m clusterHelper) GetProcessProfile(group string) *share.CLUSProcessProfile {

@@ -1,216 +1,457 @@
-:host {
-  display: block;
-}
-
-.microsegx-page {
-  padding-bottom: 24px;
-}
-
-.microsegx-summary-section {
-  margin-bottom: 24px;
-}
-
-.microsegx-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.summary-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.port-exposure-page {
   padding: 20px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid rgba(22, 119, 255, 0.08);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    &__info h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    &__actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .view-mode-field {
+      width: 150px;
+    }
+  }
+
+  .error-card,
+  .warning-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .error-card {
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+    color: #cf1322;
+  }
+
+  .warning-card {
+    background: #fffbe6;
+    border: 1px solid #ffe58f;
+    color: #ad8b00;
+
+    .warning-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      mat-icon {
+        font-size: 24px;
+        color: #faad14;
+      }
+
+      h3 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 60px;
+  }
+
+  .cluster-info {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #666;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 20px;
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    &--primary .stat-value { color: #1677ff; }
+    &--warning .stat-value { color: #faad14; }
+    &--info .stat-value { color: #1677ff; }
+    &--success .stat-value { color: #52c41a; }
+  }
+
+  .filters-card {
+    margin-bottom: 20px;
+
+    .filters-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-field {
+      width: 180px;
+    }
+
+    .search-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .hide-system-toggle {
+      margin-left: auto;
+    }
+  }
+
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .exposure-table,
+  .service-table {
+    width: 100%;
+    min-width: 800px;
+    table-layout: auto;
+
+    th {
+      background: #fafafa;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      word-break: break-word;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .resource-cell,
+  .service-cell {
+    display: flex;
+    flex-direction: column;
+
+    .resource-name,
+    .service-name {
+      font-weight: 500;
+    }
+
+    .resource-kind,
+    .service-type-badge {
+      font-size: 12px;
+      color: #999;
+    }
+  }
+
+  .type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.type-loadbalancer { background: #e6f7ff; color: #1890ff; }
+    &.type-nodeport { background: #fff7e6; color: #fa8c16; }
+    &.type-nodelistener { background: #f6ffed; color: #52c41a; }
+  }
+
+  .port-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+
+    &.status-ok { background: #f6ffed; color: #52c41a; }
+    &.status-warning { background: #fff7e6; color: #fa8c16; }
+    &.status-info { background: #e6f7ff; color: #1890ff; }
+    &.status-error { background: #fff2f0; color: #cf1322; }
+  }
+
+  .traffic-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+
+    &.traffic-yes { background: #fff7e6; color: #fa8c16; }
+    &.traffic-listener { background: #e6f7ff; color: #1890ff; }
+    &.traffic-none { color: #ccc; }
+  }
+
+  // Ports container for service control view
+  .ports-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .port-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: #f5f5f5;
+      border-radius: 4px;
+
+      .port-number {
+        font-family: monospace;
+        font-weight: 500;
+      }
+
+      .port-status-badge {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 3px;
+
+        &.port-open {
+          background: #f6ffed;
+          color: #52c41a;
+        }
+
+        &.port-closed {
+          background: #f0f0f0;
+          color: #999;
+        }
+      }
+
+      button {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  // Quick actions
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+
+    button {
+      font-size: 12px;
+      padding: 0 8px;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    color: #999;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+    }
+  }
 }
 
-.summary-card__icon {
-  width: 48px;
-  height: 48px;
+// Port Dialog Overlay
+.port-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  background: rgba(22, 119, 255, 0.1);
-  color: #1677ff;
+  z-index: 1000;
 }
 
-.summary-card__icon--primary { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
-.summary-card__icon--warning { background: rgba(250, 173, 20, 0.1); color: #faad14; }
-.summary-card__icon--info { background: rgba(22, 119, 255, 0.1); color: #1677ff; }
-.summary-card__icon--success { background: rgba(82, 196, 26, 0.1); color: #52c41a; }
+.port-dialog {
+  max-width: 500px;
+  width: 90%;
 
-.summary-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  .dialog-info {
+    margin-bottom: 20px;
+
+    .dialog-row {
+      display: flex;
+      margin-bottom: 8px;
+
+      .dialog-label {
+        width: 100px;
+        color: #666;
+        flex-shrink: 0;
+      }
+
+      .dialog-value {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .suggested-ports {
+    margin-top: 12px;
+
+    .suggested-label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .suggested-port-list {
+      display: flex;
+      gap: 8px;
+
+      button {
+        min-width: 70px;
+      }
+    }
+  }
+
+  .dialog-error-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    margin-top: 16px;
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+    color: #cf1322;
+
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+
+  mat-card-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px;
+
+    button mat-spinner {
+      display: inline-block;
+      margin-right: 8px;
+    }
+  }
 }
 
-.summary-card__value {
-  font-size: 28px;
-  font-weight: 700;
-  font-family: Poppins, sans-serif;
-  color: #1f2329;
-}
-
-.summary-card__label {
-  font-size: 12px;
-  color: #8f959e;
-  font-weight: 600;
-}
-
-.view-tabs-card {
-  border-radius: 20px;
-  border: 1px solid rgba(22, 119, 255, 0.08);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-}
-
-.tab-content {
-  padding: 20px;
-}
-
-.filter-bar {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.filter-namespace {
-  width: 200px;
-}
-
-.filter-search {
-  flex: 1;
-  max-width: 400px;
-}
-
-.exposure-table,
-.services-table,
-.nodes-table {
-  width: 100%;
-}
-
-.resource-name {
-  display: block;
-  font-weight: 600;
-  color: #1f2329;
-}
-
-.resource-kind {
-  display: block;
-  font-size: 12px;
-  color: #8f959e;
-}
-
-.port-badge {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(22, 119, 255, 0.1);
-  color: #1677ff;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: monospace;
-}
-
-.port-chip {
-  display: inline-flex;
-  margin: 2px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: rgba(22, 119, 255, 0.08);
-  color: #1677ff;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.status-badge mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-.status-warning {
-  background: rgba(250, 173, 20, 0.1);
-  color: #d48806;
-}
-
-.status-info {
-  background: rgba(22, 119, 255, 0.1);
-  color: #1677ff;
-}
-
-.status-ok {
-  background: rgba(82, 196, 26, 0.1);
-  color: #52c41a;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  color: #8f959e;
-}
-
-.empty-state mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 16px;
-  color: #d9d9d9;
-}
-
-.microsegx-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  background: rgba(255, 77, 79, 0.08);
-  color: #ff4d4f;
-}
-
-.page-action-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-@media screen and (max-width: 1200px) {
-  .microsegx-summary-grid {
+@media (max-width: 1200px) {
+  .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media screen and (max-width: 767px) {
-  .microsegx-summary-grid {
+@media (max-width: 768px) {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 
-  .filter-bar {
+  .filters-row {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .filter-namespace,
-  .filter-search {
+  .filter-field, .search-field {
     width: 100%;
-    max-width: none;
+  }
+
+  .ports-container {
+    flex-direction: column;
+
+    .port-item {
+      width: 100%;
+    }
+  }
+
+  .quick-actions {
+    flex-direction: column;
   }
 }

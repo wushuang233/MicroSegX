@@ -23,6 +23,7 @@ $scrollbar-wd: 17px;
   height: 100%;
   margin: 0 14px 20px;
   padding: 18px 14px 20px;
+  min-width: 240px;
   background:
     linear-gradient(180deg, rgba(6, 26, 56, 0.98) 0%, rgba(0, 21, 41, 0.98) 100%);
   border-radius: 28px;
@@ -103,6 +104,12 @@ $scrollbar-wd: 17px;
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(100vh - 320px);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   > .nav-heading:first-child {
     padding-top: 20px;
@@ -156,6 +163,7 @@ $scrollbar-wd: 17px;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.04);
         flex-shrink: 0;
+        overflow: hidden;
       }
 
       > span {

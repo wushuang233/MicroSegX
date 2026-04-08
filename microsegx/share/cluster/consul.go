@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"reflect"
 	"sort"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -48,6 +49,7 @@ type consulMethod struct {
 	client    *api.Client
 	clusterIP string
 	rpcPort   uint
+	httpPort  uint
 	pid       int // is a pgid
 }
 
@@ -134,7 +136,7 @@ func createPeerFileV3(cc *ClusterConfig) error {
 }
 
 func createConfigFile(cc *ClusterConfig) error {
-	var rpcPort, lanPort uint
+	var rpcPort, lanPort, httpPort uint
 	if rpcPort = cc.RPCPort; rpcPort == 0 {
 		rpcPort = defaultRPCPort
 		cc.RPCPort = rpcPort
@@ -142,9 +144,13 @@ func createConfigFile(cc *ClusterConfig) error {
 	if lanPort = cc.LANPort; lanPort == 0 {
 		lanPort = defaultLANPort
 	}
+	if httpPort = cc.HTTPPort; httpPort == 0 {
+		httpPort = 8500
+	}
 
 	type tConsulConfigPorts struct {
 		Dns      int  `json:"dns"`
+		Http     int  `json:"http"`
 		Server   uint `json:"server"`
 		Serf_lan uint `json:"serf_lan"`
 		Serf_wan int  `json:"serf_wan"`
@@ -207,6 +213,7 @@ func createConfigFile(cc *ClusterConfig) error {
 		Verify_outgoing:         true,
 		Ports: tConsulConfigPorts{
 			Dns:      -1,
+			Http:     int(httpPort),
 			Server:   rpcPort,
 			Serf_lan: lanPort,
 			Serf_wan: -1,
@@ -232,7 +239,27 @@ func createConfigFile(cc *ClusterConfig) error {
 }
 
 func isBootstrap(cc *ClusterConfig) bool {
-	return len(cc.joinAddrList) == 1 && cc.joinAddrList[0] == cc.AdvertiseAddr
+	return cc.Server && len(cc.joinAddrList) == 1 && cc.joinAddrList[0] == cc.AdvertiseAddr
+}
+
+func getJoinTargets(cc *ClusterConfig) []string {
+	defaultPort := joinDefaultPort(cc)
+
+	targets, _ := resolveJoinTargets(cc.JoinAddr, defaultPort, true)
+	if len(targets) > 0 {
+		cc.joinTargetList = targets
+		return targets
+	}
+
+	if len(cc.joinTargetList) > 0 {
+		return cc.joinTargetList
+	}
+
+	if len(cc.joinAddrList) > 0 {
+		cc.joinTargetList = buildJoinTargetsFromAddrs(cc.joinAddrList, defaultPort)
+	}
+
+	return cc.joinTargetList
 }
 
 func (m *consulMethod) stopRunningInstance() error {
@@ -264,7 +291,11 @@ func (m *consulMethod) stopRunningInstance() error {
 func (m *consulMethod) getClient() (*api.Client, error) {
 	if m.client == nil {
 		var err error
-		m.client, err = api.NewClient(api.DefaultConfig())
+		config := api.DefaultConfig()
+		if m.httpPort != 0 {
+			config.Address = fmt.Sprintf("127.0.0.1:%d", m.httpPort)
+		}
+		m.client, err = api.NewClient(config)
 		return m.client, err
 	}
 	return m.client, nil
@@ -320,14 +351,14 @@ func (m *consulMethod) Start(cc *ClusterConfig, eCh chan error, recover bool) {
 	}
 
 	if nodeID == "" {
-		nodeID = genGuidFromAddr(m.clusterIP)
+		nodeID = genGuidFromAddr(BuildConsulNodeName(m.clusterIP, cc.Server))
 		log.WithFields(log.Fields{"node-id": nodeID}).Info()
 	}
 
-	// Use advertise address as node name.
-	// We later read node name to get back cluster IP. See GetNodeAddress
+	nodeName := BuildConsulNodeName(m.clusterIP, cc.Server)
+
 	args = append(args, "-node")
-	args = append(args, m.clusterIP)
+	args = append(args, nodeName)
 	args = append(args, "-node-id")
 	args = append(args, nodeID)
 	// Set raft v3 explicitly
@@ -345,11 +376,13 @@ func (m *consulMethod) Start(cc *ClusterConfig, eCh chan error, recover bool) {
 	*/
 
 	if !isBootstrap(cc) {
-		for _, ip := range cc.joinAddrList {
-			if ip != cc.AdvertiseAddr {
-				args = append(args, "-retry-join")
-				args = append(args, ip)
+		for _, target := range getJoinTargets(cc) {
+			host, _ := splitClusterJoinAddr(target)
+			if cc.Server && host == cc.AdvertiseAddr {
+				continue
 			}
+			args = append(args, "-retry-join")
+			args = append(args, target)
 		}
 	}
 
@@ -360,6 +393,7 @@ func (m *consulMethod) Start(cc *ClusterConfig, eCh chan error, recover bool) {
 		_ = createPeerFileV3(cc)
 	}
 	m.rpcPort = cc.RPCPort
+	m.httpPort = cc.HTTPPort
 
 	log.WithFields(log.Fields{"args": args}).Info("Consul start")
 
@@ -433,6 +467,9 @@ func (m *consulMethod) ForceLeave(node string, server bool) error {
 		return err
 	}
 	agent := c.Agent()
+	if _, ok := GetConsulNodeRole(node); !ok {
+		node = BuildConsulNodeName(node, server)
+	}
 	return agent.ForceLeave(node)
 }
 
@@ -443,9 +480,9 @@ func (m *consulMethod) Join(cc *ClusterConfig) error {
 	}
 	agent := c.Agent()
 
-	for _, ip := range cc.joinAddrList {
-		if err := agent.Join(ip, false); err != nil {
-			log.WithFields(log.Fields{"error": err, "ip": ip}).Error()
+	for _, target := range getJoinTargets(cc) {
+		if err := agent.Join(target, false); err != nil {
+			log.WithFields(log.Fields{"error": err, "target": target}).Error()
 		}
 	}
 
@@ -509,7 +546,12 @@ func ConsulGet(url string) (string, bool) {
 
 // Consul KV Store related
 
-const CONSUL_KV_BASE_URL = "http://localhost:8500/v1/kv"
+func getConsulKVBaseURL() string {
+	if consul.httpPort != 0 {
+		return fmt.Sprintf("http://localhost:%d/v1/kv", consul.httpPort)
+	}
+	return "http://localhost:8500/v1/kv"
+}
 
 type consulBody struct {
 	CreateIndex int    `json:"CreateIndex,omitempty"`
@@ -523,7 +565,7 @@ func GetAll(store string) ([][]byte, []int, bool) {
 	if offlineSupport && !started {
 		return getAllFromCache(store)
 	}
-	url := CONSUL_KV_BASE_URL + store + "?recurse"
+	url := getConsulKVBaseURL() + store + "?recurse"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Error (%v) in Get for %s\n", err, url)
@@ -920,6 +962,12 @@ func (m *consulMethod) SetWatcherCongestionCtl(key string, enabled bool) {
 }
 
 func (m *consulMethod) ServerAlive() (bool, error) {
+	if knownServers, err := m.knownServerCount(); err == nil && knownServers == 0 {
+		return false, nil
+	} else if err != nil {
+		log.WithFields(log.Fields{"err": err}).Debug("Failed to query known Consul servers")
+	}
+
 	c, err := m.getClient()
 	if err != nil {
 		log.WithFields(log.Fields{"err": err}).Error()
@@ -944,12 +992,73 @@ func (m *consulMethod) ServerAlive() (bool, error) {
 }
 
 func (m *consulMethod) GetLead() (string, error) {
+	if knownServers, err := m.knownServerCount(); err == nil && knownServers == 0 {
+		return "", nil
+	} else if err != nil {
+		log.WithFields(log.Fields{"err": err}).Debug("Failed to query known Consul servers")
+	}
+
 	c, err := m.getClient()
 	if err != nil {
 		return "", err
 	}
 	st := c.Status()
 	return st.Leader()
+}
+
+func parseKnownServers(value interface{}) (int, error) {
+	switch v := value.(type) {
+	case string:
+		return strconv.Atoi(v)
+	case float64:
+		return int(v), nil
+	case int:
+		return v, nil
+	case int32:
+		return int(v), nil
+	case int64:
+		return int(v), nil
+	case json.Number:
+		n, err := v.Int64()
+		return int(n), err
+	default:
+		return 0, fmt.Errorf("unexpected known_servers type %T", value)
+	}
+}
+
+func (m *consulMethod) knownServerCount() (int, error) {
+	c, err := m.getClient()
+	if err != nil {
+		return 0, err
+	}
+
+	agent := c.Agent()
+	self, err := agent.Self()
+	if err != nil {
+		return 0, err
+	}
+
+	stats, ok := self["Stats"]
+	if !ok {
+		return 0, errors.New("missing agent stats")
+	}
+
+	consulStatsRaw, ok := stats["consul"]
+	if !ok {
+		return 0, errors.New("missing consul stats")
+	}
+
+	consulStats, ok := consulStatsRaw.(map[string]interface{})
+	if !ok {
+		return 0, fmt.Errorf("unexpected consul stats type %T", consulStatsRaw)
+	}
+
+	knownServersRaw, ok := consulStats["known_servers"]
+	if !ok {
+		return 0, errors.New("missing known_servers stat")
+	}
+
+	return parseKnownServers(knownServersRaw)
 }
 
 func (m *consulMethod) GetAllMembers() []ClusterMemberInfo {
@@ -967,7 +1076,7 @@ func (m *consulMethod) GetAllMembers() []ClusterMemberInfo {
 
 	var nodes = make([]ClusterMemberInfo, len(curMembers))
 	for i, mem := range curMembers {
-		nodes[i].Name = mem.Name
+		nodes[i].Name = GetConsulNodeAddress(mem.Name)
 		if mem.Tags["role"] == "consul" {
 			nodes[i].Role = NodeRoleServer
 		} else {
@@ -1020,7 +1129,13 @@ func register(params map[string]interface{}, handler watch.HandlerFunc) *watch.W
 
 	wp.Handler = handler
 	// Run the watch
-	if err := wp.Run(api.DefaultConfig().Address); err != nil {
+	var consulAddr string
+	if consul.httpPort != 0 {
+		consulAddr = fmt.Sprintf("127.0.0.1:%d", consul.httpPort)
+	} else {
+		consulAddr = api.DefaultConfig().Address
+	}
+	if err := wp.Run(consulAddr); err != nil {
 		log.WithFields(log.Fields{"error": err}).Error("Error in registering watch")
 	}
 
@@ -1034,12 +1149,12 @@ func compareNodes(X, Y []*api.Node) []*api.Node {
 	m := make(map[string]bool)
 
 	for _, y := range Y {
-		m[y.Address] = true
+		m[y.Node] = true
 	}
 
 	var ret []*api.Node
 	for _, x := range X {
-		if _, ok := m[x.Address]; ok {
+		if _, ok := m[x.Node]; ok {
 			continue
 		}
 		ret = append(ret, x)
@@ -1449,7 +1564,7 @@ func (m *consulMethod) GetSelfAddress() string {
 		if _, ok := self["Config"]["NodeName"]; !ok {
 			return ""
 		}
-		return self["Config"]["NodeName"].(string)
+		return GetConsulNodeAddress(self["Config"]["NodeName"].(string))
 	}
 
 	return ""

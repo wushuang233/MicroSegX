@@ -21,17 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsof \
     procps \
     libpcre3 \
-    unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install OPA (Open Policy Agent)
-RUN curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && \
-    chmod +x /usr/local/bin/opa
-
-# Install Consul
-RUN curl -L -o /tmp/consul.zip https://releases.hashicorp.com/consul/1.17.0/consul_1.17.0_linux_amd64.zip && \
-    unzip /tmp/consul.zip -d /usr/local/bin/ && \
-    rm /tmp/consul.zip
+# Copy pre-downloaded OPA and Consul binaries
+COPY docker-images/binaries/opa /usr/local/bin/opa
+COPY docker-images/binaries/consul /usr/local/bin/consul
+RUN chmod +x /usr/local/bin/opa /usr/local/bin/consul
 
 # Create directories
 RUN mkdir -p /etc/microsegx/certs/internal \

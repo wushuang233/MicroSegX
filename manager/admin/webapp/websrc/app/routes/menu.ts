@@ -13,7 +13,7 @@ const NETWORK_ACTIVITY = {
 const MICROSEGX = {
   text: 'MicroSegX',
   translate: 'sidebar.nav.MICROSEGX',
-  icon: 'shield_with_house',
+  icon: 'security',
   submenu: [
     {
       text: 'Port Exposure',

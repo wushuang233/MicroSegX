@@ -410,6 +410,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .pipe()
       .subscribe({
         next: (data: ClusterData) => {
+          if (!data) {
+            // Handle null data - set default values
+            this.clusters = [];
+            this.isMemberRole = false;
+            this.isMasterRole = false;
+            this.isStandaloneRole = true;
+            GlobalVariable.isMaster = false;
+            GlobalVariable.isMember = false;
+            GlobalVariable.isStandAlone = true;
+            return;
+          }
           this.clusters = data.clusters || [];
           //get primary cluster's rest_version
           const primaryCluster = this.clusters.find(

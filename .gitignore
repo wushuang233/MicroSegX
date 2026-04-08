@@ -1,2 +1,8 @@
 # 打包产物
 artifacts/*.tar
+artifacts/full-release/**/images-*.tar.gz
+artifacts/full-release/**/images-*.tar.gz.sha256
+
+# 本地构建产物
+docker-images/binaries/
+manager/stage/

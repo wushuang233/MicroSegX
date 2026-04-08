@@ -254,6 +254,7 @@ func main() {
 	fedPort := flag.Uint("fed_port", 11443, "Fed REST API server port")
 	rpcPort := flag.Uint("rpc_port", 0, "Cluster server RPC port")
 	lanPort := flag.Uint("lan_port", 0, "Cluster Serf LAN port")
+	httpPort := flag.Uint("http_port", 0, "Consul HTTP API port")
 	grpcPort := flag.Uint("grpc_port", 0, "Cluster GRPC port")
 	internalSubnets := flag.String("n", "", "Predefined internal subnets")
 	persistConfig := flag.Bool("pc", false, "Persist configurations")
@@ -651,6 +652,7 @@ func main() {
 		BindAddr:      bindAddr,
 		RPCPort:       *rpcPort,
 		LANPort:       *lanPort,
+		HTTPPort:      *httpPort,
 		DataCenter:    cluster.DefaultDataCenter,
 		EnableDebug:   debug,
 	}
