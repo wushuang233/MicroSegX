@@ -29,8 +29,29 @@ body {
   color: var(--saas-text);
 }
 
+html,
+body,
+.nv-frame .section-container,
+.nv-section {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.nv-frame .section-container::-webkit-scrollbar,
+.nv-section::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 body {
-  font-family: Lato, "Segoe UI", sans-serif;
+  font-family: Lato, 'Segoe UI', sans-serif;
+}
+
+body.microsegx-dialog-open {
+  overflow: hidden;
 }
 
 h1,
@@ -169,6 +190,11 @@ a {
   box-shadow: var(--saas-card-shadow) !important;
 }
 
+.cdk-overlay-container,
+.cdk-overlay-pane {
+  z-index: 1900 !important;
+}
+
 .md-card:hover,
 .mat-mdc-card:hover,
 .card:hover {
@@ -267,6 +293,23 @@ textarea::placeholder {
   background-color: #ffffff !important;
 }
 
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mat-mdc-select-placeholder {
+  color: var(--saas-text-secondary) !important;
+}
+
+.mat-mdc-form-field .mdc-text-field__input,
+.mat-mdc-form-field .mat-mdc-select-value-text,
+.mat-mdc-form-field .mat-mdc-select-min-line {
+  color: var(--saas-text) !important;
+}
+
+.mat-mdc-form-field .mat-mdc-select-arrow,
+.mat-mdc-form-field .mat-mdc-form-field-icon-suffix,
+.mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+  color: var(--saas-text-secondary) !important;
+}
+
 .mat-mdc-text-field-wrapper {
   min-height: 44px;
   padding-left: 14px !important;
@@ -337,6 +380,17 @@ button {
 .mat-mdc-button,
 .mat-button {
   color: var(--saas-primary);
+}
+
+.mat-mdc-button .mdc-button__label,
+.mat-mdc-unelevated-button .mdc-button__label,
+.mat-mdc-outlined-button .mdc-button__label,
+.mat-mdc-raised-button .mdc-button__label,
+.mat-mdc-button .mat-icon,
+.mat-mdc-unelevated-button .mat-icon,
+.mat-mdc-outlined-button .mat-icon,
+.mat-mdc-raised-button .mat-icon {
+  color: inherit !important;
 }
 
 .mat-mdc-dialog-surface {

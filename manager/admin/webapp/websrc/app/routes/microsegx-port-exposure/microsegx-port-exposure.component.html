@@ -1,135 +1,224 @@
 <div class="port-exposure-page">
-  <!-- Header -->
-  <div class="page-header">
-    <div class="page-header__info">
-      <h1>{{ 'MICROSEGX.PORT_EXPOSURE.TITLE' | translate }}</h1>
-      <p class="subtitle">
-        {{ 'MICROSEGX.PORT_EXPOSURE.SUBTITLE' | translate }}
+  <section class="workspace-hero">
+    <div class="workspace-hero__content">
+      <span class="workspace-kicker">
+        {{ 'MICROSEGX.PORT_EXPOSURE.HERO_EYEBROW' | translate }}
+      </span>
+      <div class="page-header__info">
+        <h1>{{ 'MICROSEGX.PORT_EXPOSURE.TITLE' | translate }}</h1>
+        <p class="subtitle">
+          {{ 'MICROSEGX.PORT_EXPOSURE.SUBTITLE' | translate }}
+        </p>
+      </div>
+      <p class="workspace-copy">
+        {{ 'MICROSEGX.PORT_EXPOSURE.HERO_COPY' | translate }}
       </p>
+      <div class="workspace-chips" *ngIf="clusterInfo">
+        <span class="workspace-chip">
+          <mat-icon>dns</mat-icon>
+          {{ 'MICROSEGX.NODE' | translate }}: {{ clusterInfo.local_node_name }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>hub</mat-icon>
+          K8s {{ clusterInfo.kubernetes_version }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>inventory_2</mat-icon>
+          {{ 'MICROSEGX.PORT_EXPOSURE.NAMESPACE_COUNT' | translate }}:
+          {{ namespaceCount }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>schedule</mat-icon>
+          {{ 'MICROSEGX.SCAN_TIME' | translate }}:
+          {{ formatDateTime(generatedAt) }}
+        </span>
+      </div>
     </div>
-    <div class="page-header__actions">
-      <mat-form-field appearance="outline" class="view-mode-field">
-        <mat-label>{{ 'MICROSEGX.VIEW_MODE' | translate }}</mat-label>
-        <mat-select [(ngModel)]="viewMode">
-          <mat-option value="services">{{
-            'MICROSEGX.PORT_EXPOSURE.VIEW_SERVICES' | translate
-          }}</mat-option>
-          <mat-option value="exposure">{{
-            'MICROSEGX.PORT_EXPOSURE.VIEW_EXPOSURE' | translate
-          }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="triggerScan()"
-        [disabled]="scanInProgress">
-        <mat-icon *ngIf="!scanInProgress">refresh</mat-icon>
-        <mat-spinner *ngIf="scanInProgress" diameter="20"></mat-spinner>
-        {{
-          scanInProgress
-            ? ('MICROSEGX.SCANNING' | translate)
-            : ('MICROSEGX.SCAN_NOW' | translate)
-        }}
-      </button>
-      <button mat-stroked-button (click)="refresh()">
-        <mat-icon>cached</mat-icon>
-        {{ 'general.REFRESH' | translate }}
-      </button>
-    </div>
-  </div>
 
-  <!-- Error Banner -->
-  <mat-card *ngIf="error" class="error-card">
+    <div class="workspace-hero__actions">
+      <mat-card class="control-card">
+        <div class="control-card__header">
+          <span class="control-card__label">{{
+            'MICROSEGX.VIEW_MODE' | translate
+          }}</span>
+          <p>{{ 'MICROSEGX.PORT_EXPOSURE.MODE_SWITCH_DESC' | translate }}</p>
+        </div>
+
+        <div class="mode-switch">
+          <button
+            type="button"
+            class="mode-switch__button"
+            [class.is-active]="viewMode === 'services'"
+            (click)="viewMode = 'services'">
+            <mat-icon>shield</mat-icon>
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.VIEW_SERVICES' | translate
+            }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="mode-switch__button"
+            [class.is-active]="viewMode === 'exposure'"
+            (click)="viewMode = 'exposure'">
+            <mat-icon>lan</mat-icon>
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.VIEW_EXPOSURE' | translate
+            }}</span>
+          </button>
+        </div>
+      </mat-card>
+
+      <mat-card class="control-card quick-actions-card">
+        <div class="control-card__header">
+          <span class="control-card__label">{{
+            'MICROSEGX.PORT_EXPOSURE.QUICK_ACTIONS' | translate
+          }}</span>
+          <p>{{ 'MICROSEGX.PORT_EXPOSURE.QUICK_ACTIONS_DESC' | translate }}</p>
+        </div>
+
+        <div class="quick-actions-card__buttons">
+          <button
+            mat-flat-button
+            color="primary"
+            class="hero-action hero-action--primary"
+            (click)="triggerScan()"
+            [disabled]="scanInProgress">
+            <mat-icon *ngIf="!scanInProgress">radar</mat-icon>
+            <mat-spinner *ngIf="scanInProgress" diameter="18"></mat-spinner>
+            {{
+              scanInProgress
+                ? ('MICROSEGX.SCANNING' | translate)
+                : ('MICROSEGX.SCAN_NOW' | translate)
+            }}
+          </button>
+
+          <button
+            mat-stroked-button
+            class="hero-action"
+            (click)="refresh()"
+            [disabled]="loading">
+            <mat-icon>cached</mat-icon>
+            {{ 'general.REFRESH' | translate }}
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  </section>
+
+  <mat-card *ngIf="error" class="feedback-card feedback-card--error">
     <mat-icon>error</mat-icon>
     <span>{{ error }}</span>
   </mat-card>
 
-  <!-- Service Controls Not Enabled Warning -->
   <mat-card
     *ngIf="!loading && viewMode === 'services' && !serviceControlsEnabled"
-    class="warning-card">
-    <mat-card-content>
-      <div class="warning-content">
-        <mat-icon>warning</mat-icon>
+    class="feedback-card feedback-card--warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <h3>{{ 'MICROSEGX.PORT_EXPOSURE.CONTROL_DISABLED' | translate }}</h3>
+      <p>
+        {{ 'MICROSEGX.PORT_EXPOSURE.CONTROL_DISABLED_DESC' | translate }}
+      </p>
+    </div>
+  </mat-card>
+
+  <div *ngIf="loading" class="loading-shell">
+    <mat-spinner diameter="44"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading && dashboard">
+    <div class="stats-grid">
+      <mat-card class="metric-card metric-card--primary">
+        <div class="metric-card__icon">
+          <mat-icon>outbound</mat-icon>
+        </div>
+        <div class="metric-card__body">
+          <span>{{ 'MICROSEGX.PORT_EXPOSURE.OPEN_PORTS' | translate }}</span>
+          <strong>{{ openPortCount }}</strong>
+          <small>{{
+            'MICROSEGX.PORT_EXPOSURE.OPEN_PORTS_DESC' | translate
+          }}</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-card__icon metric-card__icon--amber">
+          <mat-icon>visibility</mat-icon>
+        </div>
+        <div class="metric-card__body">
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.TRAFFIC_EVIDENCE' | translate
+          }}</span>
+          <strong>{{ trafficEvidenceCount }}</strong>
+          <small
+            >{{ uniqueAddressCount }}
+            {{ 'MICROSEGX.PORT_EXPOSURE.UNIQUE_ENDPOINTS' | translate }}</small
+          >
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-card__icon metric-card__icon--blue">
+          <mat-icon>lan</mat-icon>
+        </div>
+        <div class="metric-card__body">
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS' | translate
+          }}</span>
+          <strong>{{ exposedObjectCount }}</strong>
+          <small>{{
+            'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS_DESC' | translate
+          }}</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <div class="metric-card__icon metric-card__icon--green">
+          <mat-icon>shield</mat-icon>
+        </div>
+        <div class="metric-card__body">
+          <span>{{
+            viewMode === 'services'
+              ? ('MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES' | translate)
+              : ('MICROSEGX.PORT_EXPOSURE.RECORDS' | translate)
+          }}</span>
+          <strong>{{
+            viewMode === 'services' ? managedServiceCount : recordCount
+          }}</strong>
+          <small>
+            {{
+              viewMode === 'services'
+                ? ('MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES_DESC' | translate)
+                : ('MICROSEGX.PORT_EXPOSURE.EXPOSURE_RECORDS_DESC' | translate)
+            }}
+          </small>
+        </div>
+      </mat-card>
+    </div>
+
+    <mat-card class="filters-card">
+      <div class="filters-card__header">
         <div>
-          <h3>{{ 'MICROSEGX.PORT_EXPOSURE.CONTROL_DISABLED' | translate }}</h3>
+          <h2>
+            {{
+              viewMode === 'services'
+                ? ('MICROSEGX.PORT_EXPOSURE.SERVICE_VIEW_TITLE' | translate)
+                : ('MICROSEGX.PORT_EXPOSURE.EXPOSURE_VIEW_TITLE' | translate)
+            }}
+          </h2>
           <p>
-            {{ 'MICROSEGX.PORT_EXPOSURE.CONTROL_DISABLED_DESC' | translate }}
+            {{
+              viewMode === 'services'
+                ? ('MICROSEGX.PORT_EXPOSURE.SERVICE_VIEW_DESC' | translate)
+                : ('MICROSEGX.PORT_EXPOSURE.EXPOSURE_VIEW_DESC' | translate)
+            }}
           </p>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <!-- Main Content -->
-  <ng-container *ngIf="!loading && dashboard">
-    <!-- Cluster Info -->
-    <div class="cluster-info" *ngIf="clusterInfo">
-      <span class="info-item">
-        <mat-icon>dns</mat-icon>
-        {{ 'MICROSEGX.NODE' | translate }}: {{ clusterInfo.local_node_name }}
-      </span>
-      <span class="info-item">
-        <mat-icon>code</mat-icon>
-        K8s: {{ clusterInfo.kubernetes_version }}
-      </span>
-      <span class="info-item">
-        <mat-icon>schedule</mat-icon>
-        {{ 'MICROSEGX.SCAN_TIME' | translate }}:
-        {{ generatedAt | date: 'yyyy-MM-dd HH:mm:ss' }}
-      </span>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-      <mat-card class="stat-card stat-card--primary">
-        <div class="stat-value">
-          {{
-            dashboard?.service_controls?.open_port_count ||
-              summary?.open_count ||
-              0
-          }}
-        </div>
-        <div class="stat-label">
-          {{ 'MICROSEGX.PORT_EXPOSURE.OPEN_PORTS' | translate }}
-        </div>
-      </mat-card>
-      <mat-card class="stat-card stat-card--warning">
-        <div class="stat-value">{{ summary?.traffic_observed_count || 0 }}</div>
-        <div class="stat-label">
-          {{ 'MICROSEGX.PORT_EXPOSURE.TRAFFIC_EVIDENCE' | translate }}
-        </div>
-      </mat-card>
-      <mat-card class="stat-card stat-card--info">
-        <div class="stat-value">
-          {{
-            dashboard?.service_controls?.service_count ||
-              summary?.resource_count ||
-              0
-          }}
-        </div>
-        <div class="stat-label">
-          {{ 'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS' | translate }}
-        </div>
-      </mat-card>
-      <mat-card class="stat-card stat-card--success">
-        <div class="stat-value">{{ summary?.item_count || 0 }}</div>
-        <div class="stat-label">
-          {{ 'MICROSEGX.PORT_EXPOSURE.RECORDS' | translate }}
-        </div>
-      </mat-card>
-    </div>
-
-    <!-- Filters -->
-    <mat-card class="filters-card">
       <div class="filters-row">
-        <mat-form-field appearance="outline" class="filter-field search-field">
+        <mat-form-field appearance="outline" class="search-field">
           <mat-label>{{ 'general.FILTER' | translate }}</mat-label>
           <input
             matInput
@@ -141,23 +230,115 @@
             " />
         </mat-form-field>
 
-        <mat-slide-toggle
-          [(ngModel)]="hideK8sSystem"
-          class="hide-system-toggle">
-          {{ 'MICROSEGX.HIDE_K8S_SYSTEM' | translate }}
-        </mat-slide-toggle>
+        <mat-form-field
+          *ngIf="viewMode === 'exposure'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.STATUS' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="statusFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="open">{{
+              'MICROSEGX.PORT_EXPOSURE.STATUS_OPEN' | translate
+            }}</mat-option>
+            <mat-option value="closed">{{
+              'MICROSEGX.PORT_EXPOSURE.STATUS_CLOSED' | translate
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'exposure'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.EXPOSURE_TYPE' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="typeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let type of exposureTypes" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'services'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE_STATE_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="serviceStateFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="open">{{
+              'MICROSEGX.PORT_EXPOSURE.STATUS_OPEN' | translate
+            }}</mat-option>
+            <mat-option value="secured">{{
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_STATE_SECURED' | translate
+            }}</mat-option>
+            <mat-option value="blocked">{{
+              'MICROSEGX.PORT_EXPOSURE.CONTROL_BLOCKED' | translate
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'services'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE_PUBLISH_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="servicePublishTypeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let type of servicePublishTypes" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'services'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.PORT_SCOPE_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="servicePortScopeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="public">{{
+              'MICROSEGX.PORT_EXPOSURE.PORT_SCOPE_PUBLIC' | translate
+            }}</mat-option>
+            <mat-option value="nodeport">{{
+              'MICROSEGX.PORT_EXPOSURE.PORT_SCOPE_NODEPORT' | translate
+            }}</mat-option>
+            <mat-option value="private">{{
+              'MICROSEGX.PORT_EXPOSURE.PORT_SCOPE_PRIVATE' | translate
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </mat-card>
 
-    <!-- Service Control View -->
     <ng-container *ngIf="viewMode === 'services'">
-      <mat-card class="table-card">
-        <table mat-table [dataSource]="serviceControls" class="service-table">
+      <mat-card class="table-shell">
+        <div class="table-shell__meta">
+          <span class="table-shell__count">{{ serviceControls.length }}</span>
+          <span class="table-shell__hint">
+            {{ 'MICROSEGX.PORT_EXPOSURE.SERVICE_VIEW_DESC' | translate }}
+          </span>
+        </div>
+
+        <table mat-table [dataSource]="serviceControls" class="data-table">
           <ng-container matColumnDef="namespace">
             <th mat-header-cell *matHeaderCellDef>
               {{ 'general.NAMESPACES' | translate }}
             </th>
-            <td mat-cell *matCellDef="let item">{{ item.namespace }}</td>
+            <td mat-cell *matCellDef="let item">
+              <span class="table-pill">{{ item.namespace }}</span>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="service">
@@ -165,19 +346,35 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <div class="service-cell">
-                <span class="service-name">{{ item.service_name }}</span>
-                <span class="service-type-badge">{{ item.service_type }}</span>
+              <div class="entity-cell">
+                <strong>{{ item.service_name }}</strong>
+                <small>
+                  {{ item.service_type }} · {{ item.public_service_type }}
+                </small>
+                <div
+                  *ngIf="!item.manageable && item.disabled_reason"
+                  class="entity-cell__note">
+                  {{ item.disabled_reason }}
+                </div>
               </div>
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="type">
+          <ng-container matColumnDef="state">
             <th mat-header-cell *matHeaderCellDef>
-              {{ 'MICROSEGX.PORT_EXPOSURE.PUBLIC_TYPE' | translate }}
+              {{ 'MICROSEGX.PORT_EXPOSURE.SERVICE_STATE' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              {{ item.public_service_type }}
+              <div class="state-chip" [ngClass]="getServiceStateClass(item)">
+                <mat-icon>{{
+                  getServiceStateKey(item) === 'open'
+                    ? 'public'
+                    : getServiceStateKey(item) === 'secured'
+                      ? 'verified_user'
+                      : 'lock'
+                }}</mat-icon>
+                <span>{{ getServiceStateLabelKey(item) | translate }}</span>
+              </div>
             </td>
           </ng-container>
 
@@ -186,26 +383,43 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.PORTS' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <div class="ports-container">
-                <div *ngFor="let port of item.ports" class="port-item">
-                  <span class="port-number">{{ port.service_port }}</span>
-                  <span
-                    class="port-status-badge"
-                    [ngClass]="port.public ? 'port-open' : 'port-closed'">
-                    {{ port.public ? getPublicPortDisplay(port) : '-' }}
-                  </span>
+              <div class="port-grid">
+                <div *ngFor="let port of item.ports" class="port-card">
+                  <div class="port-card__main">
+                    <div class="port-card__title">
+                      <strong
+                        >{{ port.service_port }}/{{ port.protocol }}</strong
+                      >
+                      <span *ngIf="port.port_name">{{ port.port_name }}</span>
+                    </div>
+                    <div class="port-card__meta">
+                      <span
+                        class="port-visibility"
+                        [ngClass]="port.public ? 'is-open' : 'is-closed'">
+                        {{
+                          port.public
+                            ? ('MICROSEGX.PORT_EXPOSURE.OPEN' | translate)
+                            : ('MICROSEGX.PORT_EXPOSURE.CLOSE' | translate)
+                        }}
+                      </span>
+                      <span class="port-mapping">
+                        {{ getPublicPortDisplay(port) }}
+                      </span>
+                    </div>
+                  </div>
                   <button
                     mat-icon-button
+                    class="port-card__action"
                     [color]="port.public ? 'warn' : 'primary'"
-                    (click)="
-                      openPortDialog(item, port, port.public ? 'close' : 'open')
-                    "
                     [disabled]="!item.manageable"
-                    matTooltip="{{
+                    [matTooltip]="
                       port.public
                         ? ('MICROSEGX.PORT_EXPOSURE.CLOSE_PORT' | translate)
                         : ('MICROSEGX.PORT_EXPOSURE.OPEN_PORT' | translate)
-                    }}">
+                    "
+                    (click)="
+                      openPortDialog(item, port, port.public ? 'close' : 'open')
+                    ">
                     <mat-icon>{{
                       port.public ? 'lock' : 'lock_open'
                     }}</mat-icon>
@@ -217,10 +431,10 @@
 
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>
-              {{ 'MICROSEGX.PORT_EXPOSURE.QUICK_ACTIONS' | translate }}
+              {{ 'general.ACTIONS' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <div class="quick-actions">
+              <div class="row-actions">
                 <button
                   mat-stroked-button
                   color="primary"
@@ -250,56 +464,29 @@
 
         <div *ngIf="serviceControls.length === 0" class="empty-state">
           <mat-icon>info</mat-icon>
-          <p>{{ 'general.NO_ROWS' | translate }}</p>
+          <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+          <p>{{ 'MICROSEGX.PORT_EXPOSURE.SERVICE_VIEW_DESC' | translate }}</p>
         </div>
       </mat-card>
     </ng-container>
 
-    <!-- Exposure View -->
     <ng-container *ngIf="viewMode === 'exposure'">
-      <!-- Additional Filters for Exposure View -->
-      <mat-card class="filters-card">
-        <div class="filters-row">
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>{{
-              'MICROSEGX.PORT_EXPOSURE.STATUS' | translate
-            }}</mat-label>
-            <mat-select [(ngModel)]="statusFilter">
-              <mat-option value="all">{{
-                'general.FILTER_MATCH_ALL' | translate
-              }}</mat-option>
-              <mat-option value="open">{{
-                'MICROSEGX.PORT_EXPOSURE.STATUS_OPEN' | translate
-              }}</mat-option>
-              <mat-option value="closed">{{
-                'MICROSEGX.PORT_EXPOSURE.STATUS_CLOSED' | translate
-              }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>{{
-              'MICROSEGX.PORT_EXPOSURE.EXPOSURE_TYPE' | translate
-            }}</mat-label>
-            <mat-select [(ngModel)]="typeFilter">
-              <mat-option value="all">{{
-                'general.FILTER_MATCH_ALL' | translate
-              }}</mat-option>
-              <mat-option *ngFor="let type of exposureTypes" [value]="type">{{
-                type
-              }}</mat-option>
-            </mat-select>
-          </mat-form-field>
+      <mat-card class="table-shell">
+        <div class="table-shell__meta">
+          <span class="table-shell__count">{{ exposureItems.length }}</span>
+          <span class="table-shell__hint">
+            {{ 'MICROSEGX.PORT_EXPOSURE.EXPOSURE_VIEW_DESC' | translate }}
+          </span>
         </div>
-      </mat-card>
 
-      <mat-card class="table-card">
-        <table mat-table [dataSource]="exposureItems" class="exposure-table">
+        <table mat-table [dataSource]="exposureItems" class="data-table">
           <ng-container matColumnDef="namespace">
             <th mat-header-cell *matHeaderCellDef>
               {{ 'general.NAMESPACES' | translate }}
             </th>
-            <td mat-cell *matCellDef="let item">{{ item.namespace }}</td>
+            <td mat-cell *matCellDef="let item">
+              <span class="table-pill">{{ item.namespace }}</span>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="resource">
@@ -307,9 +494,9 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.RESOURCE' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <div class="resource-cell">
-                <span class="resource-name">{{ item.resource_name }}</span>
-                <span class="resource-kind">{{ item.resource_kind }}</span>
+              <div class="entity-cell">
+                <strong>{{ item.resource_name }}</strong>
+                <small>{{ item.resource_kind }}</small>
               </div>
             </td>
           </ng-container>
@@ -319,10 +506,8 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.EXPOSURE_TYPE' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <span
-                class="type-badge"
-                [ngClass]="'type-' + item.exposure_type?.toLowerCase()">
-                {{ item.exposure_type }}
+              <span class="table-pill table-pill--soft">
+                {{ item.exposure_type || '-' }}
               </span>
             </td>
           </ng-container>
@@ -331,7 +516,9 @@
             <th mat-header-cell *matHeaderCellDef>
               {{ 'MICROSEGX.PORT_EXPOSURE.ADDRESS' | translate }}
             </th>
-            <td mat-cell *matCellDef="let item">{{ item.address }}</td>
+            <td mat-cell *matCellDef="let item">
+              <span class="mono-text">{{ item.address }}</span>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="port">
@@ -339,7 +526,7 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.PORT' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <span class="port-badge">{{ item.port }}</span>
+              <span class="table-pill table-pill--mono">{{ item.port }}</span>
             </td>
           </ng-container>
 
@@ -348,8 +535,12 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.STATUS' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <span class="status-badge" [ngClass]="getStatusClass(item)">
-                {{ item.status }}
+              <span class="status-chip" [ngClass]="getStatusClass(item)">
+                {{
+                  item.status === 'open'
+                    ? ('MICROSEGX.PORT_EXPOSURE.STATUS_OPEN' | translate)
+                    : ('MICROSEGX.PORT_EXPOSURE.STATUS_CLOSED' | translate)
+                }}
               </span>
             </td>
           </ng-container>
@@ -359,23 +550,25 @@
               {{ 'MICROSEGX.PORT_EXPOSURE.TRAFFIC' | translate }}
             </th>
             <td mat-cell *matCellDef="let item">
-              <span
-                *ngIf="item.traffic_observed"
-                class="traffic-badge traffic-yes">
-                <mat-icon>visibility</mat-icon>
-                {{ 'MICROSEGX.PORT_EXPOSURE.TRAFFIC_YES' | translate }}
+              <span class="traffic-chip" [ngClass]="getTrafficClass(item)">
+                <mat-icon>{{
+                  item.traffic_observed
+                    ? 'visibility'
+                    : item.listener_observed
+                      ? 'hearing'
+                      : 'remove'
+                }}</mat-icon>
+                <span>
+                  {{
+                    item.traffic_observed
+                      ? ('MICROSEGX.PORT_EXPOSURE.TRAFFIC_YES' | translate)
+                      : item.listener_observed
+                        ? ('MICROSEGX.PORT_EXPOSURE.TRAFFIC_LISTENER'
+                          | translate)
+                        : '-'
+                  }}
+                </span>
               </span>
-              <span
-                *ngIf="item.listener_observed && !item.traffic_observed"
-                class="traffic-badge traffic-listener">
-                <mat-icon>hearing</mat-icon>
-                {{ 'MICROSEGX.PORT_EXPOSURE.TRAFFIC_LISTENER' | translate }}
-              </span>
-              <span
-                *ngIf="!item.traffic_observed && !item.listener_observed"
-                class="traffic-badge traffic-none"
-                >-</span
-              >
             </td>
           </ng-container>
 
@@ -384,20 +577,17 @@
         </table>
 
         <div *ngIf="exposureItems.length === 0" class="empty-state">
-          <mat-icon>info</mat-icon>
-          <p>{{ 'general.NO_ROWS' | translate }}</p>
+          <mat-icon>search_off</mat-icon>
+          <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+          <p>{{ 'MICROSEGX.PORT_EXPOSURE.EXPOSURE_VIEW_DESC' | translate }}</p>
         </div>
       </mat-card>
     </ng-container>
   </ng-container>
 </div>
 
-<!-- Port Toggle Dialog -->
-<div
-  *ngIf="showPortDialog"
-  class="port-dialog-overlay"
-  (click)="closePortDialog()">
-  <mat-card class="port-dialog" (click)="$event.stopPropagation()">
+<div *ngIf="showPortDialog" class="dialog-overlay" (click)="closePortDialog()">
+  <mat-card class="dialog-card" (click)="$event.stopPropagation()">
     <mat-card-header>
       <mat-card-title>
         {{
@@ -407,33 +597,25 @@
         }}
       </mat-card-title>
     </mat-card-header>
+
     <mat-card-content>
-      <div class="dialog-info">
-        <div class="dialog-row">
-          <span class="dialog-label"
-            >{{ 'general.NAMESPACES' | translate }}:</span
-          >
-          <span class="dialog-value">{{ selectedService?.namespace }}</span>
+      <div class="dialog-summary">
+        <div class="dialog-summary__row">
+          <span>{{ 'general.NAMESPACES' | translate }}</span>
+          <strong>{{ selectedService?.namespace }}</strong>
         </div>
-        <div class="dialog-row">
-          <span class="dialog-label"
-            >{{ 'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate }}:</span
-          >
-          <span class="dialog-value">{{ selectedService?.service_name }}</span>
+        <div class="dialog-summary__row">
+          <span>{{ 'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate }}</span>
+          <strong>{{ selectedService?.service_name }}</strong>
         </div>
-        <div class="dialog-row">
-          <span class="dialog-label"
-            >{{ 'MICROSEGX.PORT_EXPOSURE.PORT' | translate }}:</span
-          >
-          <span class="dialog-value"
-            >{{ selectedPort?.service_port }} ({{
-              selectedPort?.protocol
-            }})</span
-          >
+        <div class="dialog-summary__row">
+          <span>{{ 'MICROSEGX.PORT_EXPOSURE.PORT' | translate }}</span>
+          <strong>
+            {{ selectedPort?.service_port }}/{{ selectedPort?.protocol }}
+          </strong>
         </div>
       </div>
 
-      <!-- NodePort Selection for Open Mode -->
       <ng-container *ngIf="portDialogMode === 'open'">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>{{
@@ -444,8 +626,8 @@
             type="number"
             [(ngModel)]="requestedNodePort"
             [placeholder]="nodePortRange.start + '-' + nodePortRange.end"
-            min="{{ nodePortRange.start }}"
-            max="{{ nodePortRange.end }}" />
+            [min]="nodePortRange.start"
+            [max]="nodePortRange.end" />
           <mat-hint>
             {{ 'MICROSEGX.PORT_EXPOSURE.NODE_PORT_RANGE' | translate }}:
             {{ nodePortRange.start }}-{{ nodePortRange.end }}
@@ -457,23 +639,22 @@
         </mat-form-field>
 
         <div class="suggested-ports">
-          <span class="suggested-label"
-            >{{ 'MICROSEGX.PORT_EXPOSURE.SUGGESTED_PORTS' | translate }}:</span
-          >
-          <div class="suggested-port-list">
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.SUGGESTED_PORTS' | translate
+          }}</span>
+          <div class="suggested-ports__list">
             <button
               *ngFor="
-                let p of [
+                let port of [
                   suggestNodePort(),
                   suggestNodePort() + 1,
                   suggestNodePort() + 2,
                 ]
               "
               mat-stroked-button
-              [color]="isNodePortUsed(p) ? 'warn' : 'primary'"
-              (click)="requestedNodePort = p"
-              [disabled]="isNodePortUsed(p)">
-              {{ p }}
+              [disabled]="isNodePortUsed(port)"
+              (click)="requestedNodePort = port">
+              {{ port }}
             </button>
           </div>
         </div>
@@ -484,6 +665,7 @@
         <span>{{ portDialogError }}</span>
       </mat-card>
     </mat-card-content>
+
     <mat-card-actions>
       <button
         mat-flat-button
@@ -492,10 +674,10 @@
         [disabled]="
           portDialogLoading ||
           (portDialogMode === 'open' &&
-            requestedNodePort &&
+            !!requestedNodePort &&
             isNodePortUsed(requestedNodePort))
         ">
-        <mat-spinner *ngIf="portDialogLoading" diameter="20"></mat-spinner>
+        <mat-spinner *ngIf="portDialogLoading" diameter="18"></mat-spinner>
         {{
           portDialogMode === 'open'
             ? ('MICROSEGX.PORT_EXPOSURE.OPEN' | translate)

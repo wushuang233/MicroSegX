@@ -258,7 +258,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       '/regScan',
       '/scan',
       '/security-event',
-      '/support',
     ]);
     return menu
       .map(item => {

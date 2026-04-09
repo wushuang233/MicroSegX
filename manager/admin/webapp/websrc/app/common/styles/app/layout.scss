@@ -51,9 +51,8 @@ body {
 
     .left-side {
       padding-top: $navbar-hg + 12px;
-      height: 100%;
       width: $left-side-wd;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .sidebar-floating {
@@ -99,10 +98,10 @@ body {
 // Page main content
 // -----------------------------
 .nv-section {
-    padding: 15px;
-    width: 100%;
-    border-top: none;
-    margin-top: 0;
+  padding: 15px;
+  width: 100%;
+  border-top: none;
+  margin-top: 0;
 
   .unwrap {
     margin: -15px;
@@ -158,7 +157,14 @@ body {
 
   .nv-frame {
     .left-side-container {
+      bottom: auto;
+
       .left-side {
+        position: sticky;
+        top: 16px;
+        height: auto;
+        max-height: calc(100vh - 32px);
+        padding-top: 0;
       }
     }
 
@@ -422,28 +428,28 @@ body {
 
   .nv-frame {
     .topnavbar-wrapper {
-      position: fixed;
-      top: 0;
+      position: relative;
+      top: auto;
       width: 100%;
-      z-index: $z-index-main-section + 10;
+      z-index: $z-index-main-section + 6;
     }
     .left-side-container,
     .offsidebar {
-      position: fixed;
+      position: absolute;
     }
 
     .left-side-container {
-      height: 1px;
-      min-height: 100%;
+      top: $navbar-hg + 8px;
+      height: auto;
+      min-height: 0;
 
       .left-side {
-        position: fixed;
-        top: 0;
-        bottom: 0;
+        top: 12px;
+        max-height: calc(100vh - 24px);
       }
     }
     .section-container {
-      margin-top: $navbar-hg;
+      margin-top: 0;
     }
   }
 }

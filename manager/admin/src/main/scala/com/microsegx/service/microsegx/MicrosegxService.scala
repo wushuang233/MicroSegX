@@ -60,10 +60,16 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
     .followRedirects(HttpClient.Redirect.NORMAL)
     .build()
 
-  def getOverview: JsObject = {
+  def getOverview(request: HttpRequest): JsObject = {
+    val forwardedHeaders = forwardedOverviewHeaders(request)
     val dashboardPayload = requestJson(HttpMethods.GET.value, "/api/dashboard").asJsObject
-    val zitiSession      = requestJson(HttpMethods.GET.value, "/api/ziti/session").asJsObject
-    val zitiSnapshot     = fetchZitiSnapshot(zitiSession)
+    val zitiSession      =
+      requestJson(
+        HttpMethods.GET.value,
+        "/api/ziti/session",
+        headers = forwardedHeaders
+      ).asJsObject
+    val zitiSnapshot     = fetchZitiSnapshot(zitiSession, forwardedHeaders)
 
     JsObject(
       "baseUrl"      -> JsString(baseUrl),
@@ -157,7 +163,29 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
     )
   }
 
-  private def fetchZitiSnapshot(sessionPayload: JsObject): Option[JsObject] = {
+  private def fetchZitiSnapshot(
+    sessionPayload: JsObject,
+    forwardedHeaders: Seq[(String, String)]
+  ): Option[JsObject] = {
+    // Prefer the browser's current Ziti session so the UI can reflect the
+    // user's real logged-in state. Fall back to a short-lived session only
+    // when default credentials are configured but the browser has no cookie.
+    if (booleanField(sessionPayload, "logged_in")) {
+      val forwardedOverview = Try(
+        requestJson(
+          HttpMethods.GET.value,
+          "/api/ziti/overview",
+          headers = forwardedHeaders
+        ).asJsObject
+      ).toOption
+
+      if (forwardedOverview.nonEmpty) {
+        return forwardedOverview
+      }
+
+      logger.warn("Unable to fetch Ziti overview from forwarded browser session, falling back")
+    }
+
     if (!booleanField(sessionPayload, "default_credentials_configured")) {
       return None
     }
@@ -257,6 +285,12 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
             HeaderCacheControl.toLowerCase,
             HeaderPragma.toLowerCase
           ).contains(header.lowercaseName()) =>
+        header.name() -> header.value()
+    }
+
+  private def forwardedOverviewHeaders(request: HttpRequest): Seq[(String, String)] =
+    request.headers.collect {
+      case header if header.lowercaseName() == HeaderCookie.toLowerCase =>
         header.name() -> header.value()
     }
 

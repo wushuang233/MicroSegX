@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { GlobalVariable } from '@common/variables/global.variable';
 import { TranslateService } from '@ngx-translate/core';
+import { GlobalVariable } from '@common/variables/global.variable';
 
 interface PortItem {
   key: string;
@@ -84,19 +84,21 @@ interface DashboardData {
   templateUrl: './microsegx-port-exposure.component.html',
   styleUrls: ['./microsegx-port-exposure.component.scss'],
 })
-export class MicrosegxPortExposureComponent implements OnInit {
+export class MicrosegxPortExposureComponent
+  implements OnInit, AfterViewChecked, OnDestroy
+{
   dashboard: DashboardData | null = null;
   loading = false;
   error = '';
   scanInProgress = false;
 
-  // Filter state
   statusFilter = 'all';
   typeFilter = 'all';
   searchText = '';
-  hideK8sSystem = false;
+  serviceStateFilter = 'all';
+  servicePublishTypeFilter = 'all';
+  servicePortScopeFilter = 'all';
 
-  // Port toggle state
   selectedService: ServiceControlItem | null = null;
   selectedPort: PortItem | null = null;
   showPortDialog = false;
@@ -105,10 +107,8 @@ export class MicrosegxPortExposureComponent implements OnInit {
   portDialogLoading = false;
   portDialogError = '';
 
-  // Used NodePorts for duplicate detection
   usedNodePorts: Set<number> = new Set();
 
-  // Table columns for exposure view
   exposureColumns = [
     'namespace',
     'resource',
@@ -119,11 +119,11 @@ export class MicrosegxPortExposureComponent implements OnInit {
     'traffic',
   ];
 
-  // Table columns for service control view
-  serviceColumns = ['namespace', 'service', 'type', 'ports', 'actions'];
+  serviceColumns = ['namespace', 'service', 'state', 'ports', 'actions'];
 
   exposureTypes: string[] = [];
   viewMode: 'exposure' | 'services' = 'services';
+  private dialogBodyLocked = false;
 
   constructor(
     private http: HttpClient,
@@ -132,6 +132,14 @@ export class MicrosegxPortExposureComponent implements OnInit {
 
   ngOnInit(): void {
     this.refresh();
+  }
+
+  ngAfterViewChecked(): void {
+    this.syncDialogBodyState();
+  }
+
+  ngOnDestroy(): void {
+    this.releaseDialogBodyState();
   }
 
   private getHeaders(): HttpHeaders {
@@ -168,13 +176,19 @@ export class MicrosegxPortExposureComponent implements OnInit {
       });
   }
 
-  updateExposureTypes(): void {
+  private updateExposureTypes(): void {
     const items = this.dashboard?.external_exposure_summary?.items || [];
-    const types = new Set(items.map(i => i.exposure_type).filter(Boolean));
-    this.exposureTypes = Array.from(types) as string[];
+    const types = new Set(
+      items
+        .map(item => (item.exposure_type || '').trim())
+        .filter((type): type is string => !!type)
+    );
+    this.exposureTypes = Array.from(types).sort((left, right) =>
+      left.localeCompare(right)
+    );
   }
 
-  updateUsedNodePorts(): void {
+  private updateUsedNodePorts(): void {
     const ports = new Set<number>();
     const items = this.dashboard?.service_controls?.items || [];
     for (const service of items) {
@@ -184,13 +198,14 @@ export class MicrosegxPortExposureComponent implements OnInit {
         }
       }
     }
-    // Also add from exposure items
+
     const exposures = this.dashboard?.external_exposure_summary?.items || [];
-    for (const exp of exposures) {
-      if (exp.port >= 30000 && exp.port <= 32767) {
-        ports.add(exp.port);
+    for (const exposure of exposures) {
+      if (exposure.port >= 30000 && exposure.port <= 32767) {
+        ports.add(exposure.port);
       }
     }
+
     this.usedNodePorts = ports;
   }
 
@@ -200,27 +215,27 @@ export class MicrosegxPortExposureComponent implements OnInit {
       .post('/microsegx/api/scan', {}, { headers: this.getHeaders() })
       .subscribe({
         next: () => this.pollScanStatus(),
-        error: err => {
+        error: () => {
           this.error = this.translate.instant('MICROSEGX.SCAN_FAILED');
           this.scanInProgress = false;
         },
       });
   }
 
-  pollScanStatus(): void {
+  private pollScanStatus(): void {
     setTimeout(() => {
       this.http
-        .get<{
-          scan_in_progress: boolean;
-        }>('/microsegx/api/dashboard', { headers: this.getHeaders() })
+        .get<DashboardData>('/microsegx/api/dashboard', {
+          headers: this.getHeaders(),
+        })
         .subscribe({
           next: data => {
-            if (data.scan_in_progress) {
+            if (data.scan_state?.scan_in_progress) {
               this.pollScanStatus();
-            } else {
-              this.scanInProgress = false;
-              this.refresh();
+              return;
             }
+            this.scanInProgress = false;
+            this.refresh();
           },
           error: () => {
             this.scanInProgress = false;
@@ -230,71 +245,93 @@ export class MicrosegxPortExposureComponent implements OnInit {
   }
 
   get exposureItems(): ExposureItem[] {
-    let items = this.dashboard?.external_exposure_summary?.items || [];
+    let items = [...(this.dashboard?.external_exposure_summary?.items || [])];
 
-    // Filter by status
     if (this.statusFilter !== 'all') {
-      items = items.filter(i => i.status === this.statusFilter);
+      items = items.filter(item => item.status === this.statusFilter);
     }
 
-    // Filter by exposure type
     if (this.typeFilter !== 'all') {
-      items = items.filter(i => i.exposure_type === this.typeFilter);
+      items = items.filter(item => item.exposure_type === this.typeFilter);
     }
 
-    // Filter by search text
-    if (this.searchText) {
-      const search = this.searchText.toLowerCase();
+    if (this.searchText.trim()) {
+      const search = this.searchText.trim().toLowerCase();
       items = items.filter(
-        i =>
-          i.namespace?.toLowerCase().includes(search) ||
-          i.resource_name?.toLowerCase().includes(search) ||
-          i.address?.toLowerCase().includes(search) ||
-          i.port?.toString().includes(search)
+        item =>
+          item.namespace?.toLowerCase().includes(search) ||
+          item.resource_name?.toLowerCase().includes(search) ||
+          item.resource_kind?.toLowerCase().includes(search) ||
+          item.address?.toLowerCase().includes(search) ||
+          String(item.port || '').includes(search)
       );
     }
 
-    // Hide K8s system components
-    if (this.hideK8sSystem) {
-      items = items.filter(i => !this.isK8sSystemNamespace(i.namespace));
-    }
-
-    return items;
+    return items.sort((left, right) => {
+      const leftScore = left.status === 'open' ? 0 : 1;
+      const rightScore = right.status === 'open' ? 0 : 1;
+      if (leftScore !== rightScore) {
+        return leftScore - rightScore;
+      }
+      return `${left.namespace}/${left.resource_name}`.localeCompare(
+        `${right.namespace}/${right.resource_name}`
+      );
+    });
   }
 
   get serviceControls(): ServiceControlItem[] {
-    let items = this.dashboard?.service_controls?.items || [];
+    let items = [...(this.dashboard?.service_controls?.items || [])];
 
-    // Filter by search text
-    if (this.searchText) {
-      const search = this.searchText.toLowerCase();
+    if (this.serviceStateFilter !== 'all') {
       items = items.filter(
-        i =>
-          i.namespace?.toLowerCase().includes(search) ||
-          i.service_name?.toLowerCase().includes(search)
+        item => this.getServiceStateKey(item) === this.serviceStateFilter
       );
     }
 
-    // Hide K8s system components
-    if (this.hideK8sSystem) {
-      items = items.filter(i => !this.isK8sSystemNamespace(i.namespace));
+    if (this.servicePublishTypeFilter !== 'all') {
+      items = items.filter(
+        item => item.public_service_type === this.servicePublishTypeFilter
+      );
     }
 
-    return items;
+    if (this.servicePortScopeFilter !== 'all') {
+      items = items.filter(item => {
+        switch (this.servicePortScopeFilter) {
+          case 'public':
+            return item.open_port_count > 0;
+          case 'nodeport':
+            return item.ports.some(
+              port => port.public && port.public_type === 'NodePort'
+            );
+          case 'private':
+            return item.open_port_count === 0;
+          default:
+            return true;
+        }
+      });
+    }
+
+    if (this.searchText.trim()) {
+      const search = this.searchText.trim().toLowerCase();
+      items = items.filter(item =>
+        this.getServiceSearchTokens(item).some(token => token.includes(search))
+      );
+    }
+
+    return items.sort((left, right) =>
+      `${left.namespace}/${left.service_name}`.localeCompare(
+        `${right.namespace}/${right.service_name}`
+      )
+    );
   }
 
-  get serviceControlsEnabled(): boolean {
-    return this.dashboard?.service_controls?.enabled || false;
-  }
-
-  get nodePortRange(): { start: number; end: number } {
-    const range =
-      this.dashboard?.service_controls?.node_port_range || '30000-32767';
-    const parts = range.split('-');
-    return {
-      start: parseInt(parts[0]) || 30000,
-      end: parseInt(parts[1]) || 32767,
-    };
+  get servicePublishTypes(): string[] {
+    const types = new Set(
+      (this.dashboard?.service_controls?.items || [])
+        .map(item => String(item.public_service_type || '').trim())
+        .filter(Boolean)
+    );
+    return Array.from(types).sort((left, right) => left.localeCompare(right));
   }
 
   get summary() {
@@ -309,26 +346,147 @@ export class MicrosegxPortExposureComponent implements OnInit {
     return this.dashboard?.generated_at || '-';
   }
 
-  isK8sSystemNamespace(ns: string): boolean {
-    const systemNs = [
+  formatDateTime(value?: string | number): string {
+    if (!value || value === '-') {
+      return '-';
+    }
+
+    const date =
+      typeof value === 'number'
+        ? new Date(value > 1e12 ? value : value * 1000)
+        : new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return '-';
+    }
+
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    const hours = `${date.getHours()}`.padStart(2, '0');
+    const minutes = `${date.getMinutes()}`.padStart(2, '0');
+    const seconds = `${date.getSeconds()}`.padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
+  get serviceControlsEnabled(): boolean {
+    return this.dashboard?.service_controls?.enabled || false;
+  }
+
+  get managedServiceCount(): number {
+    return this.dashboard?.service_controls?.service_count || 0;
+  }
+
+  get openPortCount(): number {
+    return (
+      this.dashboard?.service_controls?.open_port_count ||
+      this.summary?.open_count ||
+      0
+    );
+  }
+
+  get trafficEvidenceCount(): number {
+    return this.summary?.traffic_observed_count || 0;
+  }
+
+  get exposedObjectCount(): number {
+    return this.summary?.resource_count || 0;
+  }
+
+  get recordCount(): number {
+    return this.summary?.item_count || 0;
+  }
+
+  get namespaceCount(): number {
+    return this.summary?.namespace_count || 0;
+  }
+
+  get uniqueAddressCount(): number {
+    return this.summary?.unique_address_count || 0;
+  }
+
+  get nodePortRange(): { start: number; end: number } {
+    const range =
+      this.dashboard?.service_controls?.node_port_range || '30000-32767';
+    const [start, end] = range.split('-').map(value => parseInt(value, 10));
+    return {
+      start: start || 30000,
+      end: end || 32767,
+    };
+  }
+
+  isK8sSystemNamespace(namespace: string): boolean {
+    return [
       'kube-system',
       'kube-public',
       'kube-node-lease',
       'local-path-storage',
-    ];
-    return systemNs.includes(ns);
+    ].includes(namespace);
+  }
+
+  getServiceStateKey(item: ServiceControlItem): 'open' | 'secured' | 'blocked' {
+    if (!item.manageable) {
+      return 'blocked';
+    }
+    return item.open_port_count > 0 ? 'open' : 'secured';
+  }
+
+  getServiceStateLabelKey(item: ServiceControlItem): string {
+    const state = this.getServiceStateKey(item);
+    if (state === 'blocked') {
+      return 'MICROSEGX.PORT_EXPOSURE.CONTROL_BLOCKED';
+    }
+    return state === 'open'
+      ? 'MICROSEGX.PORT_EXPOSURE.STATUS_OPEN'
+      : 'MICROSEGX.PORT_EXPOSURE.STATUS_CLOSED';
   }
 
   getStatusClass(item: ExposureItem): string {
     if (item.status === 'open') {
-      if (item.traffic_observed) return 'status-warning';
-      if (item.listener_observed) return 'status-info';
-      return 'status-ok';
+      if (item.traffic_observed) {
+        return 'status-warning';
+      }
+      if (item.listener_observed) {
+        return 'status-info';
+      }
+      return 'status-open';
     }
-    return 'status-error';
+
+    return 'status-closed';
   }
 
-  // Port toggle functions
+  getServiceStateClass(item: ServiceControlItem): string {
+    if (this.getServiceStateKey(item) === 'blocked') {
+      return 'state-blocked';
+    }
+    return item.open_port_count > 0 ? 'state-open' : 'state-secured';
+  }
+
+  getPublicPortDisplay(port: PortItem): string {
+    if (!port.public) {
+      return '-';
+    }
+    if (port.public_type === 'NodePort') {
+      return port.node_port?.toString() || '-';
+    }
+    return (
+      port.effective_public_port?.toString() ||
+      port.public_port?.toString() ||
+      '-'
+    );
+  }
+
+  getTrafficClass(item: ExposureItem): string {
+    if (item.traffic_observed) {
+      return 'traffic-observed';
+    }
+    if (item.listener_observed) {
+      return 'traffic-listener';
+    }
+    return 'traffic-none';
+  }
+
   openPortDialog(
     service: ServiceControlItem,
     port: PortItem,
@@ -337,7 +495,7 @@ export class MicrosegxPortExposureComponent implements OnInit {
     this.selectedService = service;
     this.selectedPort = port;
     this.portDialogMode = mode;
-    this.requestedNodePort = null;
+    this.requestedNodePort = mode === 'open' ? this.suggestNodePort() : null;
     this.portDialogError = '';
     this.showPortDialog = true;
   }
@@ -348,6 +506,7 @@ export class MicrosegxPortExposureComponent implements OnInit {
     this.selectedPort = null;
     this.portDialogLoading = false;
     this.portDialogError = '';
+    this.syncDialogBodyState();
   }
 
   isNodePortUsed(port: number): boolean {
@@ -356,16 +515,18 @@ export class MicrosegxPortExposureComponent implements OnInit {
 
   suggestNodePort(): number {
     const range = this.nodePortRange;
-    for (let p = range.start; p <= range.end; p++) {
-      if (!this.isNodePortUsed(p)) {
-        return p;
+    for (let candidate = range.start; candidate <= range.end; candidate += 1) {
+      if (!this.isNodePortUsed(candidate)) {
+        return candidate;
       }
     }
     return range.start;
   }
 
   executePortToggle(): void {
-    if (!this.selectedService || !this.selectedPort) return;
+    if (!this.selectedService || !this.selectedPort) {
+      return;
+    }
 
     this.portDialogLoading = true;
     this.portDialogError = '';
@@ -375,7 +536,7 @@ export class MicrosegxPortExposureComponent implements OnInit {
       namespace: this.selectedService.namespace,
       service_name: this.selectedService.service_name,
       port_key: this.selectedPort.key,
-      expose: expose,
+      expose,
       public_port: expose ? this.requestedNodePort : null,
     };
 
@@ -392,83 +553,6 @@ export class MicrosegxPortExposureComponent implements OnInit {
         error: err => {
           this.portDialogError =
             err?.error?.error ||
-            this.translate.instant('MICROSEGX.PORT_TOGGLE_FAILED');
-          this.portDialogLoading = false;
-        },
-      });
-  }
-
-  togglePortQuick(service: ServiceControlItem, port: PortItem): void {
-    // Quick toggle: if open, close it; if closed, open with auto-assigned port
-    if (port.public) {
-      this.openPortDialog(service, port, 'close');
-    } else {
-      this.requestedNodePort = this.suggestNodePort();
-      this.selectedService = service;
-      this.selectedPort = port;
-      this.portDialogMode = 'open';
-      this.portDialogError = '';
-      this.executePortToggle();
-    }
-  }
-
-  getPublicPortDisplay(port: PortItem): string {
-    if (!port.public) return '-';
-    if (port.public_type === 'NodePort') {
-      return port.node_port?.toString() || '-';
-    }
-    return port.public_port?.toString() || '-';
-  }
-
-  getPortStatusBadge(port: PortItem): string {
-    return port.public ? 'open' : 'closed';
-  }
-
-  toggleAllPorts(service: ServiceControlItem, expose: boolean): void {
-    // Toggle all ports in a service
-    const portsToToggle = service.ports.filter(p =>
-      expose ? !p.public : p.public
-    );
-    if (portsToToggle.length === 0) return;
-
-    // Start with the first port
-    const port = portsToToggle[0];
-    if (expose) {
-      this.requestedNodePort = this.suggestNodePort();
-    }
-    this.selectedService = service;
-    this.selectedPort = port;
-    this.portDialogMode = expose ? 'open' : 'close';
-    this.portDialogError = '';
-
-    const body = {
-      namespace: service.namespace,
-      service_name: service.service_name,
-      port_key: port.key,
-      expose: expose,
-      public_port: expose ? this.requestedNodePort : null,
-    };
-
-    this.portDialogLoading = true;
-
-    this.http
-      .post('/microsegx/api/service-controls/toggle', body, {
-        headers: this.getHeaders(),
-      })
-      .subscribe({
-        next: () => {
-          // Continue with remaining ports
-          const remainingPorts = portsToToggle.slice(1);
-          if (remainingPorts.length > 0) {
-            this.togglePortsSequentially(service, remainingPorts, expose);
-          } else {
-            this.portDialogLoading = false;
-            this.refresh();
-          }
-        },
-        error: err => {
-          this.portDialogError =
-            err?.error?.error ||
             this.translate.instant(
               'MICROSEGX.PORT_EXPOSURE.PORT_TOGGLE_FAILED'
             );
@@ -477,12 +561,25 @@ export class MicrosegxPortExposureComponent implements OnInit {
       });
   }
 
+  toggleAllPorts(service: ServiceControlItem, expose: boolean): void {
+    const portsToToggle = service.ports.filter(port =>
+      expose ? !port.public : port.public
+    );
+    if (portsToToggle.length === 0) {
+      return;
+    }
+
+    this.portDialogLoading = true;
+    this.togglePortsSequentially(service, portsToToggle, expose);
+  }
+
   private togglePortsSequentially(
     service: ServiceControlItem,
     ports: PortItem[],
     expose: boolean
   ): void {
     if (ports.length === 0) {
+      this.portDialogLoading = false;
       this.refresh();
       return;
     }
@@ -492,7 +589,7 @@ export class MicrosegxPortExposureComponent implements OnInit {
       namespace: service.namespace,
       service_name: service.service_name,
       port_key: port.key,
-      expose: expose,
+      expose,
       public_port: expose ? this.suggestNodePort() : null,
     };
 
@@ -505,9 +602,66 @@ export class MicrosegxPortExposureComponent implements OnInit {
           this.togglePortsSequentially(service, ports.slice(1), expose);
         },
         error: () => {
-          // Continue even if one fails
           this.togglePortsSequentially(service, ports.slice(1), expose);
         },
       });
+  }
+
+  private getServiceSearchTokens(item: ServiceControlItem): string[] {
+    const portTokens = item.ports.flatMap(port => [
+      port.port_name,
+      port.protocol,
+      `${port.service_port}`,
+      `${port.service_port}/${port.protocol}`,
+      `${port.target_port || ''}`,
+      `${port.public_port || ''}`,
+      `${port.node_port || ''}`,
+      `${port.effective_public_port || ''}`,
+      port.public_type,
+      port.public ? 'public' : 'private',
+    ]);
+
+    return [
+      item.namespace,
+      item.service_name,
+      item.public_service_type,
+      item.service_type,
+      item.public_service_name,
+      item.node_port_range,
+      ...portTokens,
+    ]
+      .map(token =>
+        String(token || '')
+          .trim()
+          .toLowerCase()
+      )
+      .filter(Boolean);
+  }
+
+  private syncDialogBodyState(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    if (this.showPortDialog === this.dialogBodyLocked) {
+      return;
+    }
+
+    document.body.classList.toggle(
+      'microsegx-dialog-open',
+      this.showPortDialog
+    );
+    this.dialogBodyLocked = this.showPortDialog;
+  }
+
+  private releaseDialogBodyState(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    if (this.dialogBodyLocked) {
+      document.body.classList.remove('microsegx-dialog-open');
+      this.dialogBodyLocked = false;
+    }
   }
 }

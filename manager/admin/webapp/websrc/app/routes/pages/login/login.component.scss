@@ -88,6 +88,17 @@ input[type='text'] {
   font-weight: 600;
 }
 
+.login-icon {
+  top: 44px !important;
+  right: 12px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: #8f959e !important;
+  line-height: 1 !important;
+  pointer-events: none;
+}
+
 @media only screen and (max-width: 767px) {
   .login-shell__toolbar {
     flex-direction: column;

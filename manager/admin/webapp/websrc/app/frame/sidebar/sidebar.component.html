@@ -22,10 +22,7 @@
     </div>
 
     <!-- START sidebar nav-->
-    <ul
-      class="sidebar-nav"
-      style="height: calc(100vh - 292px)"
-      [ngStyle]="customSideBarStyle">
+    <ul class="sidebar-nav sidebar-nav--main" [ngStyle]="customSideBarStyle">
       <li
         *ngFor="let item of menuItems; let idx = index"
         [ngClass]="{ 'nav-heading': item.heading }"
@@ -157,11 +154,6 @@
       </li>
     </ul>
     <!-- END sidebar nav-->
-
-    <footer
-      class="footer-container"
-      [ngStyle]="customFooterStyle"
-      app-footer></footer>
   </nav>
 </div>
 <!-- END Sidebar (left)-->

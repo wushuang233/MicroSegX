@@ -1,12 +1,12 @@
 // @use "bootstrap/scss/_functions.scss";
 // @use "bootstrap/scss/_variables.scss";
 // @use "bootstrap/scss/_mixins.scss";
-@use "bootstrap" as *;
-@use "../../common/styles/app/variables";
+@use 'bootstrap' as *;
+@use '../../common/styles/app/variables';
 
-$system-prepare-bg: $dark;
-$system-prepare-wd: 100px;
-$system-prepare-hg: 30px;
+$system-prepare-bg: #f4f9ff;
+$system-prepare-wd: 88px;
+$system-prepare-hg: 88px;
 
 .system-prepare {
   position: fixed;
@@ -16,13 +16,20 @@ $system-prepare-hg: 30px;
   height: 100%;
   overflow: hidden;
   background-color: $system-prepare-bg;
-  background-image: linear-gradient(90deg, $system-prepare-bg 10%, darken($system-prepare-bg, 5%) 90%); /* W3C */
-  background-image: -webkit-linear-gradient(90deg, $system-prepare-bg 10%, darken($system-prepare-bg, 5%) 90%); /* Chrome 10+, Saf5.1+ */
-  background-image: -moz-linear-gradient(90deg, $system-prepare-bg 10%, darken($system-prepare-bg, 5%) 90%); /* FF3.6+ */
-  background-image: -o-linear-gradient(90deg, $system-prepare-bg 10%, darken($system-prepare-bg, 5%) 90%); /* Opera 11.10+ */
-  background-image: -ms-linear-gradient(90deg, $system-prepare-bg 10%, darken($system-prepare-bg, 5%) 90%); /* IE10 */
+  background-image:
+    radial-gradient(
+      circle at top right,
+      rgba(22, 119, 255, 0.16),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(22, 119, 255, 0.1),
+      transparent 24%
+    ),
+    linear-gradient(180deg, #f8fbff 0%, #edf4ff 100%);
   z-index: 9999;
-  transition: opacity .65s;
+  transition: opacity 0.65s;
 }
 
 .system-prepare-progress {
@@ -34,9 +41,34 @@ $system-prepare-hg: 30px;
   margin: auto;
   width: $system-prepare-wd;
   height: $system-prepare-hg;
-  background-image: url(../../../assets/img/systemPrepare/systemPrepare.full.png);
-  background-size: $system-prepare-wd $system-prepare-hg;
-  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(22, 119, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(22, 119, 255, 0.14);
+  overflow: hidden;
+}
+
+.system-prepare-progress::before {
+  content: '';
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(22, 119, 255, 0.16);
+  border-top-color: #1677ff;
+  animation: system-prepare-spin 0.85s linear infinite;
+}
+
+@keyframes system-prepare-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .system-prepare-hidden {
@@ -48,7 +80,7 @@ $system-prepare-hg: 30px;
   display: block;
 
   .system-prepare-progress {
-    transition: transform .4s ease;
+    transition: transform 0.4s ease;
     transform: scale(0);
   }
 }

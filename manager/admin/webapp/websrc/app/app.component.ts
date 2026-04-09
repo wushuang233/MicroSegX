@@ -92,12 +92,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.multiClusterService.getClusters().subscribe({
-      next: (data: ClusterData) => {
-        GlobalVariable.isMaster =
-          data.fed_role === MapConstant.FED_ROLES.MASTER;
-        GlobalVariable.isMember =
-          data.fed_role === MapConstant.FED_ROLES.MEMBER;
-        GlobalVariable.isStandAlone = data.fed_role === '';
+      next: (data: ClusterData | null) => {
+        const fedRole = data?.fed_role || '';
+        GlobalVariable.isMaster = fedRole === MapConstant.FED_ROLES.MASTER;
+        GlobalVariable.isMember = fedRole === MapConstant.FED_ROLES.MEMBER;
+        GlobalVariable.isStandAlone = fedRole === '';
         //get the status of the chosen cluster
         const sessionCluster = this.localStorage.get(
           GlobalConstant.LOCAL_STORAGE_CLUSTER

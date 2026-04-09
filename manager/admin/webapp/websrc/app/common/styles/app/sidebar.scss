@@ -19,16 +19,23 @@ $sidebar-item-border-wd: 5px;
 $scrollbar-wd: 17px;
 
 .sidebar {
+  display: flex;
+  flex-direction: column;
   margin-top: 0;
-  height: 100%;
-  margin: 0 14px 20px;
-  padding: 18px 14px 20px;
+  height: auto;
+  max-height: 100%;
+  margin: 0 14px;
+  padding: 18px 14px;
   min-width: 240px;
-  background:
-    linear-gradient(180deg, rgba(6, 26, 56, 0.98) 0%, rgba(0, 21, 41, 0.98) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(6, 26, 56, 0.98) 0%,
+    rgba(0, 21, 41, 0.98) 100%
+  );
   border-radius: 28px;
   box-shadow: 0 24px 46px rgba(0, 21, 41, 0.22);
   overflow: hidden;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 
   &:after {
@@ -46,12 +53,22 @@ $scrollbar-wd: 17px;
   }
 }
 
+.sidebar-nav--main {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 280px);
+  padding-bottom: 4px;
+}
+
 .sidebar-workspace-card {
   padding: 18px 18px 16px;
   margin-bottom: 18px;
   border-radius: 22px;
-  background:
-    linear-gradient(145deg, rgba(22, 119, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(22, 119, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
   border: 1px solid rgba(145, 201, 255, 0.14);
   color: #ffffff;
 }
@@ -217,8 +234,7 @@ $scrollbar-wd: 17px;
 $tablet-landscape: 1025px;
 @media only screen and (min-width: $tablet-landscape) {
   .sidebar:not(.show-scrollbar) {
-    margin-right: calc(14px - #{$scrollbar-wd});
-    overflow-y: scroll;
+    overflow-y: hidden;
   }
 }
 
@@ -401,17 +417,4 @@ $tablet-landscape: 1025px;
     transition: height 0.2s ease;
     animation: fadeInLeft 0.5s;
   }
-}
-
-.footer-container {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
-  height: auto;
-  padding: 14px 16px !important;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.82);
-  text-align: center;
 }

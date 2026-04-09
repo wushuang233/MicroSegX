@@ -1,161 +1,1106 @@
 <div class="ziti-page">
-  <!-- Header -->
-  <div class="page-header">
-    <div class="page-header__info">
-      <h1>{{ 'MICROSEGX.ZITI.TITLE' | translate }}</h1>
-      <p class="subtitle">{{ 'MICROSEGX.ZITI.SUBTITLE' | translate }}</p>
+  <section class="workspace-hero">
+    <div class="workspace-hero__content">
+      <span class="workspace-kicker">
+        {{ 'MICROSEGX.ZITI.HERO_EYEBROW' | translate }}
+      </span>
+      <div class="page-header__info">
+        <h1>{{ 'MICROSEGX.ZITI.TITLE' | translate }}</h1>
+        <p class="subtitle">{{ 'MICROSEGX.ZITI.SUBTITLE' | translate }}</p>
+      </div>
+      <p class="workspace-copy">
+        {{ 'MICROSEGX.ZITI.HERO_COPY' | translate }}
+      </p>
+      <div class="workspace-chips">
+        <span class="workspace-chip">
+          <mat-icon>hub</mat-icon>
+          {{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}:
+          {{
+            session?.controller_url || session?.default_controller_url || '-'
+          }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>badge</mat-icon>
+          {{ 'MICROSEGX.ZITI.IDENTITY' | translate }}:
+          {{ session?.identity_name || '-' }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>lan</mat-icon>
+          {{ 'MICROSEGX.ZITI.K8S_SERVICES' | translate }}:
+          {{ k8sServices.length }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>verified_user</mat-icon>
+          {{ 'MICROSEGX.ZITI.AUTH_POLICIES' | translate }}:
+          {{ authPolicies.length }}
+        </span>
+      </div>
     </div>
-    <div class="page-header__actions">
-      <button mat-stroked-button (click)="refresh()">
+
+    <div class="workspace-hero__actions">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'general.FILTER' | translate }}</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          [placeholder]="'MICROSEGX.ZITI.SEARCH_PLACEHOLDER' | translate" />
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="hero-action hero-action--primary"
+        (click)="refresh()"
+        [disabled]="loading">
         <mat-icon>cached</mat-icon>
         {{ 'general.REFRESH' | translate }}
       </button>
-    </div>
-  </div>
 
-  <!-- Error Banner -->
-  <mat-card *ngIf="error" class="error-card">
+      <button
+        mat-stroked-button
+        class="hero-action"
+        (click)="logout()"
+        [disabled]="!isLoggedIn">
+        <mat-icon>logout</mat-icon>
+        {{ 'MICROSEGX.ZITI.LOGOUT' | translate }}
+      </button>
+    </div>
+  </section>
+
+  <mat-card *ngIf="error" class="feedback-card feedback-card--error">
     <mat-icon>error</mat-icon>
     <span>{{ error }}</span>
   </mat-card>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
+  <div *ngIf="loading" class="loading-shell">
+    <mat-spinner diameter="44"></mat-spinner>
   </div>
 
-  <!-- Main Content -->
   <ng-container *ngIf="!loading">
-    <!-- Not Configured Warning -->
-    <mat-card *ngIf="!isConfigured" class="warning-card">
-      <mat-card-content>
-        <div class="warning-content">
-          <mat-icon>warning</mat-icon>
-          <div>
-            <h3>{{ 'MICROSEGX.ZITI.NOT_CONFIGURED' | translate }}</h3>
-            <p>{{ 'MICROSEGX.ZITI.NOT_CONFIGURED_DESC' | translate }}</p>
-          </div>
-        </div>
-      </mat-card-content>
+    <mat-card
+      *ngIf="!isConfigured"
+      class="feedback-card feedback-card--warning">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <h3>{{ 'MICROSEGX.ZITI.NOT_CONFIGURED' | translate }}</h3>
+        <p>{{ 'MICROSEGX.ZITI.NOT_CONFIGURED_DESC' | translate }}</p>
+      </div>
     </mat-card>
 
-    <!-- Logged In Content -->
-    <ng-container *ngIf="isConfigured && isLoggedIn">
-      <!-- Session Info -->
-      <mat-card class="session-card">
-        <div class="session-info">
-          <div class="session-item">
-            <mat-icon>link</mat-icon>
-            <div>
-              <div class="session-label">
-                {{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}
-              </div>
-              <div class="session-value">
-                {{ session?.controller_url || session?.default_controller_url }}
-              </div>
-            </div>
-          </div>
-          <div class="session-item">
-            <mat-icon>person</mat-icon>
-            <div>
-              <div class="session-label">
-                {{ 'MICROSEGX.ZITI.IDENTITY' | translate }}
-              </div>
-              <div class="session-value">
-                {{ session?.identity_name || '-' }}
-              </div>
-            </div>
-          </div>
-          <div class="session-item">
-            <mat-icon>schedule</mat-icon>
-            <div>
-              <div class="session-label">
-                {{ 'MICROSEGX.ZITI.EXPIRES' | translate }}
-              </div>
-              <div class="session-value">
-                {{ getExpiresAt() }}
-              </div>
-            </div>
-          </div>
-          <button mat-stroked-button color="warn" (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            {{ 'MICROSEGX.ZITI.LOGOUT' | translate }}
-          </button>
-        </div>
-      </mat-card>
+    <mat-card
+      *ngIf="isConfigured && !isLoggedIn"
+      class="feedback-card feedback-card--warning">
+      <mat-icon>lock_clock</mat-icon>
+      <div>
+        <h3>{{ 'MICROSEGX.ZITI.SESSION_READY' | translate }}</h3>
+        <p>{{ 'MICROSEGX.ZITI.LOGIN_FAILED' | translate }}</p>
+      </div>
+    </mat-card>
 
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <mat-card class="stat-card">
-          <div class="stat-icon stat-icon--primary">
-            <mat-icon>router</mat-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">
-              {{ counts.alive_edge_routers || 0 }}/{{
-                counts.deployed_edge_routers || 0
-              }}
+    <ng-container *ngIf="isConfigured && isLoggedIn">
+      <div class="session-grid">
+        <mat-card class="session-card session-card--primary">
+          <div class="session-card__head">
+            <div>
+              <span class="session-card__eyebrow">{{
+                'MICROSEGX.ZITI.SESSION_TITLE' | translate
+              }}</span>
+              <h2>{{ session?.identity_name || session?.username || '-' }}</h2>
+              <p>{{ 'MICROSEGX.ZITI.SESSION_DESC' | translate }}</p>
             </div>
-            <div class="stat-label">
-              {{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}
+            <span class="status-chip status-online">
+              <mat-icon>check_circle</mat-icon>
+              {{ 'MICROSEGX.ZITI.SESSION_ACTIVE' | translate }}
+            </span>
+          </div>
+
+          <div class="session-card__grid">
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}</span>
+              <strong>{{
+                session?.controller_url ||
+                  session?.default_controller_url ||
+                  '-'
+              }}</strong>
             </div>
-          </div>
-        </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-icon stat-icon--success">
-            <mat-icon>category</mat-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ counts.services || 0 }}</div>
-            <div class="stat-label">
-              {{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.CURRENT_OPERATOR' | translate }}</span>
+              <strong>{{ session?.username || '-' }}</strong>
             </div>
-          </div>
-        </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-icon stat-icon--info">
-            <mat-icon>badge</mat-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ counts.identities || 0 }}</div>
-            <div class="stat-label">
-              {{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.EXPIRES' | translate }}</span>
+              <strong>{{ getExpiresAt() }}</strong>
             </div>
           </div>
         </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-icon stat-icon--warning">
-            <mat-icon>settings</mat-icon>
+
+        <mat-card class="session-card">
+          <div class="session-card__head">
+            <div>
+              <span class="session-card__eyebrow">{{
+                'MICROSEGX.ZITI.FABRIC_HEALTH' | translate
+              }}</span>
+              <h2>{{ counts.alive_edge_routers || 0 }}</h2>
+              <p>{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}</p>
+            </div>
+            <div class="metric-badge">
+              <mat-icon>router</mat-icon>
+            </div>
           </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ counts.configs || 0 }}</div>
-            <div class="stat-label">
-              {{ 'MICROSEGX.ZITI.CONFIGS.TITLE' | translate }}
+
+          <div class="session-card__grid">
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</span>
+              <strong>{{ counts.services || 0 }}</strong>
+            </div>
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}</span>
+              <strong>{{ counts.identities || 0 }}</strong>
+            </div>
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.POLICIES.TITLE' | translate }}</span>
+              <strong>
+                {{
+                  (counts.service_policies || 0) +
+                    (counts.edge_router_policies || 0) +
+                    (counts.service_edge_router_policies || 0)
+                }}
+              </strong>
+            </div>
+          </div>
+        </mat-card>
+
+        <mat-card class="session-card">
+          <div class="session-card__head">
+            <div>
+              <span class="session-card__eyebrow">{{
+                'MICROSEGX.ZITI.K8S_INTEGRATION' | translate
+              }}</span>
+              <h2>{{ counts.deployed_edge_routers || 0 }}</h2>
+              <p>{{ 'MICROSEGX.ZITI.ROUTER_RESOURCES' | translate }}</p>
+            </div>
+            <div class="metric-badge metric-badge--soft">
+              <mat-icon>lan</mat-icon>
+            </div>
+          </div>
+
+          <div class="session-card__grid">
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.K8S_SERVICES' | translate }}</span>
+              <strong>{{ k8sServices.length }}</strong>
+            </div>
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.AUTH_POLICIES' | translate }}</span>
+              <strong>{{ authPolicies.length }}</strong>
+            </div>
+            <div class="session-meta">
+              <span>{{ 'MICROSEGX.ZITI.POSTURE_CHECKS' | translate }}</span>
+              <strong>{{ postureChecks.length }}</strong>
             </div>
           </div>
         </mat-card>
       </div>
 
-      <!-- Tab Navigation -->
+      <div class="stats-grid">
+        <mat-card class="metric-card metric-card--primary">
+          <div class="metric-card__icon">
+            <mat-icon>router</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}</span>
+            <strong>{{ counts.alive_edge_routers || 0 }}</strong>
+            <small>
+              {{ counts.deployed_edge_routers || 0 }}
+              {{ 'MICROSEGX.ZITI.ROUTER_RESOURCES' | translate }}
+            </small>
+          </div>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <div class="metric-card__icon metric-card__icon--green">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</span>
+            <strong>{{ counts.services || 0 }}</strong>
+            <small>{{ 'MICROSEGX.ZITI.SERVICE_MODELS' | translate }}</small>
+          </div>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <div class="metric-card__icon metric-card__icon--blue">
+            <mat-icon>badge</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}</span>
+            <strong>{{ counts.identities || 0 }}</strong>
+            <small>{{ 'MICROSEGX.ZITI.IDENTITIES_COUNT' | translate }}</small>
+          </div>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <div class="metric-card__icon metric-card__icon--amber">
+            <mat-icon>settings</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.CONFIGS.TITLE' | translate }}</span>
+            <strong>{{ counts.configs || 0 }}</strong>
+            <small>{{ 'MICROSEGX.ZITI.CONFIG_OBJECTS' | translate }}</small>
+          </div>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <div class="metric-card__icon metric-card__icon--blue">
+            <mat-icon>shield</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.POLICIES.TITLE' | translate }}</span>
+            <strong>
+              {{
+                (counts.service_policies || 0) +
+                  (counts.edge_router_policies || 0) +
+                  (counts.service_edge_router_policies || 0)
+              }}
+            </strong>
+            <small>{{ 'MICROSEGX.ZITI.POLICIES_COUNT' | translate }}</small>
+          </div>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <div class="metric-card__icon metric-card__icon--green">
+            <mat-icon>checklist</mat-icon>
+          </div>
+          <div class="metric-card__body">
+            <span>{{ 'MICROSEGX.ZITI.POSTURE_CHECKS' | translate }}</span>
+            <strong>{{ postureChecks.length }}</strong>
+            <small
+              >{{ 'MICROSEGX.ZITI.AUTH_POLICIES' | translate }}:
+              {{ authPolicies.length }}</small
+            >
+          </div>
+        </mat-card>
+      </div>
+
       <mat-card class="tabs-card">
+        <div class="tabs-card__header">
+          <div>
+            <span class="tabs-card__eyebrow">{{
+              'MICROSEGX.ZITI.WORKSPACE_TITLE' | translate
+            }}</span>
+            <h2>{{ 'MICROSEGX.ZITI.TITLE' | translate }}</h2>
+            <p>{{ getActiveTabDescriptionKey() | translate }}</p>
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            class="tabs-card__create"
+            (click)="openActiveCreateDialog()">
+            <mat-icon>add</mat-icon>
+            {{ getActiveCreateLabelKey() | translate }}
+          </button>
+        </div>
+
         <mat-tab-group [(selectedIndex)]="activeTabIndex">
           <mat-tab label="{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}">
-            <ng-container *ngTemplateOutlet="routersTab"></ng-container>
+            <div class="tab-content">
+              <div class="tab-toolbar">
+                <div>
+                  <h2>{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}</h2>
+                  <p>
+                    {{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }} ·
+                    {{ filteredRouters.length }}
+                  </p>
+                </div>
+                <div class="tab-toolbar__filters">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.ROUTER_STATUS_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="routerStatusFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="online">{{
+                        'MICROSEGX.ZITI.Routers.ONLINE' | translate
+                      }}</mat-option>
+                      <mat-option value="offline">{{
+                        'MICROSEGX.ZITI.Routers.OFFLINE' | translate
+                      }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.ROUTER_DEPLOY_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="routerDeploymentFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="deployed">{{
+                        'MICROSEGX.ZITI.ROUTER_DEPLOYED' | translate
+                      }}</mat-option>
+                      <mat-option value="standalone">{{
+                        'MICROSEGX.ZITI.ROUTER_STANDALONE' | translate
+                      }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <table
+                mat-table
+                [dataSource]="filteredRouters"
+                class="entity-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.Routers.NAME' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let router">
+                    <div class="entity-cell">
+                      <strong>{{ router.name }}</strong>
+                      <small>{{ router.hostname || '-' }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.Routers.STATUS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let router">
+                    <span
+                      class="status-chip"
+                      [ngClass]="
+                        router.isOnline ? 'status-online' : 'status-offline'
+                      ">
+                      <mat-icon>{{
+                        router.isOnline ? 'check_circle' : 'pause_circle'
+                      }}</mat-icon>
+                      {{
+                        router.isOnline
+                          ? ('MICROSEGX.ZITI.Routers.ONLINE' | translate)
+                          : ('MICROSEGX.ZITI.Routers.OFFLINE' | translate)
+                      }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="workload">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.Routers.K8S_WORKLOAD' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let router">
+                    <div class="entity-cell">
+                      <strong>{{ getRouterWorkloadLabel(router) }}</strong>
+                      <small>{{ getRouterRoles(router) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'general.ACTIONS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let router">
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        (click)="openEditRouterDialog(router)">
+                        <mat-icon>edit</mat-icon>
+                        {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="
+                          (getRouterWorkload(router)
+                            ? 'MICROSEGX.ZITI.Routers.UPDATE_DEPLOY'
+                            : 'MICROSEGX.ZITI.Routers.DEPLOY_K8S'
+                          ) | translate
+                        "
+                        (click)="openRouterDeployDialog(router)">
+                        <mat-icon>cloud_upload</mat-icon>
+                        {{
+                          (getRouterWorkload(router)
+                            ? 'MICROSEGX.ZITI.Routers.UPDATE_DEPLOY'
+                            : 'MICROSEGX.ZITI.Routers.DEPLOY_K8S'
+                          ) | translate
+                        }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [disabled]="isEntityBusy('router-reenroll', router.id)"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.Routers.RE_ENROLL' | translate
+                        "
+                        (click)="reenrollRouter(router)">
+                        <mat-icon>autorenew</mat-icon>
+                        {{ 'MICROSEGX.ZITI.Routers.RE_ENROLL' | translate }}
+                      </button>
+                      <button
+                        *ngIf="getRouterWorkload(router)"
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.Routers.DELETE_K8S' | translate
+                        "
+                        (click)="deleteRouterK8s(router)">
+                        <mat-icon>dns_off</mat-icon>
+                        {{ 'MICROSEGX.ZITI.Routers.DELETE_K8S' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.Routers.DELETE_ROUTER' | translate
+                        "
+                        (click)="openDeleteRouterDialog(router)">
+                        <mat-icon>delete</mat-icon>
+                        {{ 'MICROSEGX.ZITI.Routers.DELETE_ROUTER' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="[
+                    'name',
+                    'status',
+                    'workload',
+                    'actions',
+                  ]"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['name', 'status', 'workload', 'actions']
+                  "></tr>
+              </table>
+
+              <div *ngIf="filteredRouters.length === 0" class="empty-state">
+                <mat-icon>router</mat-icon>
+                <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+                <p>{{ 'MICROSEGX.ZITI.Routers.CREATE_HINT' | translate }}</p>
+              </div>
+            </div>
           </mat-tab>
+
           <mat-tab label="{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}">
-            <ng-container *ngTemplateOutlet="servicesTab"></ng-container>
+            <div class="tab-content">
+              <div class="tab-toolbar">
+                <div>
+                  <h2>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</h2>
+                  <p>
+                    {{ filteredServices.length }}
+                    {{ 'MICROSEGX.ZITI.SERVICE_MODELS' | translate }}
+                  </p>
+                </div>
+                <div class="tab-toolbar__filters">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.SERVICE_ENCRYPTION_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="serviceEncryptionFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="required">{{
+                        'MICROSEGX.ZITI.SERVICES.ENCRYPTION_REQUIRED'
+                          | translate
+                      }}</mat-option>
+                      <mat-option value="optional">{{
+                        'MICROSEGX.ZITI.SERVICES.ENCRYPTION_OPTIONAL'
+                          | translate
+                      }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <table
+                mat-table
+                [dataSource]="filteredServices"
+                class="entity-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.NAME' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="entity-cell">
+                      <strong>{{ service.name }}</strong>
+                      <small>{{ listPreview(service.roleAttributes) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="encryption">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.ENCRYPTION' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <span
+                      class="status-chip"
+                      [ngClass]="
+                        service.encryptionRequired
+                          ? 'status-online'
+                          : 'status-paused'
+                      ">
+                      <mat-icon>{{
+                        service.encryptionRequired ? 'lock' : 'lock_open'
+                      }}</mat-icon>
+                      {{
+                        service.encryptionRequired
+                          ? ('MICROSEGX.ZITI.SERVICES.ENCRYPTION_REQUIRED'
+                            | translate)
+                          : ('MICROSEGX.ZITI.SERVICES.ENCRYPTION_OPTIONAL'
+                            | translate)
+                      }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="configs">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.CONFIGS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="entity-cell">
+                      <strong>{{
+                        getServiceConfigNames(service).length
+                      }}</strong>
+                      <small>{{
+                        listPreview(getServiceConfigNames(service))
+                      }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="routing">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.ROUTING' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="entity-cell">
+                      <strong>{{
+                        service.terminatorStrategy || 'smartrouting'
+                      }}</strong>
+                      <small>{{ service.maxIdleTimeMillis || 0 }} ms</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'general.ACTIONS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        (click)="openEditServiceDialog(service)">
+                        <mat-icon>edit</mat-icon>
+                        {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.DELETE_ENTITY' | translate
+                        "
+                        (click)="openDeleteServiceDialog(service)">
+                        <mat-icon>delete</mat-icon>
+                        {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="[
+                    'name',
+                    'encryption',
+                    'configs',
+                    'routing',
+                    'actions',
+                  ]"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: [
+                      'name',
+                      'encryption',
+                      'configs',
+                      'routing',
+                      'actions',
+                    ]
+                  "></tr>
+              </table>
+
+              <div *ngIf="filteredServices.length === 0" class="empty-state">
+                <mat-icon>category</mat-icon>
+                <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+                <p>{{ 'MICROSEGX.ZITI.SERVICES.CREATE_HINT' | translate }}</p>
+              </div>
+            </div>
           </mat-tab>
+
           <mat-tab label="{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}">
-            <ng-container *ngTemplateOutlet="identitiesTab"></ng-container>
+            <div class="tab-content">
+              <div class="tab-toolbar">
+                <div>
+                  <h2>{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}</h2>
+                  <p>
+                    {{ filteredIdentities.length }}
+                    {{ 'MICROSEGX.ZITI.IDENTITIES_COUNT' | translate }}
+                  </p>
+                </div>
+                <div class="tab-toolbar__filters">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.IDENTITY_ENROLLMENT_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="identityEnrollmentFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="enrolled">{{
+                        'MICROSEGX.ZITI.IDENTITIES.ENROLLED' | translate
+                      }}</mat-option>
+                      <mat-option value="pending">{{
+                        'MICROSEGX.ZITI.IDENTITIES.PENDING' | translate
+                      }}</mat-option>
+                      <mat-option value="none">{{
+                        'MICROSEGX.ZITI.IDENTITIES.NO_ENROLLMENT' | translate
+                      }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.IDENTITY_TYPE_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="identityTypeFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option
+                        *ngFor="let type of identityTypeOptions"
+                        [value]="type">
+                        {{
+                          type === 'admin'
+                            ? ('MICROSEGX.ZITI.TYPE_ADMIN' | translate)
+                            : type
+                        }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <table
+                mat-table
+                [dataSource]="filteredIdentities"
+                class="entity-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.IDENTITIES.NAME' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let identity">
+                    <div class="entity-cell">
+                      <strong>{{ identity.name }}</strong>
+                      <small>{{ listPreview(identity.roleAttributes) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.IDENTITIES.TYPE' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let identity">
+                    <div class="entity-cell">
+                      <strong>{{ identity.type || 'Default' }}</strong>
+                      <small>{{ getIdentityTypeLabel(identity) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="enrollment">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.IDENTITIES.ENROLLMENT' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let identity">
+                    <span
+                      class="status-chip"
+                      [ngClass]="{
+                        'status-online':
+                          getIdentityEnrollmentState(identity) === 'enrolled',
+                        'status-paused':
+                          getIdentityEnrollmentState(identity) === 'pending',
+                        'status-offline':
+                          getIdentityEnrollmentState(identity) === 'none',
+                      }">
+                      <mat-icon>{{
+                        getIdentityEnrollmentState(identity) === 'enrolled'
+                          ? 'task_alt'
+                          : getIdentityEnrollmentState(identity) === 'pending'
+                            ? 'pending'
+                            : 'remove_circle'
+                      }}</mat-icon>
+                      {{
+                        getIdentityEnrollmentState(identity) === 'enrolled'
+                          ? ('MICROSEGX.ZITI.IDENTITIES.ENROLLED' | translate)
+                          : getIdentityEnrollmentState(identity) === 'pending'
+                            ? ('MICROSEGX.ZITI.IDENTITIES.PENDING' | translate)
+                            : ('MICROSEGX.ZITI.IDENTITIES.NO_ENROLLMENT'
+                              | translate)
+                      }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="auth">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.IDENTITIES.AUTH_POLICY' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let identity">
+                    {{ getIdentityPolicyName(identity) }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'general.ACTIONS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let identity">
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        (click)="openEditIdentityDialog(identity)">
+                        <mat-icon>edit</mat-icon>
+                        {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [disabled]="isEntityBusy('identity-jwt', identity.id)"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.IDENTITIES.DOWNLOAD_JWT' | translate
+                        "
+                        (click)="requestIdentityJwt(identity, false)">
+                        <mat-icon>download</mat-icon>
+                        {{
+                          'MICROSEGX.ZITI.IDENTITIES.DOWNLOAD_JWT' | translate
+                        }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [disabled]="
+                          isEntityBusy('identity-jwt-rotate', identity.id)
+                        "
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.IDENTITIES.ROTATE_JWT' | translate
+                        "
+                        (click)="requestIdentityJwt(identity, true)">
+                        <mat-icon>sync</mat-icon>
+                        {{ 'MICROSEGX.ZITI.IDENTITIES.ROTATE_JWT' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.DELETE_ENTITY' | translate
+                        "
+                        (click)="openDeleteIdentityDialog(identity)">
+                        <mat-icon>delete</mat-icon>
+                        {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="[
+                    'name',
+                    'type',
+                    'enrollment',
+                    'auth',
+                    'actions',
+                  ]"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['name', 'type', 'enrollment', 'auth', 'actions']
+                  "></tr>
+              </table>
+
+              <div *ngIf="filteredIdentities.length === 0" class="empty-state">
+                <mat-icon>badge</mat-icon>
+                <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+                <p>{{ 'MICROSEGX.ZITI.IDENTITIES.CREATE_HINT' | translate }}</p>
+              </div>
+            </div>
           </mat-tab>
+
           <mat-tab label="{{ 'MICROSEGX.ZITI.CONFIGS.TITLE' | translate }}">
-            <ng-container *ngTemplateOutlet="configsTab"></ng-container>
+            <div class="tab-content">
+              <div class="tab-toolbar">
+                <div>
+                  <h2>{{ 'MICROSEGX.ZITI.CONFIGS.TITLE' | translate }}</h2>
+                  <p>
+                    {{ filteredConfigs.length }}
+                    {{ 'MICROSEGX.ZITI.CONFIG_OBJECTS' | translate }}
+                  </p>
+                </div>
+                <div class="tab-toolbar__filters">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.CONFIG_TYPE_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="configTypeFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option
+                        *ngFor="let type of configTypeNames"
+                        [value]="type">
+                        {{ type }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <table
+                mat-table
+                [dataSource]="filteredConfigs"
+                class="entity-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.CONFIGS.NAME' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let config">
+                    <div class="entity-cell">
+                      <strong>{{ config.name }}</strong>
+                      <small>{{
+                        config.configType?.name || config.configTypeId || '-'
+                      }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.CONFIGS.TYPE' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let config">
+                    <span class="table-pill">
+                      {{
+                        config.configType?.name || config.configTypeId || '-'
+                      }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="usage">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.CONFIGS.USAGE' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let config">
+                    <div class="entity-cell">
+                      <strong>{{ getConfigUsageCount(config) }}</strong>
+                      <small>{{ previewConfigData(config) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'general.ACTIONS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let config">
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        (click)="openEditConfigDialog(config)">
+                        <mat-icon>edit</mat-icon>
+                        {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.DELETE_ENTITY' | translate
+                        "
+                        (click)="openDeleteConfigDialog(config)">
+                        <mat-icon>delete</mat-icon>
+                        {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="['name', 'type', 'usage', 'actions']"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['name', 'type', 'usage', 'actions']
+                  "></tr>
+              </table>
+
+              <div *ngIf="filteredConfigs.length === 0" class="empty-state">
+                <mat-icon>settings</mat-icon>
+                <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+                <p>{{ 'MICROSEGX.ZITI.CONFIGS.CREATE_HINT' | translate }}</p>
+              </div>
+            </div>
           </mat-tab>
-          <mat-tab
-            label="{{
-              'MICROSEGX.ZITI.POLICIES.SERVICE_POLICIES' | translate
-            }}">
-            <ng-container *ngTemplateOutlet="policiesTab"></ng-container>
+
+          <mat-tab label="{{ 'MICROSEGX.ZITI.POLICIES.TITLE' | translate }}">
+            <div class="tab-content">
+              <div class="tab-toolbar">
+                <div>
+                  <h2>{{ getActivePolicyTitleKey() | translate }}</h2>
+                  <p>
+                    {{ activePolicies.length }}
+                    {{ 'MICROSEGX.ZITI.POLICIES.TITLE' | translate }}
+                  </p>
+                </div>
+                <div class="tab-toolbar__filters">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.POLICY_SEMANTIC_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="policySemanticFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="AnyOf">AnyOf</mat-option>
+                      <mat-option value="AllOf">AllOf</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-button-toggle-group
+                class="policy-toggle"
+                [(ngModel)]="selectedPolicyType">
+                <mat-button-toggle value="service-policies">
+                  {{ 'MICROSEGX.ZITI.POLICIES.SERVICE_POLICIES' | translate }}
+                </mat-button-toggle>
+                <mat-button-toggle value="edge-router-policies">
+                  {{
+                    'MICROSEGX.ZITI.POLICIES.EDGE_ROUTER_POLICIES' | translate
+                  }}
+                </mat-button-toggle>
+                <mat-button-toggle value="service-edge-router-policies">
+                  {{
+                    'MICROSEGX.ZITI.POLICIES.SERVICE_EDGE_ROUTER_POLICIES'
+                      | translate
+                  }}
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+
+              <table
+                mat-table
+                [dataSource]="activePolicies"
+                class="entity-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.POLICIES.NAME' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let policy">
+                    <div class="entity-cell">
+                      <strong>{{ policy.name }}</strong>
+                      <small>{{ getPolicySummary(policy) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="matches">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.POLICIES.MATCHES' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let policy">
+                    {{ getPolicyMatches(policy) }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'general.ACTIONS' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let policy">
+                    <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        (click)="
+                          openEditPolicyDialog(policy, selectedPolicyType)
+                        ">
+                        <mat-icon>edit</mat-icon>
+                        {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        color="warn"
+                        [matTooltip]="
+                          'MICROSEGX.ZITI.DELETE_ENTITY' | translate
+                        "
+                        (click)="
+                          openDeletePolicyDialog(policy, selectedPolicyType)
+                        ">
+                        <mat-icon>delete</mat-icon>
+                        {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="['name', 'matches', 'actions']"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['name', 'matches', 'actions']
+                  "></tr>
+              </table>
+
+              <div *ngIf="activePolicies.length === 0" class="empty-state">
+                <mat-icon>shield</mat-icon>
+                <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+                <p>{{ 'MICROSEGX.ZITI.POLICIES.CREATE_HINT' | translate }}</p>
+              </div>
+            </div>
           </mat-tab>
         </mat-tab-group>
       </mat-card>
@@ -163,501 +1108,15 @@
   </ng-container>
 </div>
 
-<!-- Routers Tab Template -->
-<ng-template #routersTab>
-  <div class="tab-content">
-    <div class="tab-header">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="openRouterDeployDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'MICROSEGX.ZITI.Routers.DEPLOY_K8S' | translate }}
-      </button>
-    </div>
-    <table mat-table [dataSource]="getEdgeRouters()" class="entity-table">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.Routers.NAME' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let router">{{ router.name }}</td>
-      </ng-container>
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.Routers.STATUS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let router">
-          <span
-            class="status-badge"
-            [ngClass]="router.isOnline ? 'status-online' : 'status-offline'">
-            {{
-              router.isOnline
-                ? ('MICROSEGX.ZITI.Routers.ONLINE' | translate)
-                : ('MICROSEGX.ZITI.Routers.OFFLINE' | translate)
-            }}
-          </span>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="hostname">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.Routers.HOSTNAME' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let router">{{ router.hostname || '-' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="k8s">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.Routers.K8S_WORKLOAD' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let router">
-          <ng-container *ngIf="getRouterWorkload(router.id) as w">
-            <div class="k8s-info">
-              <span class="k8s-name">{{ w.deploymentName }}</span>
-              <span
-                class="k8s-status"
-                [ngClass]="w.available ? 'available' : 'unavailable'">
-                {{ w.readyReplicas }}/{{ w.replicas }}
-              </span>
-              <span class="k8s-port"
-                >{{ w.publicHost }}:{{ w.advertisedPort }}</span
-              >
-            </div>
-          </ng-container>
-          <span *ngIf="!getRouterWorkload(router.id)" class="no-k8s">-</span>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'general.ACTIONS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let router">
-          <button mat-icon-button [matMenuTriggerFor]="routerMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #routerMenu="matMenu">
-            <button mat-menu-item (click)="openRouterDeployDialog(router)">
-              <mat-icon>cloud_upload</mat-icon>
-              {{ 'MICROSEGX.ZITI.Routers.DEPLOY_K8S' | translate }}
-            </button>
-            <button mat-menu-item (click)="reenrollRouter(router)">
-              <mat-icon>autorenew</mat-icon>
-              {{ 'MICROSEGX.ZITI.Routers.RE_ENROLL' | translate }}
-            </button>
-            <button
-              mat-menu-item
-              color="warn"
-              (click)="deleteRouterK8s(router)"
-              *ngIf="getRouterWorkload(router.id)">
-              <mat-icon>delete</mat-icon>
-              {{ 'MICROSEGX.ZITI.Routers.DELETE_K8S' | translate }}
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-      <tr
-        mat-header-row
-        *matHeaderRowDef="[
-          'name',
-          'status',
-          'hostname',
-          'k8s',
-          'actions',
-        ]"></tr>
-      <tr
-        mat-row
-        *matRowDef="
-          let row;
-          columns: ['name', 'status', 'hostname', 'k8s', 'actions']
-        "></tr>
-    </table>
-  </div>
-</ng-template>
-
-<!-- Services Tab Template -->
-<ng-template #servicesTab>
-  <div class="tab-content">
-    <div class="tab-header">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="openCreateServiceDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'MICROSEGX.ZITI.SERVICES.CREATE_SERVICE' | translate }}
-      </button>
-    </div>
-    <table mat-table [dataSource]="getServices()" class="entity-table">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.SERVICES.NAME' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let service">{{ service.name }}</td>
-      </ng-container>
-      <ng-container matColumnDef="encryption">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.SERVICES.ENCRYPTION' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let service">
-          <span
-            class="encryption-badge"
-            [ngClass]="service.encryptionRequired ? 'required' : 'optional'">
-            {{ service.encryptionRequired ? 'Required' : 'Optional' }}
-          </span>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="configs">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.SERVICES.CONFIGS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let service">
-          {{ service.configs?.length || 0 }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'general.ACTIONS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let service">
-          <button mat-icon-button [matMenuTriggerFor]="serviceMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #serviceMenu="matMenu">
-            <button mat-menu-item (click)="openEditServiceDialog(service)">
-              <mat-icon>edit</mat-icon>
-              {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
-            </button>
-            <button
-              mat-menu-item
-              color="warn"
-              (click)="openDeleteServiceDialog(service)">
-              <mat-icon>delete</mat-icon>
-              {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-      <tr
-        mat-header-row
-        *matHeaderRowDef="['name', 'encryption', 'configs', 'actions']"></tr>
-      <tr
-        mat-row
-        *matRowDef="
-          let row;
-          columns: ['name', 'encryption', 'configs', 'actions']
-        "></tr>
-    </table>
-  </div>
-</ng-template>
-
-<!-- Identities Tab Template -->
-<ng-template #identitiesTab>
-  <div class="tab-content">
-    <div class="tab-header">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="openCreateIdentityDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'MICROSEGX.ZITI.IDENTITIES.CREATE_IDENTITY' | translate }}
-      </button>
-    </div>
-    <table mat-table [dataSource]="getIdentities()" class="entity-table">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.IDENTITIES.NAME' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let identity">{{ identity.name }}</td>
-      </ng-container>
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.IDENTITIES.TYPE' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let identity">{{ identity.type || '-' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="enrollment">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.IDENTITIES.ENROLLMENT' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let identity">
-          <span
-            class="enrollment-badge"
-            [ngClass]="identity.enrollment ? 'enrolled' : 'pending'">
-            {{ identity.enrollment ? 'Enrolled' : 'Pending' }}
-          </span>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'general.ACTIONS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let identity">
-          <button mat-icon-button [matMenuTriggerFor]="identityMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #identityMenu="matMenu">
-            <button mat-menu-item (click)="downloadIdentityJwt(identity)">
-              <mat-icon>download</mat-icon>
-              {{ 'MICROSEGX.ZITI.IDENTITIES.DOWNLOAD_JWT' | translate }}
-            </button>
-            <button
-              mat-menu-item
-              color="warn"
-              (click)="openDeleteIdentityDialog(identity)">
-              <mat-icon>delete</mat-icon>
-              {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-      <tr
-        mat-header-row
-        *matHeaderRowDef="['name', 'type', 'enrollment', 'actions']"></tr>
-      <tr
-        mat-row
-        *matRowDef="
-          let row;
-          columns: ['name', 'type', 'enrollment', 'actions']
-        "></tr>
-    </table>
-  </div>
-</ng-template>
-
-<!-- Configs Tab Template -->
-<ng-template #configsTab>
-  <div class="tab-content">
-    <div class="tab-header">
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="openCreateConfigDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'MICROSEGX.ZITI.CONFIGS.CREATE_CONFIG' | translate }}
-      </button>
-    </div>
-    <table mat-table [dataSource]="getConfigs()" class="entity-table">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.CONFIGS.NAME' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let config">{{ config.name }}</td>
-      </ng-container>
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'MICROSEGX.ZITI.CONFIGS.TYPE' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let config">
-          {{ config.configType?.name || '-' }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>
-          {{ 'general.ACTIONS' | translate }}
-        </th>
-        <td mat-cell *matCellDef="let config">
-          <button mat-icon-button [matMenuTriggerFor]="configMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #configMenu="matMenu">
-            <button mat-menu-item (click)="openEditConfigDialog(config)">
-              <mat-icon>edit</mat-icon>
-              {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
-            </button>
-            <button
-              mat-menu-item
-              color="warn"
-              (click)="openDeleteConfigDialog(config)">
-              <mat-icon>delete</mat-icon>
-              {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="['name', 'type', 'actions']"></tr>
-      <tr
-        mat-row
-        *matRowDef="let row; columns: ['name', 'type', 'actions']"></tr>
-    </table>
-  </div>
-</ng-template>
-
-<!-- Policies Tab Template -->
-<ng-template #policiesTab>
-  <div class="tab-content">
-    <mat-accordion>
-      <!-- Service Policies -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title
-            >{{ 'MICROSEGX.ZITI.POLICIES.SERVICE_POLICIES' | translate }} ({{
-              getServicePolicies().length
-            }})</mat-panel-title
-          >
-        </mat-expansion-panel-header>
-        <div class="panel-content">
-          <div class="tab-header">
-            <button
-              mat-flat-button
-              color="primary"
-              (click)="openCreatePolicyDialog('service-policies')">
-              <mat-icon>add</mat-icon>
-              {{ 'MICROSEGX.ZITI.POLICIES.CREATE' | translate }}
-            </button>
-          </div>
-          <table
-            mat-table
-            [dataSource]="getServicePolicies()"
-            class="entity-table">
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'MICROSEGX.ZITI.POLICIES.NAME' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">{{ policy.name }}</td>
-            </ng-container>
-            <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'MICROSEGX.ZITI.POLICIES.TYPE' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">{{ policy.type }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'general.ACTIONS' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">
-                <button
-                  mat-icon-button
-                  color="warn"
-                  (click)="openDeletePolicyDialog(policy, 'service-policies')">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <tr
-              mat-header-row
-              *matHeaderRowDef="['name', 'type', 'actions']"></tr>
-            <tr
-              mat-row
-              *matRowDef="let row; columns: ['name', 'type', 'actions']"></tr>
-          </table>
-        </div>
-      </mat-expansion-panel>
-
-      <!-- Edge Router Policies -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title
-            >{{
-              'MICROSEGX.ZITI.POLICIES.EDGE_ROUTER_POLICIES' | translate
-            }}
-            ({{ getEdgeRouterPolicies().length }})</mat-panel-title
-          >
-        </mat-expansion-panel-header>
-        <div class="panel-content">
-          <div class="tab-header">
-            <button
-              mat-flat-button
-              color="primary"
-              (click)="openCreatePolicyDialog('edge-router-policies')">
-              <mat-icon>add</mat-icon>
-              {{ 'MICROSEGX.ZITI.POLICIES.CREATE' | translate }}
-            </button>
-          </div>
-          <table
-            mat-table
-            [dataSource]="getEdgeRouterPolicies()"
-            class="entity-table">
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'MICROSEGX.ZITI.POLICIES.NAME' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">{{ policy.name }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'general.ACTIONS' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">
-                <button
-                  mat-icon-button
-                  color="warn"
-                  (click)="
-                    openDeletePolicyDialog(policy, 'edge-router-policies')
-                  ">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['name', 'actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['name', 'actions']"></tr>
-          </table>
-        </div>
-      </mat-expansion-panel>
-
-      <!-- Service Edge Router Policies -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title
-            >{{
-              'MICROSEGX.ZITI.POLICIES.SERVICE_EDGE_ROUTER_POLICIES' | translate
-            }}
-            ({{ getServiceEdgeRouterPolicies().length }})</mat-panel-title
-          >
-        </mat-expansion-panel-header>
-        <div class="panel-content">
-          <div class="tab-header">
-            <button
-              mat-flat-button
-              color="primary"
-              (click)="openCreatePolicyDialog('service-edge-router-policies')">
-              <mat-icon>add</mat-icon>
-              {{ 'MICROSEGX.ZITI.POLICIES.CREATE' | translate }}
-            </button>
-          </div>
-          <table
-            mat-table
-            [dataSource]="getServiceEdgeRouterPolicies()"
-            class="entity-table">
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'MICROSEGX.ZITI.POLICIES.NAME' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">{{ policy.name }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>
-                {{ 'general.ACTIONS' | translate }}
-              </th>
-              <td mat-cell *matCellDef="let policy">
-                <button
-                  mat-icon-button
-                  color="warn"
-                  (click)="
-                    openDeletePolicyDialog(
-                      policy,
-                      'service-edge-router-policies'
-                    )
-                  ">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['name', 'actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['name', 'actions']"></tr>
-          </table>
-        </div>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </div>
-</ng-template>
-
-<!-- Router Deploy Dialog -->
 <div
   *ngIf="showRouterDeployDialog"
   class="dialog-overlay"
   (click)="closeRouterDeployDialog()">
   <mat-card class="dialog-card" (click)="$event.stopPropagation()">
     <mat-card-header>
-      <mat-card-title>{{
-        'MICROSEGX.ZITI.Routers.DEPLOY_DIALOG_TITLE' | translate
-      }}</mat-card-title>
+      <mat-card-title>
+        {{ 'MICROSEGX.ZITI.Routers.DEPLOY_DIALOG_TITLE' | translate }}
+      </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <p class="dialog-desc">
@@ -668,10 +1127,7 @@
         <mat-label>{{
           'MICROSEGX.ZITI.Routers.ROUTER_NAME' | translate
         }}</mat-label>
-        <input
-          matInput
-          [(ngModel)]="routerDeployForm.routerName"
-          [disabled]="!!selectedEntity" />
+        <input matInput [value]="selectedEntity?.name || ''" disabled />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
@@ -705,7 +1161,7 @@
         color="primary"
         (click)="deployRouter()"
         [disabled]="dialogLoading">
-        <mat-spinner *ngIf="dialogLoading" diameter="20"></mat-spinner>
+        <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.SAVE' | translate }}
       </button>
       <button mat-stroked-button (click)="closeRouterDeployDialog()">
@@ -715,73 +1171,630 @@
   </mat-card>
 </div>
 
-<!-- Create Dialog -->
 <div
-  *ngIf="showCreateDialog"
+  *ngIf="showCreateDialog || showEditDialog"
   class="dialog-overlay"
-  (click)="closeCreateDialog()">
-  <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+  (click)="showCreateDialog ? closeCreateDialog() : closeEditDialog()">
+  <mat-card
+    class="dialog-card dialog-card--wide"
+    (click)="$event.stopPropagation()">
     <mat-card-header>
-      <mat-card-title>{{
-        'MICROSEGX.ZITI.CREATE_ENTITY' | translate
-      }}</mat-card-title>
+      <mat-card-title>
+        {{
+          getEntityDialogTitleKey(showCreateDialog ? 'create' : 'edit')
+            | translate
+        }}
+      </mat-card-title>
     </mat-card-header>
+
     <mat-card-content>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>{{ 'general.NAME' | translate }}</mat-label>
-        <input matInput [(ngModel)]="entityForm.name" />
-      </mat-form-field>
-
-      <!-- Additional fields based on entity type -->
-      <ng-container *ngIf="selectedEntityType === 'services'">
-        <mat-checkbox [(ngModel)]="entityForm.encryptionRequired"
-          >Encryption Required</mat-checkbox
-        >
-      </ng-container>
-
-      <ng-container *ngIf="selectedEntityType === 'identities'">
+      <div class="form-grid">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Type</mat-label>
-          <mat-select [(ngModel)]="entityForm.type">
-            <mat-option value="Device">Device</mat-option>
-            <mat-option value="User">User</mat-option>
-            <mat-option value="Service">Service</mat-option>
-          </mat-select>
+          <mat-label>{{ 'general.NAME' | translate }}</mat-label>
+          <input matInput [(ngModel)]="entityForm.name" />
         </mat-form-field>
-      </ng-container>
 
-      <ng-container *ngIf="selectedEntityType === 'configs'">
+        <ng-container [ngSwitch]="selectedEntityType">
+          <ng-container *ngSwitchCase="'edge-routers'">
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.Routers.COST' | translate
+              }}</mat-label>
+              <input matInput type="number" [(ngModel)]="entityForm.cost" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.ROLE_ATTRIBUTES' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.roleAttributesText" />
+            </mat-form-field>
+
+            <div class="toggle-grid full-width">
+              <mat-checkbox [(ngModel)]="entityForm.disabled">
+                {{ 'MICROSEGX.ZITI.Routers.DISABLED' | translate }}
+              </mat-checkbox>
+              <mat-checkbox [(ngModel)]="entityForm.noTraversal">
+                {{ 'MICROSEGX.ZITI.Routers.NO_TRAVERSAL' | translate }}
+              </mat-checkbox>
+              <mat-checkbox [(ngModel)]="entityForm.isTunnelerEnabled">
+                {{ 'MICROSEGX.ZITI.Routers.TUNNELER' | translate }}
+              </mat-checkbox>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'services'">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.SERVICES.CONFIGS' | translate
+              }}</mat-label>
+              <mat-select multiple [(ngModel)]="entityForm.configs">
+                <mat-option
+                  *ngFor="let config of availableConfigs"
+                  [value]="config.id">
+                  {{ config.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-checkbox
+              *ngIf="showCreateDialog"
+              [(ngModel)]="entityForm.encryptionRequired">
+              {{ 'MICROSEGX.ZITI.SERVICES.ENCRYPTION_REQUIRED' | translate }}
+            </mat-checkbox>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.ROLE_ATTRIBUTES' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.roleAttributesText" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.SERVICES.ROUTING' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.terminatorStrategy" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.SERVICES.MAX_IDLE_TIME' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.maxIdleTime" />
+            </mat-form-field>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'identities'">
+            <mat-form-field *ngIf="showCreateDialog" appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.TYPE' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.type">
+                <mat-option value="Default">Default</mat-option>
+                <mat-option value="Device">Device</mat-option>
+                <mat-option value="User">User</mat-option>
+                <mat-option value="Service">Service</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.AUTH_POLICY' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.authPolicyId">
+                <mat-option
+                  *ngFor="let policy of authPolicies"
+                  [value]="policy.id">
+                  {{ policy.name }}
+                </mat-option>
+                <mat-option value="default">default</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field *ngIf="showCreateDialog" appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.UPDB_USERNAME' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.updbUsername" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.ROLE_ATTRIBUTES' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.roleAttributesText" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.EXTERNAL_ID' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="entityForm.externalId" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.HOSTING_COST' | translate
+              }}</mat-label>
+              <input
+                matInput
+                type="number"
+                [(ngModel)]="entityForm.defaultHostingCost" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.IDENTITIES.HOSTING_PRECEDENCE' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.defaultHostingPrecedence">
+                <mat-option value="default">default</mat-option>
+                <mat-option value="required">required</mat-option>
+                <mat-option value="failed">failed</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="toggle-grid full-width">
+              <mat-checkbox [(ngModel)]="entityForm.isAdmin">
+                {{ 'MICROSEGX.ZITI.IDENTITIES.IS_ADMIN' | translate }}
+              </mat-checkbox>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'configs'">
+            <mat-form-field *ngIf="showCreateDialog" appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.CONFIGS.TYPE' | translate
+              }}</mat-label>
+              <mat-select
+                [(ngModel)]="entityForm.configTypeId"
+                (selectionChange)="onConfigTypeChanged()">
+                <mat-option
+                  *ngFor="let configType of configTypes"
+                  [value]="configType.id">
+                  {{ configType.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div *ngIf="showCreateDialog" class="config-helper full-width">
+              <div class="config-helper__header">
+                <div>
+                  <span class="config-helper__eyebrow">{{
+                    'MICROSEGX.ZITI.CONFIGS.K8S_SERVICE_HELPER' | translate
+                  }}</span>
+                  <h3>
+                    {{ 'MICROSEGX.ZITI.CONFIGS.K8S_SERVICE' | translate }}
+                  </h3>
+                  <p>
+                    {{ 'MICROSEGX.ZITI.CONFIGS.K8S_SERVICE_DESC' | translate }}
+                  </p>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>{{
+                  'MICROSEGX.ZITI.CONFIGS.K8S_SERVICE' | translate
+                }}</mat-label>
+                <mat-select
+                  [(ngModel)]="entityForm.k8sServiceRef"
+                  (selectionChange)="onConfigK8sServiceChange()">
+                  <mat-option value="">{{
+                    'MICROSEGX.ZITI.CONFIGS.NO_K8S_SERVICE' | translate
+                  }}</mat-option>
+                  <mat-option
+                    *ngFor="let service of k8sServices"
+                    [value]="getK8sServiceRef(service)">
+                    {{ getK8sServiceLabel(service) }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div class="config-helper__preview" *ngIf="selectedK8sService">
+                <span>{{
+                  'MICROSEGX.ZITI.CONFIGS.K8S_SERVICE_PREVIEW' | translate
+                }}</span>
+                <strong>{{ getK8sServiceSummary(selectedK8sService) }}</strong>
+              </div>
+
+              <p class="config-helper__note">
+                {{
+                  (isConfigTemplateSupported
+                    ? 'MICROSEGX.ZITI.CONFIGS.K8S_TEMPLATE_SUPPORTED'
+                    : 'MICROSEGX.ZITI.CONFIGS.K8S_TEMPLATE_REFERENCE'
+                  ) | translate
+                }}
+              </p>
+            </div>
+
+            <mat-form-field *ngIf="showEditDialog" appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.CONFIGS.TYPE' | translate
+              }}</mat-label>
+              <input
+                matInput
+                [value]="
+                  selectedEntity?.configType?.name ||
+                  selectedEntity?.configTypeId ||
+                  '-'
+                "
+                disabled />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.CONFIGS.CONFIG_JSON' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="10"
+                [(ngModel)]="entityForm.dataJson"></textarea>
+            </mat-form-field>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'service-policies'">
+            <div class="policy-helper full-width">
+              <div class="policy-helper__header">
+                <div>
+                  <span class="policy-helper__eyebrow">{{
+                    'MICROSEGX.ZITI.POLICIES.HELPER_TITLE' | translate
+                  }}</span>
+                  <h3>
+                    {{ 'MICROSEGX.ZITI.POLICIES.SERVICE_POLICIES' | translate }}
+                  </h3>
+                  <p>{{ getPolicyHelperDescriptionKey() | translate }}</p>
+                </div>
+              </div>
+
+              <div class="policy-helper__grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_IDENTITY' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.identity"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'identityRolesText',
+                        $event.value,
+                        'identity'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of identityRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_SERVICE' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.service"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'serviceRolesText',
+                        $event.value,
+                        'service'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of serviceRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_POSTURE_CHECK'
+                      | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.postureCheck"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'postureCheckRolesText',
+                        $event.value,
+                        'postureCheck'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of postureCheckQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <p class="policy-helper__note">
+                {{ 'MICROSEGX.ZITI.POLICIES.EXPRESSION_HINT' | translate }}
+              </p>
+            </div>
+
+            <mat-form-field *ngIf="showCreateDialog" appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.TYPE' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.type">
+                <mat-option value="Dial">Dial</mat-option>
+                <mat-option value="Bind">Bind</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.semantic">
+                <mat-option value="AnyOf">AnyOf</mat-option>
+                <mat-option value="AllOf">AllOf</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.IDENTITY_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.identityRolesText"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.SERVICE_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.serviceRolesText"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.POSTURE_CHECK_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.postureCheckRolesText"></textarea>
+            </mat-form-field>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'edge-router-policies'">
+            <div class="policy-helper full-width">
+              <div class="policy-helper__header">
+                <div>
+                  <span class="policy-helper__eyebrow">{{
+                    'MICROSEGX.ZITI.POLICIES.HELPER_TITLE' | translate
+                  }}</span>
+                  <h3>
+                    {{
+                      'MICROSEGX.ZITI.POLICIES.EDGE_ROUTER_POLICIES' | translate
+                    }}
+                  </h3>
+                  <p>{{ getPolicyHelperDescriptionKey() | translate }}</p>
+                </div>
+              </div>
+
+              <div class="policy-helper__grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_IDENTITY' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.identity"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'identityRolesText',
+                        $event.value,
+                        'identity'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of identityRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_ROUTER' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.router"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'edgeRouterRolesText',
+                        $event.value,
+                        'router'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of routerRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <p class="policy-helper__note">
+                {{ 'MICROSEGX.ZITI.POLICIES.EXPRESSION_HINT' | translate }}
+              </p>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.semantic">
+                <mat-option value="AnyOf">AnyOf</mat-option>
+                <mat-option value="AllOf">AllOf</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.IDENTITY_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.identityRolesText"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.EDGE_ROUTER_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.edgeRouterRolesText"></textarea>
+            </mat-form-field>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'service-edge-router-policies'">
+            <div class="policy-helper full-width">
+              <div class="policy-helper__header">
+                <div>
+                  <span class="policy-helper__eyebrow">{{
+                    'MICROSEGX.ZITI.POLICIES.HELPER_TITLE' | translate
+                  }}</span>
+                  <h3>
+                    {{
+                      'MICROSEGX.ZITI.POLICIES.SERVICE_EDGE_ROUTER_POLICIES'
+                        | translate
+                    }}
+                  </h3>
+                  <p>{{ getPolicyHelperDescriptionKey() | translate }}</p>
+                </div>
+              </div>
+
+              <div class="policy-helper__grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_SERVICE' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.service"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'serviceRolesText',
+                        $event.value,
+                        'service'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of serviceRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{
+                    'MICROSEGX.ZITI.POLICIES.QUICK_ADD_ROUTER' | translate
+                  }}</mat-label>
+                  <mat-select
+                    [(ngModel)]="policyQuickAdd.router"
+                    (selectionChange)="
+                      appendQuickRole(
+                        'edgeRouterRolesText',
+                        $event.value,
+                        'router'
+                      )
+                    ">
+                    <mat-option
+                      *ngFor="let option of routerRoleQuickOptions"
+                      [value]="option.value">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <p class="policy-helper__note">
+                {{ 'MICROSEGX.ZITI.POLICIES.EXPRESSION_HINT' | translate }}
+              </p>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
+              }}</mat-label>
+              <mat-select [(ngModel)]="entityForm.semantic">
+                <mat-option value="AnyOf">AnyOf</mat-option>
+                <mat-option value="AllOf">AllOf</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.SERVICE_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.serviceRolesText"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{
+                'MICROSEGX.ZITI.POLICIES.EDGE_ROUTER_ROLES' | translate
+              }}</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="entityForm.edgeRouterRolesText"></textarea>
+            </mat-form-field>
+          </ng-container>
+        </ng-container>
+
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Config Type</mat-label>
-          <mat-select [(ngModel)]="entityForm.configTypeId">
-            <mat-option value="g7cIWbcGg">intercept.v1</mat-option>
-            <mat-option value="hYsGGRrcg">host.v1</mat-option>
-          </mat-select>
+          <mat-label>{{ 'MICROSEGX.ZITI.TAGS_JSON' | translate }}</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            [(ngModel)]="entityForm.tagsJson"></textarea>
         </mat-form-field>
-      </ng-container>
+      </div>
 
       <mat-card *ngIf="dialogError" class="dialog-error-card">
         <mat-icon>error</mat-icon>
         <span>{{ dialogError }}</span>
       </mat-card>
     </mat-card-content>
+
     <mat-card-actions>
       <button
         mat-flat-button
         color="primary"
-        (click)="createEntity()"
+        (click)="showCreateDialog ? createEntity() : updateEntity()"
         [disabled]="dialogLoading">
-        <mat-spinner *ngIf="dialogLoading" diameter="20"></mat-spinner>
+        <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.SAVE' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeCreateDialog()">
+      <button
+        mat-stroked-button
+        (click)="showCreateDialog ? closeCreateDialog() : closeEditDialog()">
         {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
       </button>
     </mat-card-actions>
   </mat-card>
 </div>
 
-<!-- Delete Confirm Dialog -->
 <div
   *ngIf="showDeleteConfirm"
   class="dialog-overlay"
@@ -790,10 +1803,11 @@
     class="dialog-card dialog-card--small"
     (click)="$event.stopPropagation()">
     <mat-card-header>
-      <mat-card-title>{{
-        'MICROSEGX.ZITI.CONFIRM_DELETE' | translate
-      }}</mat-card-title>
+      <mat-card-title>
+        {{ 'MICROSEGX.ZITI.CONFIRM_DELETE' | translate }}
+      </mat-card-title>
     </mat-card-header>
+
     <mat-card-content>
       <p>{{ 'MICROSEGX.ZITI.CONFIRM_DELETE_MSG' | translate }}</p>
       <p class="delete-target">
@@ -805,13 +1819,14 @@
         <span>{{ dialogError }}</span>
       </mat-card>
     </mat-card-content>
+
     <mat-card-actions>
       <button
         mat-flat-button
         color="warn"
         (click)="deleteEntity()"
         [disabled]="dialogLoading">
-        <mat-spinner *ngIf="dialogLoading" diameter="20"></mat-spinner>
+        <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
       </button>
       <button mat-stroked-button (click)="closeDeleteConfirm()">

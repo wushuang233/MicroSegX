@@ -85,13 +85,15 @@ class MicrosegxApi(resourceService: MicrosegxService) extends BaseApi {
     pathPrefix("microsegx") {
       path("overview") {
         get {
-          Utils.respondWithWebServerHeaders() {
-            complete(
-              HttpEntity(
-                ContentTypes.`application/json`,
-                resourceService.getOverview.compactPrint
+          extractRequest { request =>
+            Utils.respondWithWebServerHeaders() {
+              complete(
+                HttpEntity(
+                  ContentTypes.`application/json`,
+                  resourceService.getOverview(request).compactPrint
+                )
               )
-            )
+            }
           }
         }
       } ~

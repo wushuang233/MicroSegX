@@ -73,6 +73,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       titleKey: 'customUi.header.routes.workloads',
       captionKey: 'customUi.header.captions.workloads',
     },
+    '/microsegx/port-exposure': {
+      titleKey: 'MICROSEGX.PORT_EXPOSURE.TITLE',
+      captionKey: 'MICROSEGX.PORT_EXPOSURE.SUBTITLE',
+    },
+    '/microsegx/ziti': {
+      titleKey: 'MICROSEGX.ZITI.TITLE',
+      captionKey: 'MICROSEGX.ZITI.SUBTITLE',
+    },
     '/regScan': {
       titleKey: 'customUi.header.routes.registries',
       captionKey: 'customUi.header.captions.registries',
@@ -126,10 +134,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     },
     '/signature-verifiers': {
       titleKey: 'sidebar.nav.SIGSTORE_VERIFIERS',
-    },
-    '/support': {
-      titleKey: 'customUi.header.routes.support',
-      captionKey: 'customUi.header.captions.support',
     },
   };
   navCollapsed = true;

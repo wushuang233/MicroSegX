@@ -1,5 +1,6 @@
-(function(global) {
-  var counter = 0, timeout;
+(function (global) {
+  var counter = 0,
+    timeout;
   var systemPrepare = document.querySelector('.system-prepare');
   var progressBar = document.querySelector('.system-prepare-progress');
   var body = document.querySelector('body');
@@ -8,14 +9,14 @@
 
   body.style.overflow = 'hidden';
 
-  global.appBootstrap = function() {
-    console.log("loading...");
-    setTimeout(function(){
+  global.appBootstrap = function () {
+    setTimeout(function () {
       body.style.overflow = '';
-      systemPrepare.addEventListener('transitionend', function() {
+      systemPrepare.addEventListener('transitionend', function () {
         systemPrepare.className = 'system-prepare-hidden';
       });
-      systemPrepare.className += 'system-prepare-hidden-add system-prepare-hidden-add-active';
+      systemPrepare.className +=
+        'system-prepare-hidden-add system-prepare-hidden-add-active';
       progressBar.className = '';
     }, 1000);
   };

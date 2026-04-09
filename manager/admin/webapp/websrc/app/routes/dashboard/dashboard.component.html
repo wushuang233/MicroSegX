@@ -58,12 +58,6 @@
           <span>{{ 'enum.QUARANTINED' | translate }}</span>
           <strong>{{ quarantinedContainersCount }}</strong>
         </article>
-        <article class="dashboard-metric-card">
-          <span>{{
-            'customUi.microsegx.dashboard.openPorts' | translate
-          }}</span>
-          <strong>{{ microsegxOpenPorts }}</strong>
-        </article>
       </div>
     </div>
 
@@ -111,42 +105,6 @@
             {{ leadRiskContainer?.medium4Dashboard || 0 }}
           </small>
         </article>
-        <article
-          class="dashboard-rail-card dashboard-rail-card--wide dashboard-rail-card--microsegx">
-          <span>{{
-            'customUi.microsegx.dashboard.fabricTitle' | translate
-          }}</span>
-          <strong>
-            {{
-              microsegxFabricAvailable
-                ? microsegxAliveRouters + ' / ' + microsegxZitiServices
-                : ('customUi.microsegx.dashboard.notConfigured' | translate)
-            }}
-          </strong>
-          <small>
-            {{
-              microsegxFabricAvailable
-                ? ('customUi.microsegx.dashboard.fabricMeta' | translate) +
-                  ' · ' +
-                  microsegxControllerUrl
-                : ('customUi.microsegx.dashboard.fabricHint' | translate)
-            }}
-          </small>
-          <div class="dashboard-rail-card__actions">
-            <a
-              mat-button
-              class="dashboard-inline-link"
-              [routerLink]="['/microsegx/port-exposure']">
-              {{ 'customUi.microsegx.dashboard.openPortExposure' | translate }}
-            </a>
-            <a
-              mat-button
-              class="dashboard-inline-link"
-              [routerLink]="['/microsegx/ziti']">
-              {{ 'customUi.microsegx.dashboard.openFabric' | translate }}
-            </a>
-          </div>
-        </article>
       </div>
 
       <app-loading-button
@@ -157,6 +115,153 @@
         iconName="print">
       </app-loading-button>
     </div>
+  </section>
+
+  <section class="dashboard-focus-grid">
+    <article class="dashboard-focus-card dashboard-focus-card--workloads">
+      <div class="dashboard-focus-card__headline">
+        <div>
+          <div class="dashboard-focus-card__eyebrow">
+            {{ 'customUi.header.routes.workloads' | translate }}
+          </div>
+          <strong class="dashboard-focus-card__value">
+            {{ protectedContainersCount }}
+          </strong>
+        </div>
+        <span class="dashboard-focus-card__badge">
+          {{ 'enum.PROTECT' | translate }}
+        </span>
+      </div>
+      <p class="dashboard-focus-card__copy">
+        {{ 'customUi.header.captions.workloads' | translate }}
+      </p>
+      <div class="dashboard-focus-card__metrics">
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'enum.PROTECT' | translate }}</span>
+          <strong>{{ protectedContainersCount }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'enum.MONITOR' | translate }}</span>
+          <strong>{{ monitorContainersCount }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'enum.DISCOVER' | translate }}</span>
+          <strong>{{ discoverContainersCount }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'enum.QUARANTINED' | translate }}</span>
+          <strong>{{ quarantinedContainersCount }}</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="dashboard-focus-card dashboard-focus-card--exposure">
+      <div class="dashboard-focus-card__headline">
+        <div>
+          <div class="dashboard-focus-card__eyebrow">
+            {{ 'MICROSEGX.PORT_EXPOSURE.TITLE' | translate }}
+          </div>
+          <strong class="dashboard-focus-card__value">
+            {{ microsegxOpenPorts }}
+          </strong>
+        </div>
+        <span class="dashboard-focus-card__badge">
+          {{ 'dashboard.body.panel_title.EXPOSURES' | translate }}
+        </span>
+      </div>
+      <p class="dashboard-focus-card__copy">
+        {{ 'MICROSEGX.PORT_EXPOSURE.SUBTITLE' | translate }}
+      </p>
+      <div class="dashboard-focus-card__metrics">
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'customUi.microsegx.dashboard.openPorts' | translate
+          }}</span>
+          <strong>{{ microsegxOpenPorts }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES' | translate
+          }}</span>
+          <strong>{{ microsegxManagedServices }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS' | translate
+          }}</span>
+          <strong>{{ microsegxExposedTargets }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'dashboard.body.panel_title.EXPOSURES' | translate }}</span>
+          <strong>{{ ingressExposureCount + egressExposureCount }}</strong>
+        </div>
+      </div>
+      <div class="dashboard-focus-card__actions">
+        <a
+          mat-button
+          class="dashboard-inline-link"
+          [routerLink]="['/microsegx/port-exposure']">
+          {{ 'customUi.microsegx.dashboard.openPortExposure' | translate }}
+        </a>
+      </div>
+    </article>
+
+    <article class="dashboard-focus-card dashboard-focus-card--ziti">
+      <div class="dashboard-focus-card__headline">
+        <div>
+          <div class="dashboard-focus-card__eyebrow">
+            {{ 'MICROSEGX.ZITI.TITLE' | translate }}
+          </div>
+          <strong class="dashboard-focus-card__value">
+            {{
+              microsegxFabricAvailable
+                ? microsegxAliveRouters
+                : ('customUi.microsegx.dashboard.notConfigured' | translate)
+            }}
+          </strong>
+        </div>
+        <span class="dashboard-focus-card__badge">
+          {{ 'customUi.microsegx.dashboard.fabricTitle' | translate }}
+        </span>
+      </div>
+      <p class="dashboard-focus-card__copy">
+        {{ 'MICROSEGX.ZITI.SUBTITLE' | translate }}
+      </p>
+      <div class="dashboard-focus-card__metrics">
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}</span>
+          <strong>{{
+            microsegxFabricAvailable ? microsegxAliveRouters : 0
+          }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</span>
+          <strong>{{
+            microsegxFabricAvailable ? microsegxZitiServices : 0
+          }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}</span>
+          <strong>
+            {{ microsegxFabricAvailable ? microsegxZitiIdentities : 0 }}
+          </strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}</span>
+          <strong>{{
+            microsegxFabricAvailable ? microsegxControllerUrl : '-'
+          }}</strong>
+        </div>
+      </div>
+      <div class="dashboard-focus-card__actions">
+        <a
+          mat-button
+          class="dashboard-inline-link"
+          [routerLink]="['/microsegx/ziti']">
+          {{ 'customUi.microsegx.dashboard.openFabric' | translate }}
+        </a>
+      </div>
+    </article>
   </section>
 
   <section class="dashboard-lead-grid">
