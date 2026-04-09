@@ -47,6 +47,8 @@ interface ExposureItem {
   group_name?: string;
   service_type?: string;
   exposure_type?: string;
+  platform_role?: string | null;
+  platform_roles?: string[];
   address: string;
   port: number;
   status: string;
@@ -54,6 +56,9 @@ interface ExposureItem {
   listener_observed: boolean;
   latency_ms?: number;
 }
+
+type ServiceScope = 'all' | 'business' | 'platform';
+type ExposureScope = 'all' | 'manageable' | 'platform' | 'node';
 
 interface DashboardData {
   generated_at?: string;
@@ -87,6 +92,16 @@ interface DashboardData {
 export class MicrosegxPortExposureComponent
   implements OnInit, AfterViewChecked, OnDestroy
 {
+  private readonly platformNamespaces = new Set([
+    'cert-manager',
+    'kube-system',
+    'kube-public',
+    'kube-node-lease',
+    'local-path-storage',
+    'microsegx',
+    'openziti',
+    'port-audit',
+  ]);
   dashboard: DashboardData | null = null;
   loading = false;
   error = '';
@@ -98,6 +113,8 @@ export class MicrosegxPortExposureComponent
   serviceStateFilter = 'all';
   servicePublishTypeFilter = 'all';
   servicePortScopeFilter = 'all';
+  serviceScopeFilter: ServiceScope = 'all';
+  exposureScopeFilter: ExposureScope = 'all';
 
   selectedService: ServiceControlItem | null = null;
   selectedPort: PortItem | null = null;
@@ -111,6 +128,7 @@ export class MicrosegxPortExposureComponent
 
   exposureColumns = [
     'namespace',
+    'scope',
     'resource',
     'type',
     'address',
@@ -119,7 +137,14 @@ export class MicrosegxPortExposureComponent
     'traffic',
   ];
 
-  serviceColumns = ['namespace', 'service', 'state', 'ports', 'actions'];
+  serviceColumns = [
+    'namespace',
+    'scope',
+    'service',
+    'state',
+    'ports',
+    'actions',
+  ];
 
   exposureTypes: string[] = [];
   viewMode: 'exposure' | 'services' = 'services';
@@ -245,7 +270,13 @@ export class MicrosegxPortExposureComponent
   }
 
   get exposureItems(): ExposureItem[] {
-    let items = [...(this.dashboard?.external_exposure_summary?.items || [])];
+    let items = [...this.allExposureItems];
+
+    if (this.exposureScopeFilter !== 'all') {
+      items = items.filter(
+        item => this.getExposureScope(item) === this.exposureScopeFilter
+      );
+    }
 
     if (this.statusFilter !== 'all') {
       items = items.filter(item => item.status === this.statusFilter);
@@ -280,7 +311,13 @@ export class MicrosegxPortExposureComponent
   }
 
   get serviceControls(): ServiceControlItem[] {
-    let items = [...(this.dashboard?.service_controls?.items || [])];
+    let items = [...this.allServiceControlItems];
+
+    if (this.serviceScopeFilter !== 'all') {
+      items = items.filter(
+        item => this.getServiceScope(item) === this.serviceScopeFilter
+      );
+    }
 
     if (this.serviceStateFilter !== 'all') {
       items = items.filter(
@@ -336,6 +373,30 @@ export class MicrosegxPortExposureComponent
 
   get summary() {
     return this.dashboard?.external_exposure_summary?.summary;
+  }
+
+  get manageableServiceCount(): number {
+    return this.allServiceControlItems.length;
+  }
+
+  get manageableOpenPortCount(): number {
+    return this.allServiceControlItems.reduce(
+      (total, item) => total + (+item.open_port_count || 0),
+      0
+    );
+  }
+
+  get infrastructureExposurePortCount(): number {
+    return this.allExposureItems.filter(
+      item =>
+        this.getExposureScope(item) === 'platform' && item.status === 'open'
+    ).length;
+  }
+
+  get nodeListenerPortCount(): number {
+    return this.allExposureItems.filter(
+      item => this.getExposureScope(item) === 'node' && item.status === 'open'
+    ).length;
   }
 
   get clusterInfo() {
@@ -406,6 +467,12 @@ export class MicrosegxPortExposureComponent
     return this.summary?.unique_address_count || 0;
   }
 
+  get currentInventoryCount(): number {
+    return this.viewMode === 'services'
+      ? this.serviceControls.length
+      : this.exposureItems.length;
+  }
+
   get nodePortRange(): { start: number; end: number } {
     const range =
       this.dashboard?.service_controls?.node_port_range || '30000-32767';
@@ -417,12 +484,62 @@ export class MicrosegxPortExposureComponent
   }
 
   isK8sSystemNamespace(namespace: string): boolean {
-    return [
-      'kube-system',
-      'kube-public',
-      'kube-node-lease',
-      'local-path-storage',
-    ].includes(namespace);
+    return this.isPlatformNamespace(namespace);
+  }
+
+  getServiceScope(item: ServiceControlItem): 'business' | 'platform' {
+    return this.isPlatformNamespace(item.namespace) ? 'platform' : 'business';
+  }
+
+  getServiceScopeLabelKey(item: ServiceControlItem): string {
+    return this.getServiceScope(item) === 'platform'
+      ? 'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM'
+      : 'MICROSEGX.PORT_EXPOSURE.SCOPE_BUSINESS';
+  }
+
+  getExposureScope(item: ExposureItem): 'manageable' | 'platform' | 'node' {
+    const namespace = String(item.namespace || '').trim();
+    const resourceKind = String(item.resource_kind || '')
+      .trim()
+      .toLowerCase();
+    const exposureType = String(item.exposure_type || '')
+      .trim()
+      .toLowerCase();
+
+    if (
+      namespace === '-' ||
+      resourceKind === 'node' ||
+      exposureType === 'nodelistener'
+    ) {
+      return 'node';
+    }
+
+    if (this.isManageableExposure(item)) {
+      return 'manageable';
+    }
+
+    if (resourceKind === 'service') {
+      return 'platform';
+    }
+
+    if (this.isPlatformNamespace(namespace) || Boolean(item.platform_role)) {
+      return 'platform';
+    }
+
+    return 'manageable';
+  }
+
+  getExposureScopeLabelKey(item: ExposureItem): string {
+    switch (this.getExposureScope(item)) {
+      case 'node':
+        return 'MICROSEGX.PORT_EXPOSURE.SCOPE_NODE';
+      case 'manageable':
+        return 'MICROSEGX.PORT_EXPOSURE.SCOPE_MANAGEABLE';
+      case 'platform':
+        return 'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM';
+      default:
+        return 'MICROSEGX.PORT_EXPOSURE.SCOPE_MANAGEABLE';
+    }
   }
 
   getServiceStateKey(item: ServiceControlItem): 'open' | 'secured' | 'blocked' {
@@ -636,6 +753,50 @@ export class MicrosegxPortExposureComponent
           .toLowerCase()
       )
       .filter(Boolean);
+  }
+
+  private get allServiceControlItems(): ServiceControlItem[] {
+    return this.dashboard?.service_controls?.items || [];
+  }
+
+  private get allExposureItems(): ExposureItem[] {
+    return this.dashboard?.external_exposure_summary?.items || [];
+  }
+
+  private isManageableExposure(item: ExposureItem): boolean {
+    const namespace = String(item.namespace || '').trim();
+    const resourceName = String(item.resource_name || '').trim();
+    const port = Number(item.port || 0);
+    if (!namespace || !resourceName || !port) {
+      return false;
+    }
+
+    return this.allServiceControlItems.some(service => {
+      if (
+        String(service.namespace || '').trim() !== namespace ||
+        String(service.service_name || '').trim() !== resourceName
+      ) {
+        return false;
+      }
+
+      return (service.ports || []).some(candidate => {
+        const publicPort =
+          candidate.effective_public_port ||
+          candidate.public_port ||
+          candidate.node_port ||
+          candidate.service_port;
+        return Number(publicPort || 0) === port;
+      });
+    });
+  }
+
+  private isPlatformNamespace(namespace?: string): boolean {
+    const normalized = String(namespace || '')
+      .trim()
+      .toLowerCase();
+    return (
+      normalized.startsWith('kube-') || this.platformNamespaces.has(normalized)
+    );
   }
 
   private syncDialogBodyState(): void {

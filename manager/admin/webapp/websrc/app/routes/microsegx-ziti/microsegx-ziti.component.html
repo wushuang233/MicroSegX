@@ -395,6 +395,18 @@
                     <div class="entity-cell">
                       <strong>{{ getRouterWorkloadLabel(router) }}</strong>
                       <small>{{ getRouterRoles(router) }}</small>
+                      <span
+                        class="status-chip status-chip--compact"
+                        [ngClass]="getRouterTunnelClass(router)">
+                        <mat-icon>{{
+                          getRouterTunnelState(router) === 'ready'
+                            ? 'layers'
+                            : getRouterTunnelState(router) === 'pending'
+                              ? 'hourglass_top'
+                              : 'layers_clear'
+                        }}</mat-icon>
+                        {{ getRouterTunnelLabelKey(router) | translate }}
+                      </span>
                     </div>
                   </td>
                 </ng-container>
@@ -583,6 +595,45 @@
                   </td>
                 </ng-container>
 
+                <ng-container matColumnDef="target">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.HOST_TARGET' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="entity-cell">
+                      <strong>{{ getServiceHostingTarget(service) }}</strong>
+                      <small>{{
+                        getServiceHostingConfig(service)?.name || '-'
+                      }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="hosting">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ 'MICROSEGX.ZITI.SERVICES.HOSTING' | translate }}
+                  </th>
+                  <td mat-cell *matCellDef="let service">
+                    <div class="entity-cell">
+                      <span
+                        class="status-chip"
+                        [ngClass]="getServiceHostingStatusClass(service)">
+                        <mat-icon>{{
+                          getServiceHostingStatus(service) === 'router'
+                            ? 'router'
+                            : getServiceHostingStatus(service) === 'host'
+                              ? 'dns'
+                              : getServiceHostingStatus(service) === 'pending'
+                                ? 'pending'
+                                : 'block'
+                        }}</mat-icon>
+                        {{ getServiceHostingStatusKey(service) | translate }}
+                      </span>
+                      <small>{{ getServiceHostingDetail(service) }}</small>
+                    </div>
+                  </td>
+                </ng-container>
+
                 <ng-container matColumnDef="routing">
                   <th mat-header-cell *matHeaderCellDef>
                     {{ 'MICROSEGX.ZITI.SERVICES.ROUTING' | translate }}
@@ -603,6 +654,23 @@
                   </th>
                   <td mat-cell *matCellDef="let service">
                     <div class="row-actions">
+                      <button
+                        mat-stroked-button
+                        class="action-chip"
+                        [disabled]="!canAttachServiceToRouter(service)"
+                        [matTooltip]="
+                          canAttachServiceToRouter(service)
+                            ? ('MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER'
+                              | translate)
+                            : ('MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_DISABLED'
+                              | translate)
+                        "
+                        (click)="openAttachServiceDialog(service)">
+                        <mat-icon>router</mat-icon>
+                        {{
+                          'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER' | translate
+                        }}
+                      </button>
                       <button
                         mat-stroked-button
                         class="action-chip"
@@ -632,6 +700,8 @@
                     'name',
                     'encryption',
                     'configs',
+                    'target',
+                    'hosting',
                     'routing',
                     'actions',
                   ]"></tr>
@@ -643,6 +713,8 @@
                       'name',
                       'encryption',
                       'configs',
+                      'target',
+                      'hosting',
                       'routing',
                       'actions',
                     ]
@@ -1036,7 +1108,14 @@
                   </th>
                   <td mat-cell *matCellDef="let policy">
                     <div class="entity-cell">
-                      <strong>{{ policy.name }}</strong>
+                      <strong>
+                        {{ policy.name }}
+                        <span
+                          *ngIf="isSystemManagedEntity(policy)"
+                          class="inline-chip inline-chip--system">
+                          {{ 'MICROSEGX.ZITI.SYSTEM_MANAGED' | translate }}
+                        </span>
+                      </strong>
                       <small>{{ getPolicySummary(policy) }}</small>
                     </div>
                   </td>
@@ -1071,9 +1150,8 @@
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
-                        [matTooltip]="
-                          'MICROSEGX.ZITI.DELETE_ENTITY' | translate
-                        "
+                        [disabled]="isSystemManagedEntity(policy)"
+                        [matTooltip]="getDeleteTooltip(policy)"
                         (click)="
                           openDeletePolicyDialog(policy, selectedPolicyType)
                         ">
@@ -1106,6 +1184,96 @@
       </mat-card>
     </ng-container>
   </ng-container>
+</div>
+
+<div
+  *ngIf="showServiceAttachDialog"
+  class="dialog-overlay"
+  (click)="closeServiceAttachDialog()">
+  <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_TITLE' | translate }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="dialog-desc">
+        {{ 'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_DESC' | translate }}
+      </p>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'MICROSEGX.ZITI.SERVICES.NAME' | translate }}</mat-label>
+        <input matInput [value]="selectedEntity?.name || ''" disabled />
+      </mat-form-field>
+
+      <div class="config-helper full-width">
+        <div class="config-helper__header">
+          <div>
+            <span class="config-helper__eyebrow">{{
+              'MICROSEGX.ZITI.SERVICES.HOST_TARGET' | translate
+            }}</span>
+            <h3>{{ getSelectedAttachServiceTarget() }}</h3>
+            <p>
+              {{
+                getSelectedAttachServiceConfigName() +
+                  ' · ' +
+                  (getSelectedAttachServiceStatusKey() | translate)
+              }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{
+          'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_FIELD' | translate
+        }}</mat-label>
+        <mat-select [(ngModel)]="serviceAttachForm.routerId">
+          <mat-option
+            *ngFor="let router of attachableRouters"
+            [value]="router.id">
+            {{ router.name }} · {{ getRouterEndpoint(router) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div
+        *ngIf="selectedAttachRouter"
+        class="config-helper__preview service-attach-preview">
+        <span>{{
+          'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_PREVIEW' | translate
+        }}</span>
+        <strong>{{ getRouterWorkloadLabel(selectedAttachRouter) }}</strong>
+        <small>{{
+          getRouterTunnelLabelKey(selectedAttachRouter) | translate
+        }}</small>
+      </div>
+
+      <div class="toggle-grid full-width">
+        <mat-checkbox [(ngModel)]="serviceAttachForm.autoEnableRouter">
+          {{ 'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_AUTO_ENABLE' | translate }}
+        </mat-checkbox>
+      </div>
+
+      <mat-card *ngIf="dialogError" class="dialog-error-card">
+        <mat-icon>error</mat-icon>
+        <span>{{ dialogError }}</span>
+      </mat-card>
+    </mat-card-content>
+    <mat-card-actions>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="attachServiceToRouter()"
+        [disabled]="dialogLoading">
+        <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
+        {{ 'MICROSEGX.ZITI.SAVE' | translate }}
+      </button>
+      <button mat-stroked-button (click)="closeServiceAttachDialog()">
+        {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
 </div>
 
 <div
@@ -1813,6 +1981,11 @@
       <p class="delete-target">
         <strong>{{ selectedEntity?.name }}</strong>
       </p>
+      <p
+        *ngIf="isSystemManagedEntity(selectedEntity)"
+        class="delete-system-note">
+        {{ 'MICROSEGX.ZITI.DELETE_SYSTEM_DENIED' | translate }}
+      </p>
 
       <mat-card *ngIf="dialogError" class="dialog-error-card">
         <mat-icon>error</mat-icon>
@@ -1825,7 +1998,7 @@
         mat-flat-button
         color="warn"
         (click)="deleteEntity()"
-        [disabled]="dialogLoading">
+        [disabled]="dialogLoading || isSystemManagedEntity(selectedEntity)">
         <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
       </button>

@@ -492,6 +492,8 @@ button {
   min-height: 48px;
   line-height: 1.45;
   white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   border-bottom: 1px solid var(--saas-border) !important;
 }
 
@@ -509,6 +511,11 @@ button {
   padding-left: 16px !important;
   padding-right: 16px !important;
   min-height: 52px;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
 }
 
 .table-hover tbody tr:hover,
@@ -810,6 +817,17 @@ button {
 .fas,
 .far {
   vertical-align: middle;
+}
+
+.mat-mdc-button .eos-icons,
+.mat-mdc-stroked-button .eos-icons,
+.mat-mdc-raised-button .eos-icons,
+.mat-mdc-unelevated-button .eos-icons,
+.mat-mdc-icon-button .eos-icons,
+.mat-icon-button .eos-icons,
+.mat-mdc-menu-item .eos-icons,
+.mat-mdc-option .eos-icons {
+  margin-top: 0 !important;
 }
 
 .dashboard-panel-instruction-content,

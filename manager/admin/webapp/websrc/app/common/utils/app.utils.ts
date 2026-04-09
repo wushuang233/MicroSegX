@@ -180,6 +180,21 @@ export class UtilsService {
       defaultColDef: {
         resizable: true,
         sortable: true,
+        wrapHeaderText: true,
+        autoHeaderHeight: true,
+        tooltipValueGetter: params => {
+          const value = params.valueFormatted ?? params.value;
+          if (value === null || value === undefined) {
+            return '';
+          }
+          if (Array.isArray(value)) {
+            return value.join(', ');
+          }
+          if (typeof value === 'object') {
+            return '';
+          }
+          return String(value);
+        },
       },
       headerHeight: 30,
       rowHeight: 30,
@@ -210,6 +225,7 @@ export class UtilsService {
       overlayNoRowsTemplate: `<span class="overlay">${this.translate.instant(
         'general.NO_ROWS'
       )}</span>`,
+      tooltipShowDelay: 250,
     };
     return option;
   }

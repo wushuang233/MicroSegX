@@ -9,3 +9,32 @@ div.ag-root .ag-cell-focus,
 .ag-row-highlight {
   background-color: #eef0d6 !important;
 }
+
+.ag-theme-alpine .ag-header-cell-label,
+.ag-theme-alpine .ag-header-group-cell-label,
+.ag-theme-balham .ag-header-cell-label,
+.ag-theme-balham .ag-header-group-cell-label {
+  align-items: center;
+}
+
+.ag-theme-alpine .ag-header-cell-text,
+.ag-theme-balham .ag-header-cell-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.ag-theme-alpine .ag-cell-value,
+.ag-theme-balham .ag-cell-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ag-theme-alpine .ag-cell.ag-cell-wrap-text .ag-cell-value,
+.ag-theme-balham .ag-cell.ag-cell-wrap-text .ag-cell-value {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

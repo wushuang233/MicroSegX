@@ -1,6 +1,6 @@
 .workload-name-cell {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   width: 100%;
   min-width: 0;
@@ -11,16 +11,30 @@
 }
 
 .workload-name-cell__toggle {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(22, 119, 255, 0.08);
   color: var(--saas-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.workload-name-cell__toggle-icon {
+  width: 14px;
+  min-width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px !important;
+  line-height: 1;
 }
 
 .workload-name-cell__branch {
@@ -34,12 +48,12 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .workload-name-cell__title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   min-width: 0;
 }
@@ -47,11 +61,15 @@
 .workload-name-cell__title {
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   color: var(--saas-text);
   font-size: 14px;
   font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workload-name-cell__count {
@@ -66,6 +84,8 @@
   color: var(--saas-primary);
   font-size: 11px;
   font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .workload-name-cell__meta {
@@ -80,6 +100,10 @@
 .workload-name-cell__meta span {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workload-name-cell__meta span:not(:last-child)::after {

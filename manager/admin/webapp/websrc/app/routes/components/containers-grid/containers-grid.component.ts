@@ -39,7 +39,7 @@ import { QuickFilterComponent } from '@components/quick-filter/quick-filter.comp
 })
 export class ContainersGridComponent implements OnInit {
   private readonly $win;
-  private readonly minimumComfortGridWidth = 1380;
+  private readonly minimumComfortGridWidth = 1460;
   @Input() gridHeight: number = 200;
   @Input() useQuickFilterService: boolean = false;
   @Input() gridOnly: boolean = false;
@@ -91,8 +91,11 @@ export class ContainersGridComponent implements OnInit {
         headerName: this.tr.instant('containers.detail.NAME'),
         field: 'brief.display_name',
         cellRenderer: 'nameCellRenderer',
-        width: 300,
-        minWidth: 260,
+        width: 340,
+        minWidth: 300,
+        flex: 2.1,
+        autoHeight: true,
+        cellClass: 'ag-cell-wrap-text workload-grid__cell--name',
       },
       {
         headerName: this.tr.instant('containers.detail.NAME'),
@@ -141,14 +144,22 @@ export class ContainersGridComponent implements OnInit {
       {
         headerName: this.tr.instant('group.gridHeader.DOMAIN'),
         field: 'brief.domain',
-        width: 170,
-        minWidth: 150,
+        width: 200,
+        minWidth: 170,
+        flex: 1,
+        wrapText: true,
+        autoHeight: true,
+        cellClass: 'ag-cell-wrap-text',
       },
       {
         headerName: this.tr.instant('containers.detail.HOST_NAME'),
         field: 'brief.host_name',
-        width: 190,
-        minWidth: 170,
+        width: 220,
+        minWidth: 190,
+        flex: 1.1,
+        wrapText: true,
+        autoHeight: true,
+        cellClass: 'ag-cell-wrap-text',
         hide: this.isMemberData,
       },
       {
@@ -160,8 +171,14 @@ export class ContainersGridComponent implements OnInit {
       {
         headerName: this.tr.instant('containers.detail.APPLICATIONS'),
         field: 'rt_attributes.applications',
-        width: 220,
-        minWidth: 190,
+        valueGetter: params =>
+          this.formatApplications(params.data?.rt_attributes?.applications),
+        width: 280,
+        minWidth: 220,
+        flex: 1.35,
+        wrapText: true,
+        autoHeight: true,
+        cellClass: 'ag-cell-wrap-text',
         hide: this.isMemberData,
       },
       {
@@ -254,7 +271,7 @@ export class ContainersGridComponent implements OnInit {
     this.gridOptions = {
       ...this.gridOptions,
       headerHeight: 46,
-      rowHeight: 64,
+      rowHeight: 72,
       getRowId: params => params.data.brief.id,
       postSortRows: this.postSortRows.bind(this),
       onGridReady: this.onGridReady.bind(this),
@@ -370,9 +387,9 @@ export class ContainersGridComponent implements OnInit {
         this.gridApi.applyColumnState({
           state: [
             { colId: 'brief.display_name', width: 300 },
-            { colId: 'brief.domain', width: 170 },
-            { colId: 'brief.host_name', width: 190 },
-            { colId: 'rt_attributes.applications', width: 220 },
+            { colId: 'brief.domain', width: 200 },
+            { colId: 'brief.host_name', width: 220 },
+            { colId: 'rt_attributes.applications', width: 280 },
             { colId: 'brief.state', width: 126 },
             { colId: 'security.scan_summary.status', width: 132 },
             { colId: 'security.scan_summary.high', width: 104 },
@@ -382,5 +399,12 @@ export class ContainersGridComponent implements OnInit {
         });
       }
     }
+  }
+
+  private formatApplications(applications?: string[]): string {
+    if (!applications || applications.length === 0) {
+      return '-';
+    }
+    return applications.join(', ');
   }
 }

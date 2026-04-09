@@ -93,7 +93,8 @@
             [matMenuTriggerFor]="menu"
             class="mx-2 d-flex align-items-center justify-content-center"
             mat-button>
-            {{ activeScore }} <i class="eos-icons">arrow_drop_down</i>
+            {{ activeScore }}
+            <em class="fa fa-chevron-down detail-filter__chevron"></em>
           </button>
           <mat-menu #menu="matMenu">
             <button (click)="changeScoreView('V2')" mat-menu-item>
@@ -127,9 +128,10 @@
               class="me-3"
               (click)="toggleAcceptedVuls()"
               mat-icon-button>
-              <i class="eos-icons">{{
-                !showAcceptedVuls ? 'visibility' : 'visibility_off'
-              }}</i>
+              <em
+                class="fa"
+                [ngClass]="!showAcceptedVuls ? 'fa-eye' : 'fa-eye-slash'">
+              </em>
             </button>
           </ng-container>
           <button
@@ -139,7 +141,7 @@
             class="me-3"
             (click)="exportCVE()"
             mat-icon-button>
-            <i class="eos-icons icon-18">csv_file</i>
+            <em class="fa fa-download detail-filter__icon"></em>
           </button>
         </div>
         <mat-form-field class="quick-filter">

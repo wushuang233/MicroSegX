@@ -131,66 +131,67 @@
     <div class="stats-grid">
       <mat-card class="metric-card metric-card--primary">
         <div class="metric-card__icon">
-          <mat-icon>outbound</mat-icon>
+          <mat-icon>shield</mat-icon>
         </div>
         <div class="metric-card__body">
-          <span>{{ 'MICROSEGX.PORT_EXPOSURE.OPEN_PORTS' | translate }}</span>
-          <strong>{{ openPortCount }}</strong>
+          <span>{{
+            'MICROSEGX.PORT_EXPOSURE.MANAGEABLE_OPEN_PORTS' | translate
+          }}</span>
+          <strong>{{ manageableOpenPortCount }}</strong>
           <small>{{
-            'MICROSEGX.PORT_EXPOSURE.OPEN_PORTS_DESC' | translate
+            'MICROSEGX.PORT_EXPOSURE.MANAGEABLE_OPEN_PORTS_DESC' | translate
           }}</small>
         </div>
       </mat-card>
 
       <mat-card class="metric-card">
         <div class="metric-card__icon metric-card__icon--amber">
-          <mat-icon>visibility</mat-icon>
+          <mat-icon>apps</mat-icon>
         </div>
         <div class="metric-card__body">
           <span>{{
-            'MICROSEGX.PORT_EXPOSURE.TRAFFIC_EVIDENCE' | translate
+            'MICROSEGX.PORT_EXPOSURE.INFRASTRUCTURE_EXPOSURES' | translate
           }}</span>
-          <strong>{{ trafficEvidenceCount }}</strong>
-          <small
-            >{{ uniqueAddressCount }}
-            {{ 'MICROSEGX.PORT_EXPOSURE.UNIQUE_ENDPOINTS' | translate }}</small
-          >
+          <strong>{{ infrastructureExposurePortCount }}</strong>
+          <small>{{
+            'MICROSEGX.PORT_EXPOSURE.INFRASTRUCTURE_EXPOSURES_DESC' | translate
+          }}</small>
         </div>
       </mat-card>
 
       <mat-card class="metric-card">
         <div class="metric-card__icon metric-card__icon--blue">
-          <mat-icon>lan</mat-icon>
+          <mat-icon>dns</mat-icon>
         </div>
         <div class="metric-card__body">
           <span>{{
-            'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS' | translate
+            'MICROSEGX.PORT_EXPOSURE.NODE_LISTENERS' | translate
           }}</span>
-          <strong>{{ exposedObjectCount }}</strong>
+          <strong>{{ nodeListenerPortCount }}</strong>
           <small>{{
-            'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS_DESC' | translate
+            'MICROSEGX.PORT_EXPOSURE.NODE_LISTENERS_DESC' | translate
           }}</small>
         </div>
       </mat-card>
 
       <mat-card class="metric-card">
         <div class="metric-card__icon metric-card__icon--green">
-          <mat-icon>shield</mat-icon>
+          <mat-icon>{{
+            viewMode === 'services' ? 'inventory_2' : 'lan'
+          }}</mat-icon>
         </div>
         <div class="metric-card__body">
           <span>{{
             viewMode === 'services'
-              ? ('MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES' | translate)
-              : ('MICROSEGX.PORT_EXPOSURE.RECORDS' | translate)
+              ? ('MICROSEGX.PORT_EXPOSURE.VISIBLE_SERVICES' | translate)
+              : ('MICROSEGX.PORT_EXPOSURE.VISIBLE_EXPOSURES' | translate)
           }}</span>
-          <strong>{{
-            viewMode === 'services' ? managedServiceCount : recordCount
-          }}</strong>
+          <strong>{{ currentInventoryCount }}</strong>
           <small>
             {{
               viewMode === 'services'
-                ? ('MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES_DESC' | translate)
-                : ('MICROSEGX.PORT_EXPOSURE.EXPOSURE_RECORDS_DESC' | translate)
+                ? ('MICROSEGX.PORT_EXPOSURE.VISIBLE_SERVICES_DESC' | translate)
+                : ('MICROSEGX.PORT_EXPOSURE.VISIBLE_EXPOSURES_DESC' | translate)
             }}
           </small>
         </div>
@@ -217,6 +218,14 @@
         </div>
       </div>
 
+      <div class="filters-card__helper">
+        {{
+          viewMode === 'services'
+            ? ('MICROSEGX.PORT_EXPOSURE.SERVICE_VIEW_HELPER' | translate)
+            : ('MICROSEGX.PORT_EXPOSURE.EXPOSURE_VIEW_HELPER' | translate)
+        }}
+      </div>
+
       <div class="filters-row">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>{{ 'general.FILTER' | translate }}</mat-label>
@@ -228,6 +237,27 @@
                 ? ('MICROSEGX.PORT_EXPOSURE.SEARCH_SERVICE' | translate)
                 : ('MICROSEGX.PORT_EXPOSURE.SEARCH_EXPOSURE' | translate)
             " />
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'exposure'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.EXPOSURE_SCOPE_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="exposureScopeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="manageable">{{
+              'MICROSEGX.PORT_EXPOSURE.SCOPE_MANAGEABLE' | translate
+            }}</mat-option>
+            <mat-option value="platform">{{
+              'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM' | translate
+            }}</mat-option>
+            <mat-option value="node">{{
+              'MICROSEGX.PORT_EXPOSURE.SCOPE_NODE' | translate
+            }}</mat-option>
+          </mat-select>
         </mat-form-field>
 
         <mat-form-field
@@ -260,6 +290,24 @@
             <mat-option *ngFor="let type of exposureTypes" [value]="type">
               {{ type }}
             </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'services'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE_SCOPE_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="serviceScopeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="business">{{
+              'MICROSEGX.PORT_EXPOSURE.SCOPE_BUSINESS' | translate
+            }}</mat-option>
+            <mat-option value="platform">{{
+              'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM' | translate
+            }}</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -341,6 +389,23 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="scope">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'MICROSEGX.PORT_EXPOSURE.SCOPE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">
+              <span
+                class="table-pill table-pill--scope"
+                [ngClass]="
+                  getServiceScope(item) === 'platform'
+                    ? 'table-pill--platform'
+                    : 'table-pill--business'
+                ">
+                {{ getServiceScopeLabelKey(item) | translate }}
+              </span>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="service">
             <th mat-header-cell *matHeaderCellDef>
               {{ 'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate }}
@@ -349,7 +414,8 @@
               <div class="entity-cell">
                 <strong>{{ item.service_name }}</strong>
                 <small>
-                  {{ item.service_type }} · {{ item.public_service_type }}
+                  {{ item.service_type }} · {{ item.public_service_type }} ·
+                  {{ getServiceScopeLabelKey(item) | translate }}
                 </small>
                 <div
                   *ngIf="!item.manageable && item.disabled_reason"
@@ -489,6 +555,24 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="scope">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'MICROSEGX.PORT_EXPOSURE.SCOPE' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">
+              <span
+                class="table-pill table-pill--scope"
+                [ngClass]="{
+                  'table-pill--manageable':
+                    getExposureScope(item) === 'manageable',
+                  'table-pill--platform': getExposureScope(item) === 'platform',
+                  'table-pill--node': getExposureScope(item) === 'node',
+                }">
+                {{ getExposureScopeLabelKey(item) | translate }}
+              </span>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="resource">
             <th mat-header-cell *matHeaderCellDef>
               {{ 'MICROSEGX.PORT_EXPOSURE.RESOURCE' | translate }}
@@ -496,7 +580,10 @@
             <td mat-cell *matCellDef="let item">
               <div class="entity-cell">
                 <strong>{{ item.resource_name }}</strong>
-                <small>{{ item.resource_kind }}</small>
+                <small
+                  >{{ item.resource_kind }} ·
+                  {{ getExposureScopeLabelKey(item) | translate }}</small
+                >
               </div>
             </td>
           </ng-container>

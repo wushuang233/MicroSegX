@@ -6,3 +6,9 @@ artifacts/full-release/**/images-*.tar.gz.sha256
 # 本地构建产物
 docker-images/binaries/
 manager/stage/
+
+# 本地临时打包文件
+tmp/*.tar
+tmp/**/*.tar
+tmp/*.tar.gz
+tmp/**/*.tar.gz

@@ -33,7 +33,7 @@
           mat-stroked-button
           class="page-action-button">
           {{ 'containers.report.title' | translate }}
-          <em class="eos-icons icon-18 ms-1">print</em>
+          <em class="fa fa-print ms-1 page-action-button__icon"></em>
         </button>
         <button
           mat-stroked-button
@@ -41,7 +41,7 @@
           [matMenuTriggerFor]="view_menu"
           aria-label="View menu"
           type="menu">
-          <i class="eos-icons me-1" style="font-size: 16px">settings</i>
+          <em class="fa fa-cog me-1 page-action-button__icon"></em>
           {{ 'network.SETTING' | translate }}
         </button>
         <mat-menu #view_menu="matMenu">
@@ -194,6 +194,27 @@
       <mat-card
         *ngIf="activeContainer as focus; else emptySelectionTemplate"
         class="page-card page-card--flush detail-workbench-card">
+        <div class="detail-workbench-card__header">
+          <div>
+            <h2>{{ focus.brief.display_name }}</h2>
+            <p>
+              {{ focus.brief.domain }} · {{ activeService }} ·
+              {{ focus.brief.host_name }}
+            </p>
+          </div>
+          <div class="detail-workbench-card__chips">
+            <span class="workbench-chip">
+              {{ 'scan.gridHeader.HIGH' | translate }} {{ activeHigh }}
+            </span>
+            <span class="workbench-chip">
+              {{ 'scan.gridHeader.MEDIUM' | translate }} {{ activeMedium }}
+            </span>
+            <span class="workbench-chip">
+              {{ 'containers.detail.PORT_MAPPING' | translate }}
+              {{ activePortsCount }}
+            </span>
+          </div>
+        </div>
         <app-container-details
           [gridHeight]="detailViewportHeight"
           [container]="focus">

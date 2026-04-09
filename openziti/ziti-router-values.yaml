@@ -31,4 +31,4 @@ csr:
       - 127.0.0.1
 
 tunnel:
-  mode: none
+  mode: host

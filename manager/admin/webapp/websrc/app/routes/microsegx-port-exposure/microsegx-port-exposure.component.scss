@@ -363,15 +363,26 @@
   }
 }
 
+.filters-card__helper {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(22, 119, 255, 0.06);
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
 .filters-row {
   display: grid;
-  grid-template-columns: minmax(260px, 1.3fr) repeat(3, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
   align-items: start;
 }
 
 .search-field {
   width: 100%;
+  grid-column: span 2;
 }
 
 .filter-field {
@@ -436,6 +447,26 @@
   color: var(--saas-text);
   font-size: 12px;
   font-weight: 700;
+}
+
+.table-pill--scope {
+  justify-content: center;
+}
+
+.table-pill--business,
+.table-pill--manageable {
+  background: rgba(82, 196, 26, 0.14);
+  color: #2b7a0b;
+}
+
+.table-pill--platform {
+  background: rgba(22, 119, 255, 0.1);
+  color: var(--saas-primary);
+}
+
+.table-pill--node {
+  background: rgba(250, 173, 20, 0.14);
+  color: #b26c00;
 }
 
 .table-pill--soft {
@@ -865,6 +896,10 @@
 
   .filters-row {
     grid-template-columns: 1fr;
+  }
+
+  .search-field {
+    grid-column: span 1;
   }
 
   .mode-switch {

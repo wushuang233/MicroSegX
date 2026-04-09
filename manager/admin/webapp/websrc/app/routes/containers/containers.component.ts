@@ -310,12 +310,12 @@ export class ContainersComponent implements OnInit, OnDestroy {
     const viewportHeight = GlobalVariable.window?.innerHeight || 900;
     const isCompact = (GlobalVariable.window?.innerWidth || 1440) < 1200;
     this.listViewportHeight = Math.max(
-      isCompact ? 380 : 440,
-      Math.min(isCompact ? 520 : 640, viewportHeight - (isCompact ? 430 : 360))
+      isCompact ? 400 : 500,
+      Math.min(isCompact ? 560 : 720, viewportHeight - (isCompact ? 390 : 290))
     );
     this.detailViewportHeight = Math.max(
-      isCompact ? 440 : 520,
-      Math.min(isCompact ? 620 : 760, viewportHeight - (isCompact ? 320 : 250))
+      isCompact ? 420 : 500,
+      Math.min(isCompact ? 620 : 720, viewportHeight - (isCompact ? 320 : 240))
     );
   }
 }

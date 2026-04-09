@@ -54,6 +54,10 @@
   font-weight: 700;
 }
 
+.grid-toolbar__button .eos-icons {
+  font-size: 18px !important;
+}
+
 .workload-grid {
   border-radius: 0 0 18px 18px;
   overflow: auto;
@@ -84,6 +88,33 @@
   align-items: center;
   font-size: 13px;
   line-height: 1.5;
+}
+
+:host ::ng-deep .ag-theme-alpine.workload-grid .ag-cell.ag-cell-wrap-text {
+  align-items: flex-start;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+:host
+  ::ng-deep
+  .ag-theme-alpine.workload-grid
+  .ag-cell.ag-cell-wrap-text
+  .ag-cell-wrapper,
+:host
+  ::ng-deep
+  .ag-theme-alpine.workload-grid
+  .ag-cell.ag-cell-wrap-text
+  .ag-cell-value {
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .ag-theme-alpine.workload-grid .ag-header-cell-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 :host ::ng-deep .ag-theme-alpine.workload-grid .ag-root-wrapper,

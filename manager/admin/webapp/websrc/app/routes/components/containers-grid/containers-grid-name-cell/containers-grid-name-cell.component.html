@@ -4,9 +4,10 @@
     type="button"
     class="workload-name-cell__toggle"
     (click)="toggleVisible()">
-    <i class="eos-icons">
-      {{ isChildVisible ? 'expand_more' : 'chevron_right' }}
-    </i>
+    <em
+      class="fa workload-name-cell__toggle-icon"
+      [ngClass]="isChildVisible ? 'fa-chevron-down' : 'fa-chevron-right'">
+    </em>
   </button>
 
   <span *ngIf="!isParent" class="workload-name-cell__branch"></span>

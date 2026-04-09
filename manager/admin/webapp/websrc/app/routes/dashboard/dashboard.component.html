@@ -125,17 +125,37 @@
             {{ 'customUi.header.routes.workloads' | translate }}
           </div>
           <strong class="dashboard-focus-card__value">
-            {{ protectedContainersCount }}
+            {{ workloadInventoryCount }}
           </strong>
         </div>
         <span class="dashboard-focus-card__badge">
-          {{ 'enum.PROTECT' | translate }}
+          {{ 'customUi.microsegx.dashboard.workloadInventory' | translate }}
         </span>
       </div>
       <p class="dashboard-focus-card__copy">
         {{ 'customUi.header.captions.workloads' | translate }}
       </p>
+      <p class="dashboard-focus-card__subcopy">
+        {{
+          'customUi.microsegx.dashboard.workloadCoverageHint'
+            | translate
+              : {
+                  covered: workloadCoveredCount,
+                  total: workloadInventoryCount,
+                }
+        }}
+      </p>
       <div class="dashboard-focus-card__metrics">
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'dashboard.summary.POD' | translate }}</span>
+          <strong>{{ podsCount }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'customUi.microsegx.dashboard.workloadCoverage' | translate
+          }}</span>
+          <strong>{{ workloadCoveredCount }}</strong>
+        </div>
         <div class="dashboard-focus-card__metric">
           <span>{{ 'enum.PROTECT' | translate }}</span>
           <strong>{{ protectedContainersCount }}</strong>
@@ -143,14 +163,6 @@
         <div class="dashboard-focus-card__metric">
           <span>{{ 'enum.MONITOR' | translate }}</span>
           <strong>{{ monitorContainersCount }}</strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{ 'enum.DISCOVER' | translate }}</span>
-          <strong>{{ discoverContainersCount }}</strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{ 'enum.QUARANTINED' | translate }}</span>
-          <strong>{{ quarantinedContainersCount }}</strong>
         </div>
       </div>
     </article>
@@ -162,38 +174,40 @@
             {{ 'MICROSEGX.PORT_EXPOSURE.TITLE' | translate }}
           </div>
           <strong class="dashboard-focus-card__value">
-            {{ microsegxOpenPorts }}
+            {{ microsegxManageableOpenPorts }}
           </strong>
         </div>
         <span class="dashboard-focus-card__badge">
-          {{ 'dashboard.body.panel_title.EXPOSURES' | translate }}
+          {{ 'customUi.microsegx.dashboard.manageableExposure' | translate }}
         </span>
       </div>
       <p class="dashboard-focus-card__copy">
-        {{ 'MICROSEGX.PORT_EXPOSURE.SUBTITLE' | translate }}
+        {{ 'customUi.microsegx.dashboard.exposureSummary' | translate }}
       </p>
       <div class="dashboard-focus-card__metrics">
         <div class="dashboard-focus-card__metric">
           <span>{{
-            'customUi.microsegx.dashboard.openPorts' | translate
+            'MICROSEGX.PORT_EXPOSURE.MANAGEABLE_SERVICES' | translate
           }}</span>
-          <strong>{{ microsegxOpenPorts }}</strong>
+          <strong>{{ microsegxManageableServices }}</strong>
         </div>
         <div class="dashboard-focus-card__metric">
           <span>{{
-            'MICROSEGX.PORT_EXPOSURE.MANAGED_SERVICES' | translate
+            'customUi.microsegx.dashboard.infrastructureExposure' | translate
           }}</span>
-          <strong>{{ microsegxManagedServices }}</strong>
+          <strong>{{ microsegxInfrastructureExposurePorts }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'customUi.microsegx.dashboard.nodeListeners' | translate
+          }}</span>
+          <strong>{{ microsegxNodeListenerPorts }}</strong>
         </div>
         <div class="dashboard-focus-card__metric">
           <span>{{
             'MICROSEGX.PORT_EXPOSURE.EXPOSED_OBJECTS' | translate
           }}</span>
           <strong>{{ microsegxExposedTargets }}</strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{ 'dashboard.body.panel_title.EXPOSURES' | translate }}</span>
-          <strong>{{ ingressExposureCount + egressExposureCount }}</strong>
         </div>
       </div>
       <div class="dashboard-focus-card__actions">
@@ -215,17 +229,24 @@
           <strong class="dashboard-focus-card__value">
             {{
               microsegxFabricAvailable
-                ? microsegxAliveRouters
+                ? microsegxPublishedServices
                 : ('customUi.microsegx.dashboard.notConfigured' | translate)
             }}
           </strong>
         </div>
         <span class="dashboard-focus-card__badge">
-          {{ 'customUi.microsegx.dashboard.fabricTitle' | translate }}
+          {{ 'customUi.microsegx.dashboard.publishedServices' | translate }}
         </span>
       </div>
       <p class="dashboard-focus-card__copy">
-        {{ 'MICROSEGX.ZITI.SUBTITLE' | translate }}
+        {{ 'customUi.microsegx.dashboard.zeroTrustSummary' | translate }}
+      </p>
+      <p class="dashboard-focus-card__subcopy">
+        {{
+          microsegxFabricAvailable
+            ? microsegxControllerUrl
+            : ('customUi.microsegx.dashboard.fabricHint' | translate)
+        }}
       </p>
       <div class="dashboard-focus-card__metrics">
         <div class="dashboard-focus-card__metric">
@@ -237,19 +258,23 @@
         <div class="dashboard-focus-card__metric">
           <span>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</span>
           <strong>{{
-            microsegxFabricAvailable ? microsegxZitiServices : 0
+            microsegxFabricAvailable ? microsegxPublishedServices : 0
           }}</strong>
         </div>
         <div class="dashboard-focus-card__metric">
-          <span>{{ 'MICROSEGX.ZITI.IDENTITIES.TITLE' | translate }}</span>
+          <span>{{
+            'customUi.microsegx.dashboard.connectedIdentities' | translate
+          }}</span>
           <strong>
-            {{ microsegxFabricAvailable ? microsegxZitiIdentities : 0 }}
+            {{ microsegxFabricAvailable ? microsegxConnectedIdentities : 0 }}
           </strong>
         </div>
         <div class="dashboard-focus-card__metric">
-          <span>{{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}</span>
+          <span>{{
+            'customUi.microsegx.dashboard.terminators' | translate
+          }}</span>
           <strong>{{
-            microsegxFabricAvailable ? microsegxControllerUrl : '-'
+            microsegxFabricAvailable ? microsegxTerminatorCount : 0
           }}</strong>
         </div>
       </div>

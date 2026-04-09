@@ -21,6 +21,7 @@ interface ZitiEntity {
   name: string;
   createdAt?: string;
   updatedAt?: string;
+  isSystem?: boolean;
   tags?: Record<string, any>;
   [key: string]: any;
 }
@@ -37,6 +38,8 @@ interface RouterWorkload {
   publicHost?: string;
   advertisedPort?: number;
   serviceName?: string;
+  tunnelEnabled?: boolean;
+  tunnelMode?: string;
 }
 
 interface EdgeRouter extends ZitiEntity {
@@ -66,6 +69,14 @@ interface ZitiService extends ZitiEntity {
   terminatorStrategy?: string;
   maxIdleTimeMillis?: number;
   roleAttributes?: string[];
+}
+
+interface ZitiTerminator extends ZitiEntity {
+  binding?: string;
+  address?: string;
+  precedence?: string;
+  service?: { id?: string; name?: string };
+  router?: { id?: string; name?: string };
 }
 
 interface Identity extends ZitiEntity {
@@ -157,6 +168,7 @@ interface ZitiOverview {
   service_policies?: ServicePolicy[];
   edge_router_policies?: EdgeRouterPolicy[];
   service_edge_router_policies?: ServiceEdgeRouterPolicy[];
+  terminators?: ZitiTerminator[];
   posture_checks?: PostureCheck[];
   auth_policies?: AuthPolicy[];
   enrollments?: Enrollment[];
@@ -251,6 +263,7 @@ export class MicrosegxZitiComponent
   selectedPolicyType: PolicyType = 'service-policies';
 
   showRouterDeployDialog = false;
+  showServiceAttachDialog = false;
   showCreateDialog = false;
   showEditDialog = false;
   showDeleteConfirm = false;
@@ -265,6 +278,10 @@ export class MicrosegxZitiComponent
     publicHost: '',
     nodePort: null as number | null,
   };
+  serviceAttachForm = {
+    routerId: '',
+    autoEnableRouter: true,
+  };
 
   entityForm: EntityFormState = this.createEmptyEntityForm();
   private dialogBodyLocked = false;
@@ -273,8 +290,10 @@ export class MicrosegxZitiComponent
   private routerWorkloadById = new Map<string, RouterWorkload>();
   private routerWorkloadByName = new Map<string, RouterWorkload>();
   private configNameById = new Map<string, string>();
+  private configById = new Map<string, ZitiConfig>();
   private configUsageCountById = new Map<string, number>();
   private serviceConfigNamesById = new Map<string, string[]>();
+  private terminatorsByServiceId = new Map<string, ZitiTerminator[]>();
   private identityEnrollmentStateById = new Map<
     string,
     'enrolled' | 'pending' | 'none'
@@ -411,9 +430,11 @@ export class MicrosegxZitiComponent
       });
   }
 
-  refresh(): void {
-    this.loading = true;
-    this.error = '';
+  refresh(silent = false): void {
+    if (!silent) {
+      this.loading = true;
+      this.error = '';
+    }
 
     this.http
       .get<any>('/microsegx/overview', { headers: this.getHeaders() })
@@ -960,6 +981,39 @@ export class MicrosegxZitiComponent
     return `${workload.readyReplicas || 0}/${workload.replicas || 0}`;
   }
 
+  getRouterTunnelState(router: EdgeRouter): 'ready' | 'pending' | 'disabled' {
+    const workload = this.getRouterWorkload(router);
+    if (workload?.tunnelMode === 'host') {
+      return 'ready';
+    }
+    if (router.isTunnelerEnabled) {
+      return 'pending';
+    }
+    return 'disabled';
+  }
+
+  getRouterTunnelLabelKey(router: EdgeRouter): string {
+    switch (this.getRouterTunnelState(router)) {
+      case 'ready':
+        return 'MICROSEGX.ZITI.Routers.TUNNEL_READY';
+      case 'pending':
+        return 'MICROSEGX.ZITI.Routers.TUNNEL_PENDING';
+      default:
+        return 'MICROSEGX.ZITI.Routers.TUNNEL_DISABLED';
+    }
+  }
+
+  getRouterTunnelClass(router: EdgeRouter): string {
+    switch (this.getRouterTunnelState(router)) {
+      case 'ready':
+        return 'status-online';
+      case 'pending':
+        return 'status-paused';
+      default:
+        return 'status-offline';
+    }
+  }
+
   getIdentityTypeLabel(identity: Identity): string {
     return identity.isAdmin
       ? this.translate.instant('MICROSEGX.ZITI.TYPE_ADMIN')
@@ -998,6 +1052,122 @@ export class MicrosegxZitiComponent
 
   getServiceConfigNames(service: ZitiService): string[] {
     return this.serviceConfigNamesById.get(service.id) || [];
+  }
+
+  getServiceTerminators(service: ZitiService): ZitiTerminator[] {
+    return this.terminatorsByServiceId.get(service.id) || [];
+  }
+
+  getServiceTerminatorCount(service: ZitiService): number {
+    return this.getServiceTerminators(service).length;
+  }
+
+  getServiceHostingConfig(service: ZitiService): ZitiConfig | null {
+    for (const configId of service.configs || []) {
+      const config = this.configById.get(configId);
+      const type = this.getConfigTypeName(config || ({} as ZitiConfig));
+      if (!config) {
+        continue;
+      }
+      if (type === 'host.v1' || type === 'host.v2') {
+        return config;
+      }
+    }
+    return null;
+  }
+
+  getServiceHostingTarget(service: ZitiService): string {
+    const config = this.getServiceHostingConfig(service);
+    if (!config) {
+      return '-';
+    }
+
+    const type = this.getConfigTypeName(config);
+    const data = config.data || {};
+    if (type === 'host.v1') {
+      const address = String(data.address || '').trim();
+      const port = data.port ?? '-';
+      const protocol = String(data.protocol || 'tcp').toLowerCase();
+      return [address || '-', `${protocol}/${port}`].join(' · ');
+    }
+
+    if (type === 'host.v2') {
+      const terminators = Array.isArray(data.terminators)
+        ? data.terminators
+        : [];
+      if (terminators.length === 0) {
+        return 'host.v2';
+      }
+      const first = terminators[0] || {};
+      const address = String(first.address || '').trim();
+      const port = first.port ?? '-';
+      const protocol = String(first.protocol || 'tcp').toLowerCase();
+      const extra = terminators.length > 1 ? ` +${terminators.length - 1}` : '';
+      return `${[address || '-', `${protocol}/${port}`].join(' · ')}${extra}`;
+    }
+
+    return type || '-';
+  }
+
+  getServiceHostedRouters(service: ZitiService): string[] {
+    const names = new Set<string>();
+    for (const terminator of this.getServiceTerminators(service)) {
+      const routerName = String(terminator.router?.name || '').trim();
+      if (routerName) {
+        names.add(routerName);
+      }
+    }
+    return Array.from(names).sort((left, right) => left.localeCompare(right));
+  }
+
+  getServiceHostingStatus(
+    service: ZitiService
+  ): 'router' | 'host' | 'pending' | 'missing' {
+    const terminators = this.getServiceTerminators(service);
+    if (terminators.some(terminator => terminator.binding === 'tunnel')) {
+      return 'router';
+    }
+    if (terminators.length > 0) {
+      return 'host';
+    }
+    if (this.getServiceHostingConfig(service)) {
+      return 'pending';
+    }
+    return 'missing';
+  }
+
+  getServiceHostingStatusKey(service: ZitiService): string {
+    switch (this.getServiceHostingStatus(service)) {
+      case 'router':
+        return 'MICROSEGX.ZITI.SERVICES.HOSTING_ROUTER';
+      case 'host':
+        return 'MICROSEGX.ZITI.SERVICES.HOSTING_IDENTITY';
+      case 'pending':
+        return 'MICROSEGX.ZITI.SERVICES.HOSTING_PENDING';
+      default:
+        return 'MICROSEGX.ZITI.SERVICES.HOSTING_MISSING';
+    }
+  }
+
+  getServiceHostingStatusClass(service: ZitiService): string {
+    switch (this.getServiceHostingStatus(service)) {
+      case 'router':
+      case 'host':
+        return 'status-online';
+      case 'pending':
+        return 'status-paused';
+      default:
+        return 'status-offline';
+    }
+  }
+
+  getServiceHostingDetail(service: ZitiService): string {
+    const routers = this.getServiceHostedRouters(service);
+    if (routers.length > 0) {
+      return `${routers.join(', ')} · ${this.getServiceTerminatorCount(service)} terminator`;
+    }
+    const target = this.getServiceHostingTarget(service);
+    return target || '-';
   }
 
   getConfigName(configId: string): string {
@@ -1258,6 +1428,118 @@ export class MicrosegxZitiComponent
     this.showDeleteConfirm = true;
   }
 
+  get attachableRouters(): EdgeRouter[] {
+    return this.memoize('attachableRouters', `${this.overviewRevision}`, () =>
+      this.sortByName(this.overview?.edge_routers || [])
+    );
+  }
+
+  get selectedAttachRouter(): EdgeRouter | null {
+    return (
+      this.attachableRouters.find(
+        router => router.id === this.serviceAttachForm.routerId
+      ) || null
+    );
+  }
+
+  get selectedServiceEntity(): ZitiService | null {
+    if (this.selectedEntityType !== 'services' || !this.selectedEntity) {
+      return null;
+    }
+    return this.selectedEntity as ZitiService;
+  }
+
+  getSelectedAttachServiceTarget(): string {
+    return this.selectedServiceEntity
+      ? this.getServiceHostingTarget(this.selectedServiceEntity)
+      : '-';
+  }
+
+  getSelectedAttachServiceConfigName(): string {
+    return this.selectedServiceEntity
+      ? this.getServiceHostingConfig(this.selectedServiceEntity)?.name || '-'
+      : '-';
+  }
+
+  getSelectedAttachServiceStatusKey(): string {
+    return this.selectedServiceEntity
+      ? this.getServiceHostingStatusKey(this.selectedServiceEntity)
+      : 'MICROSEGX.ZITI.SERVICES.HOSTING_MISSING';
+  }
+
+  canAttachServiceToRouter(service: ZitiService): boolean {
+    return (
+      !!this.getServiceHostingConfig(service) &&
+      this.attachableRouters.length > 0
+    );
+  }
+
+  openAttachServiceDialog(service: ZitiService): void {
+    this.selectedEntity = service;
+    this.selectedEntityType = 'services';
+    this.serviceAttachForm = {
+      routerId: this.attachableRouters[0]?.id || '',
+      autoEnableRouter: true,
+    };
+    this.dialogError = '';
+    this.showServiceAttachDialog = true;
+  }
+
+  closeServiceAttachDialog(): void {
+    this.showServiceAttachDialog = false;
+    this.selectedEntity = null;
+    this.selectedEntityType = '';
+    this.dialogLoading = false;
+    this.dialogError = '';
+    this.serviceAttachForm = {
+      routerId: '',
+      autoEnableRouter: true,
+    };
+  }
+
+  attachServiceToRouter(): void {
+    if (!this.selectedEntity) {
+      this.dialogError = this.translate.instant('MICROSEGX.ZITI.ACTION_FAILED');
+      return;
+    }
+    if (!this.serviceAttachForm.routerId) {
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_REQUIRED'
+      );
+      return;
+    }
+
+    this.dialogLoading = true;
+    this.dialogError = '';
+
+    this.http
+      .post(
+        `/microsegx/api/ziti/services/${this.selectedEntity.id}/attach-router`,
+        {
+          routerId: this.serviceAttachForm.routerId,
+          autoEnableRouter: this.serviceAttachForm.autoEnableRouter,
+          waitTimeoutSeconds: 20,
+        },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.dialogLoading = false;
+          this.applyAttachRouterResult(response?.data || null);
+          this.closeServiceAttachDialog();
+          this.refresh(true);
+        },
+        error: err => {
+          this.dialogError =
+            err?.error?.error ||
+            this.translate.instant(
+              'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_FAILED'
+            );
+          this.dialogLoading = false;
+        },
+      });
+  }
+
   openCreateIdentityDialog(): void {
     this.selectedEntity = null;
     this.selectedEntityType = 'identities';
@@ -1412,6 +1694,12 @@ export class MicrosegxZitiComponent
     policy: ServicePolicy | EdgeRouterPolicy | ServiceEdgeRouterPolicy,
     policyType: PolicyType
   ): void {
+    if (this.isSystemManagedEntity(policy)) {
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.DELETE_SYSTEM_DENIED'
+      );
+      return;
+    }
     this.selectedEntity = policy;
     this.selectedEntityType = policyType;
     this.dialogError = '';
@@ -1480,6 +1768,14 @@ export class MicrosegxZitiComponent
 
   deleteEntity(): void {
     if (!this.selectedEntity) {
+      return;
+    }
+
+    if (this.isSystemManagedEntity(this.selectedEntity)) {
+      this.dialogLoading = false;
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.DELETE_SYSTEM_DENIED'
+      );
       return;
     }
 
@@ -1894,6 +2190,7 @@ export class MicrosegxZitiComponent
 
     const shouldLock =
       this.showRouterDeployDialog ||
+      this.showServiceAttachDialog ||
       this.showCreateDialog ||
       this.showEditDialog ||
       this.showDeleteConfirm;
@@ -1967,6 +2264,18 @@ export class MicrosegxZitiComponent
     }
   }
 
+  isSystemManagedEntity(entity: ZitiEntity | null | undefined): boolean {
+    return !!entity?.isSystem;
+  }
+
+  getDeleteTooltip(entity: ZitiEntity | null | undefined): string {
+    return this.translate.instant(
+      this.isSystemManagedEntity(entity)
+        ? 'MICROSEGX.ZITI.DELETE_SYSTEM_DENIED'
+        : 'MICROSEGX.ZITI.DELETE_ENTITY'
+    );
+  }
+
   closeCreateDialog(): void {
     this.showCreateDialog = false;
     this.selectedEntity = null;
@@ -2006,12 +2315,130 @@ export class MicrosegxZitiComponent
     this.rebuildOverviewLookups();
   }
 
+  private applyAttachRouterResult(payload: any): void {
+    if (!this.overview || !payload || typeof payload !== 'object') {
+      return;
+    }
+
+    const edgeRouters = [...(this.overview.edge_routers || [])];
+    const edgeRouterWorkloads = [
+      ...(this.overview.edge_router_workloads || []),
+    ];
+    const identities = [...(this.overview.identities || [])];
+    const servicePolicies = [...(this.overview.service_policies || [])];
+    const edgeRouterPolicies = [...(this.overview.edge_router_policies || [])];
+    const serviceEdgeRouterPolicies = [
+      ...(this.overview.service_edge_router_policies || []),
+    ];
+    const terminators = [...(this.overview.terminators || [])];
+
+    const nextOverview: ZitiOverview = {
+      ...this.overview,
+      edge_routers: edgeRouters,
+      edge_router_workloads: edgeRouterWorkloads,
+      identities,
+      service_policies: servicePolicies,
+      edge_router_policies: edgeRouterPolicies,
+      service_edge_router_policies: serviceEdgeRouterPolicies,
+      terminators,
+    };
+
+    this.replaceEntityInCollection(edgeRouters, payload.router);
+    this.replaceRouterWorkload(edgeRouterWorkloads, payload.routerWorkload);
+    this.replaceEntityInCollection(identities, payload.routerIdentity);
+    this.replaceEntityInCollection(servicePolicies, payload.bindPolicy);
+    this.replaceEntityInCollection(
+      edgeRouterPolicies,
+      payload.edgeRouterPolicy
+    );
+    this.replaceEntityInCollection(
+      serviceEdgeRouterPolicies,
+      payload.serviceEdgeRouterPolicy
+    );
+    this.replaceTerminator(terminators, payload.terminator);
+
+    this.applyOverviewState(this.session, nextOverview);
+  }
+
+  private replaceEntityInCollection<T extends { id?: string; name?: string }>(
+    collection: T[],
+    entity: T | null | undefined
+  ): void {
+    if (!entity || (!entity.id && !entity.name)) {
+      return;
+    }
+
+    const entityId = String(entity.id || '').trim();
+    const entityName = String(entity.name || '').trim();
+    const index = collection.findIndex(item => {
+      const itemId = String(item?.id || '').trim();
+      const itemName = String(item?.name || '').trim();
+      return (
+        (!!entityId && itemId === entityId) ||
+        (!!entityName && itemName === entityName)
+      );
+    });
+
+    if (index >= 0) {
+      collection[index] = entity;
+      return;
+    }
+
+    collection.push(entity);
+  }
+
+  private replaceRouterWorkload(
+    collection: RouterWorkload[],
+    workload: RouterWorkload | null | undefined
+  ): void {
+    if (!workload) {
+      return;
+    }
+
+    const routerId = String(workload.routerId || '').trim();
+    const routerName = String(workload.routerName || '').trim();
+    const index = collection.findIndex(item => {
+      const itemRouterId = String(item?.routerId || '').trim();
+      const itemRouterName = String(item?.routerName || '').trim();
+      return (
+        (!!routerId && itemRouterId === routerId) ||
+        (!!routerName && itemRouterName === routerName)
+      );
+    });
+
+    if (index >= 0) {
+      collection[index] = workload;
+      return;
+    }
+
+    collection.push(workload);
+  }
+
+  private replaceTerminator(
+    collection: ZitiTerminator[],
+    terminator: ZitiTerminator | null | undefined
+  ): void {
+    if (!terminator || !terminator.id) {
+      return;
+    }
+
+    const index = collection.findIndex(item => item?.id === terminator.id);
+    if (index >= 0) {
+      collection[index] = terminator;
+      return;
+    }
+
+    collection.push(terminator);
+  }
+
   private rebuildOverviewLookups(): void {
     this.routerWorkloadById.clear();
     this.routerWorkloadByName.clear();
     this.configNameById.clear();
+    this.configById.clear();
     this.configUsageCountById.clear();
     this.serviceConfigNamesById.clear();
+    this.terminatorsByServiceId.clear();
     this.identityEnrollmentStateById.clear();
     this.k8sServiceByRef.clear();
     this.configTypeNameByValue.clear();
@@ -2043,6 +2470,7 @@ export class MicrosegxZitiComponent
 
     for (const config of overview.configs || []) {
       this.configNameById.set(config.id, config.name || config.id);
+      this.configById.set(config.id, config);
       this.configUsageCountById.set(config.id, 0);
     }
 
@@ -2082,6 +2510,16 @@ export class MicrosegxZitiComponent
         state = 'pending';
       }
       this.identityEnrollmentStateById.set(identity.id, state);
+    }
+
+    for (const terminator of overview.terminators || []) {
+      const serviceId = String(terminator.service?.id || '').trim();
+      if (!serviceId) {
+        continue;
+      }
+      const items = this.terminatorsByServiceId.get(serviceId) || [];
+      items.push(terminator);
+      this.terminatorsByServiceId.set(serviceId, items);
     }
 
     for (const service of overview.k8s_services || []) {

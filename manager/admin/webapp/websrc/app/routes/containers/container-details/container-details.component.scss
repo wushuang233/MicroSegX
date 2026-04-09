@@ -164,6 +164,27 @@
   gap: 8px;
 }
 
+.filter .mat-mdc-button-base,
+.filter .mat-button {
+  min-height: 40px;
+}
+
+.detail-filter__chevron {
+  margin-left: 8px;
+  font-size: 12px !important;
+  line-height: 1;
+}
+
+.detail-filter__icon {
+  font-size: 15px !important;
+  line-height: 1;
+}
+
+.filter .eos-icons,
+.filter .mat-icon {
+  font-size: 18px !important;
+}
+
 .quick-filter {
   width: min(320px, 100%);
   margin-bottom: 0;

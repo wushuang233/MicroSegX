@@ -26,6 +26,16 @@ import { SummaryService } from '@services/summary.service';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('dashboardReport') printableReport!: ElementRef;
+  private readonly platformNamespaces = new Set([
+    'cert-manager',
+    'kube-system',
+    'kube-public',
+    'kube-node-lease',
+    'local-path-storage',
+    'microsegx',
+    'openziti',
+    'port-audit',
+  ]);
 
   isGlobalUser: boolean = false;
   summaryInfo!: SystemSummaryDetails;
@@ -91,6 +101,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get cveDbVersion(): string {
     return this.summaryInfo?.cvedb_version || '-';
   }
+  get workloadInventoryCount(): number {
+    const containerCount = (this.details?.containers || []).length;
+    return containerCount || this.podsCount || 0;
+  }
+  get workloadCoveredCount(): number {
+    return (
+      this.protectedContainersCount +
+      this.monitorContainersCount +
+      this.discoverContainersCount +
+      this.quarantinedContainersCount
+    );
+  }
   get microsegxOpenPorts(): number {
     return this.microsegxOverview?.portExposure?.openPorts || 0;
   }
@@ -114,6 +136,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
   get microsegxFabricAvailable(): boolean {
     return Boolean(this.microsegxOverview?.ziti?.available);
+  }
+  get microsegxManageableServices(): number {
+    return this.microsegxServiceControls.length;
+  }
+  get microsegxManageableOpenPorts(): number {
+    return this.microsegxServiceControls.reduce(
+      (total, item) => total + (+item?.open_port_count || 0),
+      0
+    );
+  }
+  get microsegxInfrastructureExposurePorts(): number {
+    return this.microsegxExposureItems.filter(
+      item =>
+        this.getExposureScope(item) === 'platform' && item?.status === 'open'
+    ).length;
+  }
+  get microsegxNodeListenerPorts(): number {
+    return this.microsegxExposureItems.filter(
+      item => this.getExposureScope(item) === 'node' && item?.status === 'open'
+    ).length;
+  }
+  get microsegxPublishedServices(): number {
+    const serviceIds = new Set(
+      this.microsegxTerminators
+        .map(
+          item => item?.serviceId || item?.service?.id || item?.service?.name
+        )
+        .filter(Boolean)
+    );
+    return serviceIds.size || this.microsegxZitiServices;
+  }
+  get microsegxConnectedIdentities(): number {
+    return this.microsegxIdentities.filter(
+      identity =>
+        Boolean(identity?.hasEdgeRouterConnection) ||
+        String(identity?.edgeRouterConnectionStatus || '').toLowerCase() ===
+          'online'
+    ).length;
+  }
+  get microsegxTerminatorCount(): number {
+    return this.microsegxTerminators.length;
   }
   get leadRiskContainer(): any {
     return this.details?.highPriorityVulnerabilities?.containers
@@ -267,5 +330,88 @@ export class DashboardComponent implements OnInit, OnDestroy {
       (total, point) => total + (+point?.[1] || 0),
       0
     );
+  }
+
+  private get microsegxServiceControls(): any[] {
+    return this.microsegxOverview?.dashboard?.service_controls?.items || [];
+  }
+
+  private get microsegxExposureItems(): any[] {
+    return (
+      this.microsegxOverview?.dashboard?.external_exposure_summary?.items || []
+    );
+  }
+
+  private get microsegxTerminators(): any[] {
+    return this.microsegxOverview?.zitiOverview?.terminators || [];
+  }
+
+  private get microsegxIdentities(): any[] {
+    return this.microsegxOverview?.zitiOverview?.identities || [];
+  }
+
+  private isPlatformNamespace(namespace?: string): boolean {
+    const normalized = String(namespace || '')
+      .trim()
+      .toLowerCase();
+    return (
+      normalized.startsWith('kube-') || this.platformNamespaces.has(normalized)
+    );
+  }
+
+  private getExposureScope(item: any): 'manageable' | 'platform' | 'node' {
+    const namespace = String(item?.namespace || '')
+      .trim()
+      .toLowerCase();
+    const resourceKind = String(item?.resource_kind || '')
+      .trim()
+      .toLowerCase();
+    const exposureType = String(item?.exposure_type || '')
+      .trim()
+      .toLowerCase();
+    if (
+      namespace === '-' ||
+      resourceKind === 'node' ||
+      exposureType === 'nodelistener'
+    ) {
+      return 'node';
+    }
+    if (this.isManageableExposure(item)) {
+      return 'manageable';
+    }
+    if (resourceKind === 'service') {
+      return 'platform';
+    }
+    if (this.isPlatformNamespace(namespace) || Boolean(item?.platform_role)) {
+      return 'platform';
+    }
+    return 'manageable';
+  }
+
+  private isManageableExposure(item: any): boolean {
+    const namespace = String(item?.namespace || '').trim();
+    const resourceName = String(item?.resource_name || '').trim();
+    const port = Number(item?.port || 0);
+    if (!namespace || !resourceName || !port) {
+      return false;
+    }
+
+    return this.microsegxServiceControls.some(service => {
+      if (
+        String(service?.namespace || '').trim() !== namespace ||
+        String(service?.service_name || '').trim() !== resourceName
+      ) {
+        return false;
+      }
+
+      return (service?.ports || []).some(candidate => {
+        const publicPort =
+          candidate?.effective_public_port ||
+          candidate?.public_port ||
+          candidate?.node_port ||
+          candidate?.service_port;
+        return Number(publicPort || 0) === port;
+      });
+    });
   }
 }

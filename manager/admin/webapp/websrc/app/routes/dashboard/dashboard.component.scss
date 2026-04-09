@@ -71,7 +71,7 @@
 
 .dashboard-hero-shell__metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 14px;
 }
 
@@ -215,8 +215,9 @@
 
 .dashboard-focus-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
+  align-items: start;
 }
 
 .dashboard-focus-card {
@@ -224,6 +225,7 @@
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  min-height: 0;
   padding: 24px;
   border-radius: 24px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
@@ -297,6 +299,14 @@
   line-height: 1.7;
 }
 
+.dashboard-focus-card__subcopy {
+  margin: -8px 0 0;
+  color: var(--saas-text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
 .dashboard-focus-card__metrics {
   display: flex;
   flex-wrap: wrap;
@@ -350,28 +360,32 @@
 .dashboard-vulnerability-split,
 .dashboard-policy-grid {
   display: grid;
-  gap: 24px;
+  gap: 20px;
+  align-content: start;
 }
 
 .dashboard-analytics-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   align-items: start;
 }
 
+.dashboard-vulnerability-split,
 .dashboard-policy-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
 }
 
 .dashboard-panel-host {
   display: block;
   min-width: 0;
+  align-self: start;
 }
 
 :host ::ng-deep .dashboard-page .dashboard-card {
   margin-bottom: 0 !important;
-  height: 100%;
+  height: auto;
 }
 
 :host ::ng-deep .dashboard-page app-security-risk-panel,
