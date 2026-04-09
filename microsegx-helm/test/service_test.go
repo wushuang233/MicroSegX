@@ -78,14 +78,21 @@ func TestControllerService(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 1 {
+	if len(outs) != 2 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
-	var svc corev1.Service
-	helm.UnmarshalK8SYaml(t, outs[0], &svc)
+	for i, output := range outs {
+		var svc corev1.Service
+		helm.UnmarshalK8SYaml(t, output, &svc)
 
-	checkControllerServiceDefault(t, svc)
+		switch i {
+		case 0:
+			checkControllerServiceDefault(t, svc)
+		case 1:
+			checkControllerServiceAPI(t, svc, "ClusterIP")
+		}
+	}
 }
 
 func TestControllerServiceAPI(t *testing.T) {

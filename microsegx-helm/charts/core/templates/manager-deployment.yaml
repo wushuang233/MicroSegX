@@ -1,4 +1,5 @@
 {{- if .Values.manager.enabled -}}
+{{- $managerTag := .Values.manager.image.tag | default .Values.tag -}}
 {{- if (semverCompare ">=1.9-0" (substr 1 -1 .Capabilities.KubeVersion.GitVersion)) }}
 apiVersion: apps/v1
 {{- else }}
@@ -66,16 +67,6 @@ spec:
       securityContext:
         runAsUser: {{ .Values.manager.runAsUser }}
       {{- end }}
-      hostAliases:
-        - ip: "10.43.0.1"
-          hostnames:
-            - "kubernetes.default"
-            - "kubernetes.default.svc"
-            - "kubernetes.default.svc.cluster.local"
-        - ip: "{{ .Values.controller.apisvc.ctrlServerIP | default "192.168.198.128" }}"
-          hostnames:
-            - "microsegx-svc-controller.microsegx"
-            - "microsegx-svc-controller-api.microsegx"
       containers:
         - name: microsegx-manager-pod
           {{- if .Values.global.azure.enabled }}
@@ -94,9 +85,9 @@ spec:
           {{- end }}
           {{- else }}
           {{- if .Values.registry }}
-          image: "{{ .Values.registry }}/{{ .Values.manager.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.registry }}/{{ .Values.manager.image.repository }}:{{ $managerTag }}"
           {{- else }}
-          image: "{{ .Values.manager.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.manager.image.repository }}:{{ $managerTag }}"
           {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.manager.image.imagePullPolicy }}
@@ -113,7 +104,7 @@ spec:
               {{- if .Values.manager.ctrlServerIP }}
               value: "{{ .Values.manager.ctrlServerIP }}"
               {{- else }}
-              value: microsegx-svc-controller.{{ .Release.Namespace }}
+              value: microsegx-svc-controller-api.{{ .Release.Namespace }}
               {{- end }}
             {{- if not .Values.manager.env.ssl }}
             - name: MANAGER_SSL

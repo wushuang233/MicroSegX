@@ -27,6 +27,15 @@ func TestControllerDeployment(t *testing.T) {
 	if len(outs) != 1 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
+
+	var dep appsv1.Deployment
+	helm.UnmarshalK8SYaml(t, outs[0], &dep)
+	if dep.Spec.Template.Spec.HostNetwork {
+		t.Errorf("controller hostNetwork should be disabled by default\n")
+	}
+	if dep.Spec.Template.Spec.DNSPolicy != corev1.DNSClusterFirst {
+		t.Errorf("controller dnsPolicy is wrong. dnsPolicy=%v\n", dep.Spec.Template.Spec.DNSPolicy)
+	}
 }
 
 func TestControllerDeploymentPre53(t *testing.T) {
@@ -268,6 +277,19 @@ func TestManagerDeployment(t *testing.T) {
 		switch i {
 		case 0:
 			checkManagerDeployment(t, dep, true)
+			if len(dep.Spec.Template.Spec.HostAliases) != 0 {
+				t.Errorf("manager hostAliases should be empty. hostAliases=%+v\n", dep.Spec.Template.Spec.HostAliases)
+			}
+			found := false
+			for _, env := range dep.Spec.Template.Spec.Containers[0].Env {
+				if env.Name == "CTRL_SERVER_IP" && env.Value == "microsegx-svc-controller-api.microsegx" {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("manager CTRL_SERVER_IP should point to controller api service. env=%+v\n", dep.Spec.Template.Spec.Containers[0].Env)
+			}
 		}
 	}
 }

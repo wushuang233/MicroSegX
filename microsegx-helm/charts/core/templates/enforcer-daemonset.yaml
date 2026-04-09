@@ -21,6 +21,7 @@
 {{- $runtimePath = .Values.docker.path -}}
 {{- end }}
 {{- if .Values.enforcer.enabled -}}
+{{- $enforcerTag := .Values.enforcer.image.tag | default .Values.tag -}}
 {{- if (semverCompare ">=1.9-0" (substr 1 -1 .Capabilities.KubeVersion.GitVersion)) }}
 apiVersion: apps/v1
 {{- else }}
@@ -60,8 +61,8 @@ spec:
 {{ toYaml .Values.enforcer.tolerations | indent 8 }}
     {{- end }}
       hostPID: true
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: {{ .Values.enforcer.hostNetwork | default false }}
+      dnsPolicy: {{ ternary "ClusterFirstWithHostNet" "ClusterFirst" (.Values.enforcer.hostNetwork | default false) }}
     {{- if .Values.enforcer.priorityClassName }}
       priorityClassName: {{ .Values.enforcer.priorityClassName }}
     {{- end }}
@@ -90,9 +91,9 @@ spec:
           {{- end }}
           {{- else }}
           {{- if .Values.registry }}
-          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ $enforcerTag }}"
           {{- else }}
-          image: "{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.enforcer.image.repository }}:{{ $enforcerTag }}"
           {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.enforcer.image.imagePullPolicy }}
@@ -110,11 +111,11 @@ spec:
             - name: CLUSTER_ADVERTISED_ADDR
               valueFrom:
                 fieldRef:
-                  fieldPath: status.hostIP
+                  fieldPath: {{ ternary "status.hostIP" "status.podIP" (.Values.enforcer.hostNetwork | default false) }}
             - name: CLUSTER_BIND_ADDR
               valueFrom:
                 fieldRef:
-                  fieldPath: status.hostIP
+                  fieldPath: {{ ternary "status.hostIP" "status.podIP" (.Values.enforcer.hostNetwork | default false) }}
             - name: NO_PROXY
               value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,localhost,127.0.0.1"
             - name: no_proxy

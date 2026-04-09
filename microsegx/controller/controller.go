@@ -81,9 +81,25 @@ const memControllerTopPeak uint64 = 6 * 1024 * 1024 * 1024 // 6 GB (inc. allinon
 
 // Unlike in enforcer, only read host IPs in host mode, so no need to enter host network namespace
 func getHostModeHostIPs() {
-	ifaces := global.SYS.GetGlobalAddrs(true)
-
 	Ctrler.Ifaces = make(map[string][]share.CLUSIPAddr)
+
+	// In stub runtime mode on Kubernetes, the controller can run in the normal pod
+	// network namespace instead of hostNetwork. In that case the pod-facing link is a
+	// veth and won't appear as a "device" link, so derive the active interface from
+	// the explicit cluster bind/advertise address first.
+	for _, addr := range []string{os.Getenv("CLUSTER_BIND_ADDR"), os.Getenv("CLUSTER_ADVERTISED_ADDR")} {
+		if ip := net.ParseIP(addr); ip != nil {
+			if name, bindIPNet := global.SYS.GetBindAddr(ip); bindIPNet != nil && utils.IsIPv4(bindIPNet.IP) {
+				Ctrler.Ifaces[name] = []share.CLUSIPAddr{{
+					IPNet: *bindIPNet,
+					Scope: share.CLUSIPAddrScopeNAT,
+				}}
+				return
+			}
+		}
+	}
+
+	ifaces := global.SYS.GetGlobalAddrs(true)
 	for name, addrs := range ifaces {
 		Ctrler.Ifaces[name] = []share.CLUSIPAddr{}
 		for _, addr := range addrs {

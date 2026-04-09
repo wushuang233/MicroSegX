@@ -5,6 +5,7 @@ import (
 
 	"github.com/gruntwork-io/terratest/modules/helm"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestEnforcerDaemonset(t *testing.T) {
@@ -19,6 +20,73 @@ func TestEnforcerDaemonset(t *testing.T) {
 
 	if len(outs) != 1 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
+	}
+
+	var ds appsv1.DaemonSet
+	helm.UnmarshalK8SYaml(t, outs[0], &ds)
+	if ds.Spec.Template.Spec.HostNetwork {
+		t.Errorf("enforcer hostNetwork should be disabled by default\n")
+	}
+	if ds.Spec.Template.Spec.DNSPolicy != corev1.DNSClusterFirst {
+		t.Errorf("enforcer dnsPolicy is wrong. dnsPolicy=%v\n", ds.Spec.Template.Spec.DNSPolicy)
+	}
+
+	var bindSource, advertiseSource string
+	for _, env := range ds.Spec.Template.Spec.Containers[0].Env {
+		if env.Name == "CLUSTER_BIND_ADDR" && env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+			bindSource = env.ValueFrom.FieldRef.FieldPath
+		}
+		if env.Name == "CLUSTER_ADVERTISED_ADDR" && env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+			advertiseSource = env.ValueFrom.FieldRef.FieldPath
+		}
+	}
+	if bindSource != "status.podIP" {
+		t.Errorf("CLUSTER_BIND_ADDR should use podIP by default. fieldPath=%v\n", bindSource)
+	}
+	if advertiseSource != "status.podIP" {
+		t.Errorf("CLUSTER_ADVERTISED_ADDR should use podIP by default. fieldPath=%v\n", advertiseSource)
+	}
+}
+
+func TestEnforcerDaemonsetHostNetwork(t *testing.T) {
+	helmChartPath := "../charts/core"
+
+	options := &helm.Options{
+		SetValues: map[string]string{
+			"enforcer.hostNetwork": "true",
+		},
+	}
+
+	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/enforcer-daemonset.yaml"})
+	outs := splitYaml(out)
+
+	if len(outs) != 1 {
+		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
+	}
+
+	var ds appsv1.DaemonSet
+	helm.UnmarshalK8SYaml(t, outs[0], &ds)
+	if !ds.Spec.Template.Spec.HostNetwork {
+		t.Errorf("enforcer hostNetwork should be enabled\n")
+	}
+	if ds.Spec.Template.Spec.DNSPolicy != corev1.DNSClusterFirstWithHostNet {
+		t.Errorf("enforcer dnsPolicy is wrong. dnsPolicy=%v\n", ds.Spec.Template.Spec.DNSPolicy)
+	}
+
+	var bindSource, advertiseSource string
+	for _, env := range ds.Spec.Template.Spec.Containers[0].Env {
+		if env.Name == "CLUSTER_BIND_ADDR" && env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+			bindSource = env.ValueFrom.FieldRef.FieldPath
+		}
+		if env.Name == "CLUSTER_ADVERTISED_ADDR" && env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+			advertiseSource = env.ValueFrom.FieldRef.FieldPath
+		}
+	}
+	if bindSource != "status.hostIP" {
+		t.Errorf("CLUSTER_BIND_ADDR should use hostIP in hostNetwork mode. fieldPath=%v\n", bindSource)
+	}
+	if advertiseSource != "status.hostIP" {
+		t.Errorf("CLUSTER_ADVERTISED_ADDR should use hostIP in hostNetwork mode. fieldPath=%v\n", advertiseSource)
 	}
 }
 

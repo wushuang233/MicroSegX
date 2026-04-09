@@ -53,14 +53,16 @@ spec:
         {{- toYaml .Values.controller.podAnnotations | nindent 8 }}
         {{- end }}
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: {{ .Values.controller.hostNetwork | default false }}
+      dnsPolicy: {{ ternary "ClusterFirstWithHostNet" "ClusterFirst" (.Values.controller.hostNetwork | default false) }}
+      {{- if .Values.controller.hostNetwork }}
       hostAliases:
         - ip: "10.43.0.1"
           hostnames:
             - "kubernetes.default"
             - "kubernetes.default.svc"
             - "kubernetes.default.svc.cluster.local"
+      {{- end }}
       dnsConfig:
         nameservers:
           - 10.43.0.10

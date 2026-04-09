@@ -127,6 +127,10 @@ MANAGER_NODE_PORT=${MANAGER_NODE_PORT}
 CONTROLLER_REPLICAS=1
 SCANNER_REPLICAS=1
 
+CONTROLLER_HOST_NETWORK=false
+ENFORCER_HOST_NETWORK=false
+CONTROLLER_API_SERVICE_TYPE=ClusterIP
+
 CONTROLLER_PVC_ENABLED=true
 CONTROLLER_PVC_EXISTING_CLAIM=
 CONTROLLER_PVC_ACCESS_MODE=ReadWriteOnce
@@ -245,6 +249,9 @@ sed -n '1,240p' /opt/microsegx-delivery/${CORE_TAG}/bundle/full-release.env
 - `REGISTRY=<你的私有镜像仓库>`
 - `IMAGE_NAMESPACE=<你的镜像命名空间>`
 - `BOOTSTRAP_PASSWORD=<首次登录密码>`
+- `CONTROLLER_HOST_NETWORK=false`
+- `ENFORCER_HOST_NETWORK=false`
+- `CONTROLLER_API_SERVICE_TYPE=ClusterIP`
 - `MANAGER_SERVICE_TYPE=NodePort`
 - `MANAGER_NODE_PORT=30000`
 - `CONTROLLER_PVC_ENABLED=true`
@@ -276,7 +283,42 @@ bash /opt/microsegx-delivery/${CORE_TAG}/bundle/load-and-push.sh /opt/microsegx-
 bash /opt/microsegx-delivery/${CORE_TAG}/bundle/deploy-core.sh /opt/microsegx-delivery/${CORE_TAG}/bundle/full-release.env
 ```
 
-### 5.5 验证 `MicroSegX`
+### 5.5 默认安全配置验收
+
+必须保持下面三个结果：
+
+- `controller` 不使用 `hostNetwork`
+- `enforcer` 不使用 `hostNetwork`
+- `microsegx-svc-controller-api` 保持 `ClusterIP`
+
+验证命令：
+
+```bash
+kubectl -n microsegx get deploy microsegx-controller-pod -o jsonpath='{.spec.template.spec.hostNetwork}{"\n"}'
+kubectl -n microsegx get ds microsegx-enforcer-pod -o jsonpath='{.spec.template.spec.hostNetwork}{"\n"}'
+kubectl -n microsegx get svc microsegx-svc-controller-api -o jsonpath='{.spec.type}{"\n"}'
+```
+
+预期结果：
+
+- controller 输出空值或 `false`
+- enforcer 输出空值或 `false`
+- service 输出 `ClusterIP`
+
+以下端口只应存在于 Pod 网络，不应监听在宿主机：
+
+- controller: `10443` `20443` `30443`
+- enforcer: `18311` `18401` `18500`
+
+如果你登录的是承载 `microsegx-controller-pod` 或 `microsegx-enforcer-pod` 的节点，再执行：
+
+```bash
+ss -lntup | rg ':(10443|20443|30443|18311|18401|18500)\b' || true
+```
+
+预期输出为空。
+
+### 5.6 验证 `MicroSegX`
 
 ```bash
 kubectl get pods -n microsegx -o wide

@@ -17,6 +17,7 @@ global:
 controller:
   enabled: true
   replicas: 1
+  hostNetwork: false
   strategy:
     type: Recreate
     rollingUpdate: null
@@ -30,14 +31,14 @@ controller:
     repository: local/controller
     imagePullPolicy: Never
   apisvc:
-    type: NodePort
+    type: ClusterIP
     ctrlServerPort: 10443
-    nodePort: 30443
   disruptionbudget: 0
 
 # Enforcer configuration
 enforcer:
   enabled: true
+  hostNetwork: false
   image:
     repository: microsegx/enforcer
     imagePullPolicy: Never
@@ -56,8 +57,6 @@ manager:
     type: NodePort
     mgrServerPort: 8443
     nodePort: 30084
-  # Controller server IP (required when Ziti intercepts DNS)
-  ctrlServerIP: "192.168.198.128"
 
 # CVE Scanner configuration
 cve:

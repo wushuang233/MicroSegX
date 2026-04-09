@@ -84,6 +84,7 @@ controller:
   image:
     repository: microsegx/controller
     imagePullPolicy: IfNotPresent
+    tag:
     hash:
   replicas: 3
   disruptionbudget: 0
@@ -111,9 +112,10 @@ controller:
     {}
     # key1: value1
     # key2: value2
+  hostNetwork: false
   apisvc:
     ctrlServerPort: 10443
-    type:
+    type: ClusterIP
     annotations: {}
     nodePort:  
     # OpenShift Route configuration
@@ -335,9 +337,11 @@ controller:
 enforcer:
   # If false, enforcer will not be installed
   enabled: true
+  hostNetwork: false
   image:
     repository: microsegx/enforcer
     imagePullPolicy: IfNotPresent
+    tag:
     hash:
   updateStrategy:
     type: RollingUpdate
@@ -374,6 +378,7 @@ manager:
   image:
     repository: microsegx/manager
     imagePullPolicy: IfNotPresent
+    tag:
     hash:
   priorityClassName:
   env:

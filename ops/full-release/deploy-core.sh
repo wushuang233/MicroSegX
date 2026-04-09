@@ -16,6 +16,9 @@ source "${ENV_FILE}"
 : "${IMAGE_NAMESPACE:?IMAGE_NAMESPACE is required}"
 : "${CORE_TAG:?CORE_TAG is required}"
 : "${SCANNER_TAG:?SCANNER_TAG is required}"
+: "${CONTROLLER_HOST_NETWORK:=false}"
+: "${ENFORCER_HOST_NETWORK:=false}"
+: "${CONTROLLER_API_SERVICE_TYPE:=ClusterIP}"
 
 if [[ "${DEPLOY_MODE}" == "local" ]]; then
   REGISTRY=${REGISTRY:-${LOCAL_IMAGE_REGISTRY:-local.microsegx}}
@@ -236,9 +239,13 @@ internal:
 
 controller:
   replicas: ${CONTROLLER_REPLICAS}
+  hostNetwork: ${CONTROLLER_HOST_NETWORK}
   image:
     repository: ${IMAGE_NAMESPACE}/controller
     imagePullPolicy: ${IMAGE_PULL_POLICY}
+  apisvc:
+    type: ${CONTROLLER_API_SERVICE_TYPE}
+    ctrlServerPort: 10443
 ${CONTROLLER_STRATEGY_YAML}
 ${CONTROLLER_PVC_YAML}
   prime:
@@ -265,6 +272,7 @@ manager:
     secretName: "${MANAGER_TLS_SECRET:-}"
 
 enforcer:
+  hostNetwork: ${ENFORCER_HOST_NETWORK}
   image:
     repository: ${IMAGE_NAMESPACE}/enforcer
     imagePullPolicy: ${IMAGE_PULL_POLICY}
