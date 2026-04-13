@@ -1,5 +1,8 @@
 # Kubernetes 交付与部署手册
 
+> 如果目标环境走 `ctr/containerd` 离线导入，请不要再用这份手册。
+> 当前主手册是 `/home/wushuang/MicroSegX/docs/K8S-CONTAINERD-DELIVERY-MANUAL.md`。
+
 ## 1. 交付内容
 
 发送到目标服务器的文件一共 3 个压缩包：
@@ -243,6 +246,14 @@ tar -xzf openziti-k8s.tar.gz
 sed -n '1,240p' /opt/microsegx-delivery/${CORE_TAG}/bundle/full-release.env
 ```
 
+如果目标服务器使用的私有仓库地址和打包机不一致，先修改这里的：
+
+- `REGISTRY`
+- `IMAGE_NAMESPACE`
+- `IMAGE_PULL_SECRET`
+- `REGISTRY_USERNAME`
+- `REGISTRY_PASSWORD`
+
 必须确认这些值：
 
 - `DEPLOY_MODE=registry`
@@ -276,6 +287,8 @@ bash /opt/microsegx-delivery/${CORE_TAG}/bundle/reset-microsegx.sh /opt/microseg
 ```bash
 bash /opt/microsegx-delivery/${CORE_TAG}/bundle/load-and-push.sh /opt/microsegx-delivery/${CORE_TAG}/bundle/full-release.env
 ```
+
+`load-and-push.sh` 会根据 `bundle/full-release.env` 里的 `REGISTRY` 和 `IMAGE_NAMESPACE` 自动重打 tag 后再推送。
 
 ### 5.4 部署 `MicroSegX`
 

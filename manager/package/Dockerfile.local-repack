@@ -1,0 +1,5 @@
+ARG BASE_IMAGE=local.microsegx/microsegx/manager:2026.04.09-ui19
+
+FROM ${BASE_IMAGE}
+
+COPY admin/target/scala-3.3.5/admin-assembly-1.0.jar /usr/local/bin/admin-assembly-1.0.jar

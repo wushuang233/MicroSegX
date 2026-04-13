@@ -1,5 +1,7 @@
 # 普通 Kubernetes 集群最简交付文档
 
+> 如果目标环境走 `ctr/containerd` 离线导入，请优先使用 `/home/wushuang/MicroSegX/docs/K8S-CONTAINERD-DELIVERY-MANUAL.md`。
+
 这份文档只保留四件事：
 
 - 哪两个 `tar.gz` 要发到新服务器
@@ -122,6 +124,8 @@ IMAGE_PULL_SECRET=regcred
 REGISTRY_USERNAME=<如需登录镜像仓库就填写>
 REGISTRY_PASSWORD=<如需登录镜像仓库就填写>
 ```
+
+如果目标服务器使用的私有仓库地址和打包机不一致，先改 `bundle/full-release.env` 里的 `REGISTRY`、`IMAGE_NAMESPACE`、`IMAGE_PULL_SECRET`、`REGISTRY_USERNAME`、`REGISTRY_PASSWORD`，再继续。
 
 如果新服务器上装过旧版 `microsegx`，先清理：
 

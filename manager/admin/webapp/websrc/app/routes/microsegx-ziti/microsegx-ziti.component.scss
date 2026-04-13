@@ -624,6 +624,27 @@
   ::ng-deep
   .workspace-hero__actions
   .mat-mdc-form-field
+  .mat-mdc-select-value-text,
+:host
+  ::ng-deep
+  .workspace-hero__actions
+  .mat-mdc-form-field
+  .mat-mdc-select-min-line,
+:host ::ng-deep .tabs-card .mat-mdc-form-field .mat-mdc-select-value-text,
+:host ::ng-deep .tabs-card .mat-mdc-form-field .mat-mdc-select-min-line,
+:host ::ng-deep .tabs-card .mat-mdc-form-field .mat-mdc-select-trigger,
+:host ::ng-deep .dialog-card .mat-mdc-form-field .mat-mdc-select-value-text,
+:host ::ng-deep .dialog-card .mat-mdc-form-field .mat-mdc-select-min-line,
+:host ::ng-deep .dialog-card .mat-mdc-form-field .mat-mdc-select-trigger {
+  display: inline-flex;
+  align-items: center !important;
+  line-height: 1.4;
+}
+
+:host
+  ::ng-deep
+  .workspace-hero__actions
+  .mat-mdc-form-field
   .mat-mdc-select-arrow,
 :host
   ::ng-deep
@@ -921,6 +942,15 @@
 :host ::ng-deep .dialog-card .mat-mdc-select-value {
   display: inline-flex;
   align-items: center;
+}
+
+:host ::ng-deep .tabs-card .mat-mdc-form-field-infix,
+:host ::ng-deep .workspace-hero__actions .mat-mdc-form-field-infix {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  padding-top: 14px !important;
+  padding-bottom: 12px !important;
 }
 
 :host ::ng-deep .dialog-card textarea.mat-mdc-input-element {

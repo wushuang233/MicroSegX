@@ -17,7 +17,7 @@ export class TranslatorService {
   constructor(public translate: TranslateService) {
     this.translate.addLangs(this.availablelangs.map(lang => lang.code));
     this.translate.setFallbackLang(this.defaultLanguage);
-    this.translate.use(this.resolveLanguage());
+    this.initializeLanguage();
   }
 
   useLanguage(lang: string = '') {
@@ -27,17 +27,28 @@ export class TranslatorService {
     this.persistLanguage(language);
   }
 
+  initializeLanguage(preferredLang: string = ''): string {
+    const language = this.resolveLanguage(preferredLang);
+    this.translate.use(language);
+    this.persistLanguage(language);
+    return language;
+  }
+
   getAvailableLanguages() {
     return this.availablelangs;
   }
 
-  private resolveLanguage(): string {
+  private resolveLanguage(preferredLang: string = ''): string {
     const persisted =
       typeof window !== 'undefined'
         ? window.localStorage.getItem(LOCALE_STORAGE_KEY)
         : '';
     if (this.isSupported(persisted)) {
       return persisted as string;
+    }
+
+    if (this.isSupported(preferredLang)) {
+      return preferredLang;
     }
 
     const browserLang =

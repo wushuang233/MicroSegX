@@ -48,22 +48,22 @@
           <button
             type="button"
             class="mode-switch__button"
-            [class.is-active]="viewMode === 'services'"
-            (click)="viewMode = 'services'">
-            <mat-icon>shield</mat-icon>
+            [class.is-active]="viewMode === 'exposure'"
+            (click)="viewMode = 'exposure'">
+            <mat-icon>lan</mat-icon>
             <span>{{
-              'MICROSEGX.PORT_EXPOSURE.VIEW_SERVICES' | translate
+              'MICROSEGX.PORT_EXPOSURE.VIEW_EXPOSURE' | translate
             }}</span>
           </button>
 
           <button
             type="button"
             class="mode-switch__button"
-            [class.is-active]="viewMode === 'exposure'"
-            (click)="viewMode = 'exposure'">
-            <mat-icon>lan</mat-icon>
+            [class.is-active]="viewMode === 'services'"
+            (click)="viewMode = 'services'">
+            <mat-icon>shield</mat-icon>
             <span>{{
-              'MICROSEGX.PORT_EXPOSURE.VIEW_EXPOSURE' | translate
+              'MICROSEGX.PORT_EXPOSURE.VIEW_SERVICES' | translate
             }}</span>
           </button>
         </div>
@@ -96,7 +96,7 @@
           <button
             mat-stroked-button
             class="hero-action"
-            (click)="refresh()"
+            (click)="refresh(false)"
             [disabled]="loading">
             <mat-icon>cached</mat-icon>
             {{ 'general.REFRESH' | translate }}
@@ -316,6 +316,30 @@
           appearance="outline"
           class="filter-field">
           <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME_FILTER' | translate
+          }}</mat-label>
+          <mat-select [(ngModel)]="serviceRuntimeFilter">
+            <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
+            <mat-option value="public">{{
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME_PUBLIC' | translate
+            }}</mat-option>
+            <mat-option value="listener">{{
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME_LISTENER' | translate
+            }}</mat-option>
+            <mat-option value="traffic">{{
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME_TRAFFIC' | translate
+            }}</mat-option>
+            <mat-option value="mismatch">{{
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME_MISMATCH' | translate
+            }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          *ngIf="viewMode === 'services'"
+          appearance="outline"
+          class="filter-field">
+          <mat-label>{{
             'MICROSEGX.PORT_EXPOSURE.SERVICE_STATE_FILTER' | translate
           }}</mat-label>
           <mat-select [(ngModel)]="serviceStateFilter">
@@ -371,6 +395,65 @@
     </mat-card>
 
     <ng-container *ngIf="viewMode === 'services'">
+      <mat-card class="service-governance-card">
+        <div class="service-governance-card__header">
+          <div>
+            <h2>
+              {{
+                'MICROSEGX.PORT_EXPOSURE.SERVICE_GOVERNANCE_TITLE' | translate
+              }}
+            </h2>
+            <p>
+              {{
+                'MICROSEGX.PORT_EXPOSURE.SERVICE_GOVERNANCE_DESC' | translate
+              }}
+            </p>
+          </div>
+          <div class="service-governance-card__actions">
+            <span class="service-governance-card__badge">
+              {{
+                'MICROSEGX.PORT_EXPOSURE.SERVICE_GOVERNANCE_BADGE' | translate
+              }}
+            </span>
+            <button
+              mat-flat-button
+              color="primary"
+              class="service-governance-card__create"
+              (click)="openServiceCreateDialog()">
+              <mat-icon>add</mat-icon>
+              {{ 'MICROSEGX.PORT_EXPOSURE.CREATE_SERVICE' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="service-governance-card__stats">
+          <div class="service-governance-stat">
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.PUBLISHED_PORTS' | translate
+            }}</span>
+            <strong>{{ visiblePublishedServicePortCount }}</strong>
+          </div>
+          <div class="service-governance-stat">
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.LISTENER_PORTS' | translate
+            }}</span>
+            <strong>{{ visibleListenerServicePortCount }}</strong>
+          </div>
+          <div class="service-governance-stat">
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.TRAFFIC_PORTS' | translate
+            }}</span>
+            <strong>{{ visibleTrafficServicePortCount }}</strong>
+          </div>
+          <div class="service-governance-stat service-governance-stat--warning">
+            <span>{{
+              'MICROSEGX.PORT_EXPOSURE.MISMATCH_PORTS' | translate
+            }}</span>
+            <strong>{{ visibleMismatchServicePortCount }}</strong>
+          </div>
+        </div>
+      </mat-card>
+
       <mat-card class="table-shell">
         <div class="table-shell__meta">
           <span class="table-shell__count">{{ serviceControls.length }}</span>
@@ -444,6 +527,36 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="runtime">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ 'MICROSEGX.PORT_EXPOSURE.SERVICE_RUNTIME' | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">
+              <div class="runtime-summary">
+                <span
+                  class="runtime-summary__chip runtime-summary__chip--published">
+                  {{ 'MICROSEGX.PORT_EXPOSURE.PUBLISHED_PORTS' | translate }}
+                  {{ getServicePublishedPortCount(item) }}
+                </span>
+                <span
+                  class="runtime-summary__chip runtime-summary__chip--listener">
+                  {{ 'MICROSEGX.PORT_EXPOSURE.LISTENER_PORTS' | translate }}
+                  {{ getServiceListenerPortCount(item) }}
+                </span>
+                <span
+                  class="runtime-summary__chip runtime-summary__chip--traffic">
+                  {{ 'MICROSEGX.PORT_EXPOSURE.TRAFFIC_PORTS' | translate }}
+                  {{ getServiceTrafficPortCount(item) }}
+                </span>
+                <span
+                  class="runtime-summary__chip runtime-summary__chip--warning">
+                  {{ 'MICROSEGX.PORT_EXPOSURE.MISMATCH_PORTS' | translate }}
+                  {{ getServiceMismatchPortCount(item) }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="ports">
             <th mat-header-cell *matHeaderCellDef>
               {{ 'MICROSEGX.PORT_EXPOSURE.PORTS' | translate }}
@@ -471,6 +584,18 @@
                       <span class="port-mapping">
                         {{ getPublicPortDisplay(port) }}
                       </span>
+                      <span
+                        class="port-runtime-chip"
+                        [ngClass]="getPortRuntimeClass(item, port)">
+                        {{ getPortRuntimeLabelKey(item, port) | translate }}
+                      </span>
+                    </div>
+                    <div *ngIf="port.public" class="port-card__hint">
+                      {{
+                        'MICROSEGX.PORT_EXPOSURE.RUNTIME_ADDRESS_HINT'
+                          | translate
+                      }}:
+                      {{ getPortRuntimeAddressHint(item, port) }}
                     </div>
                   </div>
                   <button
@@ -520,6 +645,14 @@
                   <mat-icon>lock</mat-icon>
                   {{ 'MICROSEGX.PORT_EXPOSURE.CLOSE_ALL' | translate }}
                 </button>
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  (click)="requestDeleteService(item)"
+                  [disabled]="!item.manageable">
+                  <mat-icon>delete</mat-icon>
+                  {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE' | translate }}
+                </button>
               </div>
             </td>
           </ng-container>
@@ -537,6 +670,114 @@
     </ng-container>
 
     <ng-container *ngIf="viewMode === 'exposure'">
+      <mat-card class="node-overview-card">
+        <div class="node-overview-card__header">
+          <div>
+            <h2>
+              {{ 'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_TITLE' | translate }}
+            </h2>
+            <p>
+              {{ 'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_DESC' | translate }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          *ngIf="nodeExposureSummaries.length > 0; else nodeOverviewEmpty"
+          class="node-overview-grid">
+          <article
+            *ngFor="let node of nodeExposureSummaries"
+            class="node-overview-tile">
+            <div class="node-overview-tile__header">
+              <div>
+                <h3>{{ node.name }}</h3>
+                <p>
+                  {{
+                    'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_OPEN_PORTS'
+                      | translate
+                  }}:
+                  {{ node.totalOpenCount }}
+                </p>
+              </div>
+              <div class="node-overview-tile__stats">
+                <span class="node-overview-stat node-overview-stat--business">
+                  {{
+                    'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_BUSINESS' | translate
+                  }}
+                  {{ node.businessCount }}
+                </span>
+                <span class="node-overview-stat node-overview-stat--platform">
+                  {{
+                    'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_PLATFORM' | translate
+                  }}
+                  {{ node.platformCount }}
+                </span>
+                <span class="node-overview-stat node-overview-stat--node">
+                  {{ 'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_HOST' | translate }}
+                  {{ node.nodeCount }}
+                </span>
+              </div>
+            </div>
+
+            <div class="node-overview-addresses">
+              <ng-container
+                *ngIf="node.addresses.length > 0; else nodeTileEmpty">
+                <div
+                  *ngFor="let address of node.addresses"
+                  class="node-overview-address">
+                  <div class="node-overview-address__label">
+                    <span class="mono-text">{{ address.address }}</span>
+                    <span class="table-pill table-pill--soft">
+                      {{
+                        address.addressType ||
+                          ('MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_ADDRESS'
+                            | translate)
+                      }}
+                    </span>
+                  </div>
+
+                  <div class="node-overview-port-list">
+                    <span
+                      *ngFor="let item of address.items"
+                      class="node-port-chip"
+                      [ngClass]="{
+                        'node-port-chip--business':
+                          getExposureScope(item) === 'manageable',
+                        'node-port-chip--platform':
+                          getExposureScope(item) === 'platform',
+                        'node-port-chip--node':
+                          getExposureScope(item) === 'node',
+                      }">
+                      <strong>{{ item.port }}</strong>
+                      <span>{{ item.resource_name }}</span>
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #nodeTileEmpty>
+                <div class="node-overview-empty">
+                  {{
+                    'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_NODE_EMPTY'
+                      | translate
+                  }}
+                </div>
+              </ng-template>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #nodeOverviewEmpty>
+          <div class="empty-state empty-state--compact">
+            <mat-icon>lan</mat-icon>
+            <h3>{{ 'general.NO_ROWS' | translate }}</h3>
+            <p>
+              {{ 'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_EMPTY' | translate }}
+            </p>
+          </div>
+        </ng-template>
+      </mat-card>
+
       <mat-card class="table-shell">
         <div class="table-shell__meta">
           <span class="table-shell__count">{{ exposureItems.length }}</span>
@@ -772,6 +1013,226 @@
         }}
       </button>
       <button mat-stroked-button (click)="closePortDialog()">
+        {{ 'general.CANCEL' | translate }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div
+  *ngIf="showServiceCreateDialog"
+  class="dialog-overlay"
+  (click)="closeServiceCreateDialog()">
+  <mat-card
+    class="dialog-card dialog-card--wide"
+    (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'MICROSEGX.PORT_EXPOSURE.CREATE_SERVICE' | translate }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="dialog-helper-copy">
+        {{ 'MICROSEGX.PORT_EXPOSURE.CREATE_SERVICE_DESC' | translate }}
+      </p>
+
+      <div class="service-form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'general.NAMESPACES' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="serviceCreateForm.namespace"
+            [placeholder]="'default'" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate
+          }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="serviceCreateForm.serviceName"
+            [placeholder]="'web-api'" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.PUBLIC_TYPE' | translate
+          }}</mat-label>
+          <mat-select
+            [(ngModel)]="serviceCreateForm.serviceType"
+            (selectionChange)="onServiceCreateTypeChange()">
+            <mat-option value="ClusterIP">ClusterIP</mat-option>
+            <mat-option value="NodePort">NodePort</mat-option>
+            <mat-option value="LoadBalancer">LoadBalancer</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="service-form-grid__full">
+          <mat-label>{{
+            'MICROSEGX.PORT_EXPOSURE.SERVICE_SELECTOR' | translate
+          }}</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            [(ngModel)]="serviceCreateForm.selectorText"
+            [placeholder]="
+              'MICROSEGX.PORT_EXPOSURE.SERVICE_SELECTOR_PLACEHOLDER' | translate
+            "></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="service-dialog-section">
+        <div class="service-dialog-section__header">
+          <div>
+            <h3>{{ 'MICROSEGX.PORT_EXPOSURE.PORTS' | translate }}</h3>
+            <p>
+              {{
+                'MICROSEGX.PORT_EXPOSURE.CREATE_SERVICE_PORTS_DESC' | translate
+              }}
+            </p>
+          </div>
+          <button mat-stroked-button (click)="addServiceCreatePort()">
+            <mat-icon>add</mat-icon>
+            {{ 'MICROSEGX.PORT_EXPOSURE.ADD_PORT' | translate }}
+          </button>
+        </div>
+
+        <div class="service-port-rows">
+          <div
+            *ngFor="let port of serviceCreateForm.ports; let i = index"
+            class="service-port-row">
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.PORT_EXPOSURE.PORT_NAME' | translate
+              }}</mat-label>
+              <input matInput [(ngModel)]="port.name" [placeholder]="'http'" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.PORT_EXPOSURE.PORT' | translate
+              }}</mat-label>
+              <input
+                matInput
+                type="number"
+                [(ngModel)]="port.servicePort"
+                [min]="1"
+                [max]="65535" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.PORT_EXPOSURE.TARGET_PORT' | translate
+              }}</mat-label>
+              <input
+                matInput
+                [(ngModel)]="port.targetPort"
+                [placeholder]="'8080'" />
+            </mat-form-field>
+
+            <mat-form-field
+              *ngIf="serviceCreateForm.serviceType === 'NodePort'"
+              appearance="outline">
+              <mat-label>{{
+                'MICROSEGX.PORT_EXPOSURE.NODE_PORT' | translate
+              }}</mat-label>
+              <input
+                matInput
+                type="number"
+                [(ngModel)]="port.nodePort"
+                [placeholder]="nodePortRange.start + '-' + nodePortRange.end"
+                [min]="nodePortRange.start"
+                [max]="nodePortRange.end" />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              class="service-port-row__delete"
+              [disabled]="serviceCreateForm.ports.length === 1"
+              (click)="removeServiceCreatePort(i)">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <mat-card *ngIf="serviceCreateError" class="dialog-error-card">
+        <mat-icon>error</mat-icon>
+        <span>{{ serviceCreateError }}</span>
+      </mat-card>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="submitServiceCreate()"
+        [disabled]="serviceCreateLoading">
+        <mat-spinner *ngIf="serviceCreateLoading" diameter="18"></mat-spinner>
+        {{ 'general.SUBMIT' | translate }}
+      </button>
+      <button mat-stroked-button (click)="closeServiceCreateDialog()">
+        {{ 'general.CANCEL' | translate }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+<div
+  *ngIf="showServiceDeleteDialog"
+  class="dialog-overlay"
+  (click)="closeServiceDeleteDialog()">
+  <mat-card
+    class="dialog-card dialog-card--small"
+    (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE' | translate }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="dialog-helper-copy">
+        {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE_DESC' | translate }}
+      </p>
+
+      <div class="dialog-summary">
+        <div class="dialog-summary__row">
+          <span>{{ 'general.NAMESPACES' | translate }}</span>
+          <strong>{{ serviceToDelete?.namespace }}</strong>
+        </div>
+        <div class="dialog-summary__row">
+          <span>{{ 'MICROSEGX.PORT_EXPOSURE.SERVICE' | translate }}</span>
+          <strong>{{ serviceToDelete?.service_name }}</strong>
+        </div>
+        <div class="dialog-summary__row">
+          <span>{{ 'MICROSEGX.PORT_EXPOSURE.PORTS' | translate }}</span>
+          <strong>{{ serviceToDelete?.ports?.length || 0 }}</strong>
+        </div>
+      </div>
+
+      <p class="service-delete-note">
+        {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE_NOTE' | translate }}
+      </p>
+
+      <mat-card *ngIf="serviceDeleteError" class="dialog-error-card">
+        <mat-icon>error</mat-icon>
+        <span>{{ serviceDeleteError }}</span>
+      </mat-card>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button
+        mat-flat-button
+        color="warn"
+        (click)="confirmDeleteService()"
+        [disabled]="serviceDeleteLoading">
+        <mat-spinner *ngIf="serviceDeleteLoading" diameter="18"></mat-spinner>
+        {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE' | translate }}
+      </button>
+      <button mat-stroked-button (click)="closeServiceDeleteDialog()">
         {{ 'general.CANCEL' | translate }}
       </button>
     </mat-card-actions>

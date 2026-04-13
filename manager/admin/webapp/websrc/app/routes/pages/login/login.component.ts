@@ -277,7 +277,7 @@ export class LoginComponent implements OnInit, OnDestroy {
               userInfo.token.global_permissions;
             GlobalVariable.user.domain_permissions =
               userInfo.token.domain_permissions;
-            this.translatorService.useLanguage(
+            this.translatorService.initializeLanguage(
               GlobalVariable.user.token.locale
             );
             this.localStorage.set(
@@ -564,7 +564,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     GlobalVariable.isSUSESSO = userInfo.is_suse_authenticated;
     GlobalVariable.user.global_permissions = userInfo.token.global_permissions;
     GlobalVariable.user.domain_permissions = userInfo.token.domain_permissions;
-    this.translatorService.useLanguage(GlobalVariable.user.token.locale);
+    this.translatorService.initializeLanguage(GlobalVariable.user.token.locale);
     this.localStorage.set(GlobalConstant.LOCAL_STORAGE_TOKEN, userInfo);
   }
 
@@ -668,7 +668,7 @@ export class LoginComponent implements OnInit, OnDestroy {
               userInfo.token.global_permissions;
             GlobalVariable.user.domain_permissions =
               userInfo.token.domain_permissions;
-            this.translatorService.useLanguage(
+            this.translatorService.initializeLanguage(
               GlobalVariable.user.token.locale
             );
             this.localStorage.set(

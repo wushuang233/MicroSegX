@@ -245,6 +245,7 @@ export class MicrosegxZitiComponent
   implements OnInit, AfterViewChecked, OnDestroy
 {
   private static readonly DEFAULT_CONFIG_TYPE = 'Default';
+  private readonly autoRefreshIntervalMs = 10000;
 
   session: ZitiSession | null = null;
   overview: ZitiOverview | null = null;
@@ -254,10 +255,12 @@ export class MicrosegxZitiComponent
   routerStatusFilter = 'all';
   routerDeploymentFilter = 'all';
   serviceEncryptionFilter = 'all';
+  serviceHostingFilter = 'all';
   identityEnrollmentFilter = 'all';
   identityTypeFilter = 'all';
   configTypeFilter = 'all';
   policySemanticFilter = 'all';
+  policyTypeFilter = 'all';
 
   activeTab: ViewTab = 'routers';
   selectedPolicyType: PolicyType = 'service-policies';
@@ -300,6 +303,16 @@ export class MicrosegxZitiComponent
   >();
   private k8sServiceByRef = new Map<string, K8sService>();
   private configTypeNameByValue = new Map<string, string>();
+  private autoRefreshTimer: number | null = null;
+  private refreshInFlight = false;
+  private readonly handleVisibilityChange = (): void => {
+    if (typeof document !== 'undefined' && !document.hidden) {
+      this.triggerAutoRefresh(true);
+    }
+  };
+  private readonly handleWindowFocus = (): void => {
+    this.triggerAutoRefresh(true);
+  };
   policyQuickAdd = {
     identity: '',
     service: '',
@@ -314,6 +327,7 @@ export class MicrosegxZitiComponent
 
   ngOnInit(): void {
     this.checkSessionAndLoad();
+    this.startAutoRefresh();
   }
 
   ngAfterViewChecked(): void {
@@ -321,6 +335,7 @@ export class MicrosegxZitiComponent
   }
 
   ngOnDestroy(): void {
+    this.stopAutoRefresh();
     this.releaseDialogBodyState();
   }
 
@@ -388,6 +403,10 @@ export class MicrosegxZitiComponent
   }
 
   checkSessionAndLoad(): void {
+    if (this.refreshInFlight) {
+      return;
+    }
+    this.refreshInFlight = true;
     this.loading = true;
     this.error = '';
 
@@ -400,6 +419,8 @@ export class MicrosegxZitiComponent
             data.zitiOverview || null
           );
           this.loading = false;
+          this.error = '';
+          this.refreshInFlight = false;
 
           if (this.isConfigured && !this.isLoggedIn) {
             this.autoLogin();
@@ -411,6 +432,7 @@ export class MicrosegxZitiComponent
             err?.message ||
             this.translate.instant('MICROSEGX.ZITI.LOAD_FAILED');
           this.loading = false;
+          this.refreshInFlight = false;
         },
       });
   }
@@ -431,10 +453,14 @@ export class MicrosegxZitiComponent
   }
 
   refresh(silent = false): void {
+    if (this.refreshInFlight) {
+      return;
+    }
     if (!silent) {
       this.loading = true;
       this.error = '';
     }
+    this.refreshInFlight = true;
 
     this.http
       .get<any>('/microsegx/overview', { headers: this.getHeaders() })
@@ -445,18 +471,27 @@ export class MicrosegxZitiComponent
             data.zitiOverview || null
           );
           this.loading = false;
+          this.error = '';
+          this.refreshInFlight = false;
         },
         error: err => {
-          this.error =
-            err?.error?.message ||
-            err?.message ||
-            this.translate.instant('MICROSEGX.ZITI.LOAD_FAILED');
+          if (!silent || !this.overview) {
+            this.error =
+              err?.error?.message ||
+              err?.message ||
+              this.translate.instant('MICROSEGX.ZITI.LOAD_FAILED');
+          }
           this.loading = false;
+          this.refreshInFlight = false;
         },
       });
   }
 
   logout(): void {
+    if (this.refreshInFlight) {
+      return;
+    }
+    this.refreshInFlight = true;
     this.loading = true;
     this.http
       .post('/microsegx/api/ziti/logout', {}, { headers: this.getHeaders() })
@@ -464,11 +499,64 @@ export class MicrosegxZitiComponent
         next: () => {
           this.applyOverviewState(null, null);
           this.loading = false;
+          this.refreshInFlight = false;
         },
         error: () => {
           this.loading = false;
+          this.refreshInFlight = false;
         },
       });
+  }
+
+  private startAutoRefresh(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.stopAutoRefresh();
+    this.autoRefreshTimer = window.setInterval(() => {
+      this.triggerAutoRefresh();
+    }, this.autoRefreshIntervalMs);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    window.addEventListener('focus', this.handleWindowFocus);
+  }
+
+  private stopAutoRefresh(): void {
+    if (this.autoRefreshTimer !== null) {
+      window.clearInterval(this.autoRefreshTimer);
+      this.autoRefreshTimer = null;
+    }
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange
+    );
+    window.removeEventListener('focus', this.handleWindowFocus);
+  }
+
+  private triggerAutoRefresh(force = false): void {
+    if (!force && !this.shouldAutoRefresh()) {
+      return;
+    }
+    if (force && this.refreshInFlight) {
+      return;
+    }
+    this.refresh(true);
+  }
+
+  private shouldAutoRefresh(): boolean {
+    return (
+      typeof document !== 'undefined' &&
+      !document.hidden &&
+      !this.loading &&
+      !this.refreshInFlight &&
+      !this.dialogLoading &&
+      !this.actionInProgress &&
+      !this.showRouterDeployDialog &&
+      !this.showServiceAttachDialog &&
+      !this.showCreateDialog &&
+      !this.showEditDialog &&
+      !this.showDeleteConfirm
+    );
   }
 
   get isLoggedIn(): boolean {
@@ -551,7 +639,7 @@ export class MicrosegxZitiComponent
   get filteredServices(): ZitiService[] {
     return this.memoize(
       'filteredServices',
-      `${this.overviewRevision}|${this.searchText}|${this.serviceEncryptionFilter}`,
+      `${this.overviewRevision}|${this.searchText}|${this.serviceEncryptionFilter}|${this.serviceHostingFilter}`,
       () => {
         let items = this.filterItems(
           this.sortByName(this.overview?.services || []),
@@ -568,6 +656,14 @@ export class MicrosegxZitiComponent
             this.serviceEncryptionFilter === 'required'
               ? service.encryptionRequired !== false
               : service.encryptionRequired === false
+          );
+        }
+
+        if (this.serviceHostingFilter !== 'all') {
+          items = items.filter(
+            service =>
+              this.getServiceHostingStatus(service) ===
+              this.serviceHostingFilter
           );
         }
 
@@ -645,7 +741,7 @@ export class MicrosegxZitiComponent
           this.sortByName(this.overview?.identities || []),
           item => [
             item.name,
-            item.type,
+            this.getIdentityTypeName(item),
             item.authPolicyId,
             ...(item.roleAttributes || []),
             item.externalId,
@@ -664,9 +760,7 @@ export class MicrosegxZitiComponent
           items = items.filter(identity =>
             this.identityTypeFilter === 'admin'
               ? !!identity.isAdmin
-              : (identity.type ||
-                  MicrosegxZitiComponent.DEFAULT_CONFIG_TYPE) ===
-                this.identityTypeFilter
+              : this.getIdentityTypeName(identity) === this.identityTypeFilter
           );
         }
 
@@ -709,7 +803,7 @@ export class MicrosegxZitiComponent
     | ServiceEdgeRouterPolicy[] {
     return this.memoize(
       'activePolicies',
-      `${this.overviewRevision}|${this.searchText}|${this.policySemanticFilter}|${this.selectedPolicyType}`,
+      `${this.overviewRevision}|${this.searchText}|${this.policySemanticFilter}|${this.selectedPolicyType}|${this.policyTypeFilter}`,
       () => {
         if (this.selectedPolicyType === 'edge-router-policies') {
           let items = this.filterItems(
@@ -760,6 +854,11 @@ export class MicrosegxZitiComponent
             item => (item.semantic || 'AnyOf') === this.policySemanticFilter
           );
         }
+        if (this.policyTypeFilter !== 'all') {
+          items = items.filter(
+            item => (item.type || 'Dial') === this.policyTypeFilter
+          );
+        }
         return items;
       }
     );
@@ -772,11 +871,7 @@ export class MicrosegxZitiComponent
       () => {
         const values = new Set(
           (this.overview?.identities || [])
-            .map(identity =>
-              String(
-                identity.type || MicrosegxZitiComponent.DEFAULT_CONFIG_TYPE
-              ).trim()
-            )
+            .map(identity => this.getIdentityTypeName(identity))
             .filter(Boolean)
         );
 
@@ -1018,6 +1113,10 @@ export class MicrosegxZitiComponent
     return identity.isAdmin
       ? this.translate.instant('MICROSEGX.ZITI.TYPE_ADMIN')
       : this.translate.instant('MICROSEGX.ZITI.TYPE_STANDARD');
+  }
+
+  getIdentityTypeName(identity: Identity): string {
+    return this.normalizeIdentityTypeValue(identity.type);
   }
 
   getIdentityPolicyName(identity: Identity): string {
@@ -1557,7 +1656,7 @@ export class MicrosegxZitiComponent
     this.selectedEntityType = 'identities';
     this.setEntityForm({
       name: identity.name,
-      type: identity.type || 'Default',
+      type: this.getIdentityTypeName(identity),
       authPolicyId:
         identity.authPolicyId || this.authPolicies[0]?.id || 'default',
       roleAttributesText: (identity.roleAttributes || []).join(', '),
@@ -2313,6 +2412,25 @@ export class MicrosegxZitiComponent
     this.overviewRevision += 1;
     this.memoCache.clear();
     this.rebuildOverviewLookups();
+  }
+
+  private normalizeIdentityTypeValue(type: unknown): string {
+    if (typeof type === 'string') {
+      const normalized = type.trim();
+      return normalized || MicrosegxZitiComponent.DEFAULT_CONFIG_TYPE;
+    }
+
+    if (type && typeof type === 'object') {
+      const payload = type as Record<string, unknown>;
+      for (const key of ['name', 'value', 'label', 'id']) {
+        const candidate = String(payload[key] || '').trim();
+        if (candidate) {
+          return candidate;
+        }
+      }
+    }
+
+    return MicrosegxZitiComponent.DEFAULT_CONFIG_TYPE;
   }
 
   private applyAttachRouterResult(payload: any): void {

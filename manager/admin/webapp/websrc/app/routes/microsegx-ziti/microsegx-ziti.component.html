@@ -518,6 +518,29 @@
                 <div class="tab-toolbar__filters">
                   <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>{{
+                      'MICROSEGX.ZITI.SERVICE_HOSTING_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="serviceHostingFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="router">{{
+                        'MICROSEGX.ZITI.SERVICES.HOSTING_ROUTER' | translate
+                      }}</mat-option>
+                      <mat-option value="host">{{
+                        'MICROSEGX.ZITI.SERVICES.HOSTING_IDENTITY' | translate
+                      }}</mat-option>
+                      <mat-option value="pending">{{
+                        'MICROSEGX.ZITI.SERVICES.HOSTING_PENDING' | translate
+                      }}</mat-option>
+                      <mat-option value="missing">{{
+                        'MICROSEGX.ZITI.SERVICES.HOSTING_MISSING' | translate
+                      }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>{{
                       'MICROSEGX.ZITI.SERVICE_ENCRYPTION_FILTER' | translate
                     }}</mat-label>
                     <mat-select [(ngModel)]="serviceEncryptionFilter">
@@ -804,7 +827,7 @@
                   </th>
                   <td mat-cell *matCellDef="let identity">
                     <div class="entity-cell">
-                      <strong>{{ identity.type || 'Default' }}</strong>
+                      <strong>{{ getIdentityTypeName(identity) }}</strong>
                       <small>{{ getIdentityTypeLabel(identity) }}</small>
                     </div>
                   </td>
@@ -1074,6 +1097,26 @@
                       }}</mat-option>
                       <mat-option value="AnyOf">AnyOf</mat-option>
                       <mat-option value="AllOf">AllOf</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field
+                    *ngIf="selectedPolicyType === 'service-policies'"
+                    appearance="outline"
+                    class="filter-field">
+                    <mat-label>{{
+                      'MICROSEGX.ZITI.POLICY_TYPE_FILTER' | translate
+                    }}</mat-label>
+                    <mat-select [(ngModel)]="policyTypeFilter">
+                      <mat-option value="all">{{
+                        'general.ALL' | translate
+                      }}</mat-option>
+                      <mat-option value="Dial">{{
+                        'MICROSEGX.ZITI.POLICIES.TYPE_DIAL' | translate
+                      }}</mat-option>
+                      <mat-option value="Bind">{{
+                        'MICROSEGX.ZITI.POLICIES.TYPE_BIND' | translate
+                      }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>

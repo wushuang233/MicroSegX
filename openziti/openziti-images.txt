@@ -1,0 +1,7 @@
+docker.io/openziti/ziti-controller:1.7.2
+docker.io/openziti/ziti-router:1.7.2
+quay.io/jetstack/cert-manager-controller:v1.20.1
+quay.io/jetstack/cert-manager-cainjector:v1.20.1
+quay.io/jetstack/cert-manager-webhook:v1.20.1
+quay.io/jetstack/trust-manager:v0.22.0
+quay.io/jetstack/trust-pkg-debian-bookworm:20230311-deb12u1.5

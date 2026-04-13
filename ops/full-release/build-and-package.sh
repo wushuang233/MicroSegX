@@ -151,6 +151,8 @@ cp -R "${HELM_DIR}/charts" "${BUNDLE_DIR}/"
 cp "${SCRIPT_DIR}/deploy-core.sh" "${BUNDLE_DIR}/deploy-core.sh"
 cp "${SCRIPT_DIR}/load-and-push.sh" "${BUNDLE_DIR}/load-and-push.sh"
 cp "${SCRIPT_DIR}/load-local-images.sh" "${BUNDLE_DIR}/load-local-images.sh"
+cp "${SCRIPT_DIR}/import-core-images-containerd.sh" "${BUNDLE_DIR}/import-core-images-containerd.sh"
+cp "${SCRIPT_DIR}/apply-core-containerd.sh" "${BUNDLE_DIR}/apply-core-containerd.sh"
 cp "${SCRIPT_DIR}/reset-microsegx.sh" "${BUNDLE_DIR}/reset-microsegx.sh"
 cp "${SCRIPT_DIR}/full-release.env.example" "${BUNDLE_DIR}/full-release.env.example"
 cp "${ENV_FILE}" "${BUNDLE_DIR}/full-release.env"
@@ -207,6 +209,15 @@ sha256sum "${IMAGE_TAR}" >"${IMAGE_TAR}.sha256"
   echo "target_platform=${TARGET_PLATFORM}"
   echo "created_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } >>"${METADATA_FILE}"
+
+bash "${SCRIPT_DIR}/generate-containerd-env.sh" "${ENV_FILE}" "${METADATA_FILE}" "${BUNDLE_DIR}/full-release.containerd.env.example"
+chmod +x \
+  "${BUNDLE_DIR}/deploy-core.sh" \
+  "${BUNDLE_DIR}/load-and-push.sh" \
+  "${BUNDLE_DIR}/load-local-images.sh" \
+  "${BUNDLE_DIR}/import-core-images-containerd.sh" \
+  "${BUNDLE_DIR}/apply-core-containerd.sh" \
+  "${BUNDLE_DIR}/reset-microsegx.sh"
 
 echo
 echo "Bundle created:"

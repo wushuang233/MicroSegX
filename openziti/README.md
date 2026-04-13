@@ -1,5 +1,10 @@
 # OpenZiti 部署说明
 
+如果你要迁移到另一台普通 Kubernetes 服务器，并且走 `ctr/containerd` 离线导入，请优先看：
+
+- `/home/wushuang/MicroSegX/docs/K8S-CONTAINERD-DELIVERY-MANUAL.md`
+- `/home/wushuang/MicroSegX/openziti/build-openziti-offline-bundle.sh`
+
 这份目录只做两件事：
 
 - 还原你当前集群里的 `openziti` 是怎么部署出来的

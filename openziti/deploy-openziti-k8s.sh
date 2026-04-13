@@ -23,6 +23,7 @@ ZITI_CONTROLLER_DB_PVC="${ZITI_CONTROLLER_DB_PVC:-ziti-controller-db}"
 ZITI_CONTROLLER_DB_SIZE="${ZITI_CONTROLLER_DB_SIZE:-2Gi}"
 ZITI_ROUTER_ENROLLMENT_SECRET="${ZITI_ROUTER_ENROLLMENT_SECRET:-ziti-router-enrollment}"
 ZITI_STORAGE_CLASS_NAME="${ZITI_STORAGE_CLASS_NAME:-}"
+CHARTS_DIR="${CHARTS_DIR:-${SCRIPT_DIR}/charts}"
 
 detect_node_ip() {
   kubectl get nodes -o json \
@@ -39,6 +40,40 @@ require_cmd() {
   }
 }
 
+find_chart_archive() {
+  local name="$1"
+  local version="$2"
+  local candidate
+
+  for candidate in \
+    "${CHARTS_DIR}/${name}-${version}.tgz" \
+    "${CHARTS_DIR}/${name}-v${version}.tgz"; do
+    if [[ -f "${candidate}" ]]; then
+      echo "${candidate}"
+      return 0
+    fi
+  done
+
+  candidate="$(find "${CHARTS_DIR}" -maxdepth 1 -type f -name "${name}-*.tgz" | sort | tail -n 1 || true)"
+  if [[ -n "${candidate}" ]]; then
+    echo "${candidate}"
+    return 0
+  fi
+
+  return 1
+}
+
+chart_version_args() {
+  local chart_ref="$1"
+  local version="$2"
+
+  if [[ "${chart_ref}" == *.tgz ]]; then
+    return 0
+  fi
+
+  printf -- '--version\n%s\n' "${version}"
+}
+
 is_ip_address() {
   local value="$1"
   [[ "${value}" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || [[ "${value}" == *:* ]]
@@ -53,6 +88,11 @@ require_cmd bash
 require_cmd helm
 require_cmd jq
 require_cmd kubectl
+
+CERT_MANAGER_CHART="$(find_chart_archive cert-manager "${CERT_MANAGER_CHART_VERSION}" || true)"
+TRUST_MANAGER_CHART="$(find_chart_archive trust-manager "${TRUST_MANAGER_CHART_VERSION}" || true)"
+ZITI_CONTROLLER_CHART="$(find_chart_archive ziti-controller "${ZITI_CONTROLLER_CHART_VERSION}" || true)"
+ZITI_ROUTER_CHART="$(find_chart_archive ziti-router "${ZITI_ROUTER_CHART_VERSION}" || true)"
 
 ZITI_PUBLIC_HOST="${ZITI_PUBLIC_HOST:-${ZITI_HOST_IP:-$(detect_node_ip)}}"
 if [[ -z "${ZITI_PUBLIC_HOST}" ]]; then
@@ -96,16 +136,24 @@ echo "controller pvc: ${ZITI_CONTROLLER_DB_PVC}"
 echo "router enrollment secret: ${ZITI_ROUTER_ENROLLMENT_SECRET}"
 
 echo "[1/9] ensure helm repos"
-helm repo add jetstack https://charts.jetstack.io >/dev/null 2>&1 || true
-helm repo add openziti https://docs.openziti.io/helm-charts/ >/dev/null 2>&1 || true
-helm repo update >/dev/null
+if [[ -z "${CERT_MANAGER_CHART}" || -z "${TRUST_MANAGER_CHART}" || -z "${ZITI_CONTROLLER_CHART}" || -z "${ZITI_ROUTER_CHART}" ]]; then
+  helm repo add jetstack https://charts.jetstack.io >/dev/null 2>&1 || true
+  helm repo add openziti https://docs.openziti.io/helm-charts/ >/dev/null 2>&1 || true
+  helm repo update >/dev/null
+fi
+
+CERT_MANAGER_CHART="${CERT_MANAGER_CHART:-jetstack/cert-manager}"
+TRUST_MANAGER_CHART="${TRUST_MANAGER_CHART:-jetstack/trust-manager}"
+ZITI_CONTROLLER_CHART="${ZITI_CONTROLLER_CHART:-openziti/ziti-controller}"
+ZITI_ROUTER_CHART="${ZITI_ROUTER_CHART:-openziti/ziti-router}"
 
 echo "[2/9] install cert-manager"
-helm upgrade --install cert-manager jetstack/cert-manager \
+helm upgrade --install cert-manager "${CERT_MANAGER_CHART}" \
   -n "${CERT_MANAGER_NAMESPACE}" \
   --create-namespace \
-  --version "${CERT_MANAGER_CHART_VERSION}" \
-  --set crds.enabled=true
+  $(chart_version_args "${CERT_MANAGER_CHART}" "${CERT_MANAGER_CHART_VERSION}") \
+  --set crds.enabled=true \
+  --set startupapicheck.enabled=false
 
 echo "[3/9] create namespace and controller pvc"
 kubectl get namespace "${ZITI_NAMESPACE}" >/dev/null 2>&1 || kubectl create namespace "${ZITI_NAMESPACE}"
@@ -127,15 +175,15 @@ ${storage_class_block}
 EOF
 
 echo "[4/9] install trust-manager"
-helm upgrade --install trust-manager jetstack/trust-manager \
+helm upgrade --install trust-manager "${TRUST_MANAGER_CHART}" \
   -n "${CERT_MANAGER_NAMESPACE}" \
-  --version "${TRUST_MANAGER_CHART_VERSION}" \
+  $(chart_version_args "${TRUST_MANAGER_CHART}" "${TRUST_MANAGER_CHART_VERSION}") \
   --set app.trust.namespace="${ZITI_NAMESPACE}"
 
 echo "[5/9] install controller"
-helm upgrade --install "${ZITI_CONTROLLER_RELEASE}" openziti/ziti-controller \
+helm upgrade --install "${ZITI_CONTROLLER_RELEASE}" "${ZITI_CONTROLLER_CHART}" \
   -n "${ZITI_NAMESPACE}" \
-  --version "${ZITI_CONTROLLER_CHART_VERSION}" \
+  $(chart_version_args "${ZITI_CONTROLLER_CHART}" "${ZITI_CONTROLLER_CHART_VERSION}") \
   --server-side=false \
   -f "${SCRIPT_DIR}/ziti-controller-values.yaml" \
   --set persistence.existingClaim="${ZITI_CONTROLLER_DB_PVC}" \
@@ -200,9 +248,9 @@ else
   router_set_args+=(--set csr.sans.dns[1]="${ZITI_PUBLIC_HOST}")
 fi
 
-helm upgrade --install "${ZITI_ROUTER_RELEASE}" openziti/ziti-router \
+helm upgrade --install "${ZITI_ROUTER_RELEASE}" "${ZITI_ROUTER_CHART}" \
   -n "${ZITI_NAMESPACE}" \
-  --version "${ZITI_ROUTER_CHART_VERSION}" \
+  $(chart_version_args "${ZITI_ROUTER_CHART}" "${ZITI_ROUTER_CHART_VERSION}") \
   --server-side=false \
   -f "${SCRIPT_DIR}/ziti-router-values.yaml" \
   "${router_set_args[@]}"

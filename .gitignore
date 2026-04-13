@@ -1,14 +1,26 @@
 # 打包产物
-artifacts/*.tar
-artifacts/full-release/**/images-*.tar.gz
-artifacts/full-release/**/images-*.tar.gz.sha256
+artifacts/
+openziti/dist/
+k8s-node-surface/dist/
 
 # 本地构建产物
 docker-images/binaries/
 manager/stage/
+manager/admin/target/
+manager/admin/project/
+manager/admin/webapp/dist/
+manager/admin/webapp/.angular/
+manager/admin/webapp/node_modules/
 
 # 本地临时打包文件
 tmp/*.tar
 tmp/**/*.tar
 tmp/*.tar.gz
 tmp/**/*.tar.gz
+
+# 常见大体积二进制与归档
+*.tar
+*.tar.gz
+*.tgz
+*.jar
+*.zip
