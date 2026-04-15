@@ -219,9 +219,11 @@
 </ng-template>
 <ag-grid-angular
   (window:resize)="onResize()"
+  (rowDataChanged)="onRowDataChanged()"
   [ngStyle]="{ height: height - 90 + 'px' }"
   [gridOptions]="gridOptions4Groups"
   [context]="context"
+  [rowData]="groups"
   id="groups-grid"
   style="width: 100%"
   class="ag-theme-balham">

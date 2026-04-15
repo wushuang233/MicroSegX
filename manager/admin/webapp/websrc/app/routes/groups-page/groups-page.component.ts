@@ -63,14 +63,6 @@ export class GroupsPageComponent implements OnInit, AfterViewInit {
 
   toggleSystemGroup = () => {
     this.isShowingSystemGroups = !this.isShowingSystemGroups;
-    if (!this.isShowingSystemGroups) {
-      this.groupsView.groups = this.groupsView.groups.filter(function (item) {
-        return !item.platform_role;
-      });
-      this.groupsView.gridApi!.setGridOption('rowData', this.groupsView.groups);
-    } else {
-      this.refresh();
-    }
   };
 
   openImportGroupsDialog = () => {

@@ -26,9 +26,6 @@
           {{ 'customUi.login.hero.badge' | translate }}
         </span>
         <h1>{{ 'customUi.login.hero.title' | translate }}</h1>
-        <p class="showcase-copy">
-          {{ 'customUi.login.hero.subtitle' | translate }}
-        </p>
         <div class="showcase-grid">
           <div class="showcase-card">
             <span>01</span>
@@ -71,8 +68,8 @@
                 }">
                 <div class="login-brand-mark">AMS</div>
                 <div class="login-brand-copy">
-                  <div class="login-brand-title">{{ app.name }}</div>
-                  <div class="login-brand-subtitle">{{ app.description }}</div>
+                  <div class="login-brand-title">{{ app.description }}</div>
+                  <div class="login-brand-subtitle">{{ app.name }}</div>
                 </div>
               </div>
             </ng-template>
@@ -101,15 +98,9 @@
             *ngIf="!isFromSSO">
             <div class="login-panel-inner">
               <div class="login-title-block">
-                <p class="login-eyebrow">
-                  {{ 'customUi.login.form.eyebrow' | translate }}
-                </p>
                 <p
                   class="text-center login-title mt-0"
                   translate="{{ 'login.SIGN_IN_LEGACY' }}"></p>
-                <p class="login-subtitle">
-                  {{ 'customUi.login.form.subtitle' | translate }}
-                </p>
               </div>
 
               <form

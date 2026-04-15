@@ -1,4 +1,10 @@
-import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { GlobalVariable } from '@common/variables/global.variable';
 import { GroupsService } from '@common/services/groups.service';
@@ -25,7 +31,7 @@ export const groupDetailsTabs = [
   templateUrl: './group-details.component.html',
   styleUrls: ['./group-details.component.scss'],
 })
-export class GroupDetailsComponent implements OnInit, AfterViewInit {
+export class GroupDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() resizableHeight!: number;
   @Input() selectedGroupName!: string;
   @Input() members: any;
@@ -54,16 +60,32 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit {
   }
   public navSource!: string;
   filter = new FormControl('');
+  private resizeFrameId: number | null = null;
+  private resizeTimerId: number | null = null;
 
   private triggerGridResize = () => {
     const win = GlobalVariable.window;
     const $win = $(win);
-    [0, 120, 360, 900].forEach(delay => {
-      setTimeout(() => {
-        win.dispatchEvent(new Event('resize'));
-        $win.trigger(GlobalConstant.AG_GRID_RESIZE);
-      }, delay);
+    const dispatchResize = () => {
+      win.dispatchEvent(new Event('resize'));
+      $win.trigger(GlobalConstant.AG_GRID_RESIZE);
+    };
+
+    if (this.resizeFrameId !== null) {
+      win.cancelAnimationFrame(this.resizeFrameId);
+    }
+    if (this.resizeTimerId !== null) {
+      win.clearTimeout(this.resizeTimerId);
+    }
+
+    this.resizeFrameId = win.requestAnimationFrame(() => {
+      dispatchResize();
+      this.resizeFrameId = null;
     });
+    this.resizeTimerId = win.setTimeout(() => {
+      dispatchResize();
+      this.resizeTimerId = null;
+    }, 160);
   };
 
   constructor(
@@ -110,6 +132,15 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit {
     if (!TAB_VISIBLE_MATRIX[this.groupsService.activeTabIndex])
       this.groupsService.activeTabIndex = 0;
     this.triggerGridResize();
+  }
+
+  ngOnDestroy(): void {
+    if (this.resizeFrameId !== null) {
+      GlobalVariable.window.cancelAnimationFrame(this.resizeFrameId);
+    }
+    if (this.resizeTimerId !== null) {
+      GlobalVariable.window.clearTimeout(this.resizeTimerId);
+    }
   }
 
   isIncludingGroundRule = () => {

@@ -146,7 +146,10 @@ export class ScannersGridComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onResize(): void {
-    if (this.isVisible) this.gridApi.sizeColumnsToFit();
+    if (!this.isVisible || !this.gridApi) {
+      return;
+    }
+    this.gridApi.sizeColumnsToFit();
   }
 
   setDefaultSelection(): void {

@@ -56,8 +56,8 @@ export class AdjustableDivComponent implements OnInit, OnDestroy {
   gridHeight = 0;
   heightOne = 0;
   heightTwo = 0;
-  mousemoveListener;
-  mouseupListener;
+  mousemoveListener: (() => void) | null = null;
+  mouseupListener: (() => void) | null = null;
 
   constructor(private renderer2: Renderer2) {}
 
@@ -117,7 +117,15 @@ export class AdjustableDivComponent implements OnInit, OnDestroy {
     }
   }
 
+  private clearDragListeners(): void {
+    this.mousemoveListener?.();
+    this.mouseupListener?.();
+    this.mousemoveListener = null;
+    this.mouseupListener = null;
+  }
+
   startResize(): void {
+    this.clearDragListeners();
     this.mousemoveListener = this.renderer2.listen(
       'document',
       'mousemove',
@@ -138,17 +146,12 @@ export class AdjustableDivComponent implements OnInit, OnDestroy {
         }
       }
     );
-    this.mouseupListener = this.renderer2.listen(
-      'document',
-      'mouseup',
-      event => {
-        this.mousemoveListener();
-      }
-    );
+    this.mouseupListener = this.renderer2.listen('document', 'mouseup', () => {
+      this.clearDragListeners();
+    });
   }
 
   ngOnDestroy(): void {
-    this.mousemoveListener = undefined;
-    this.mouseupListener = undefined;
+    this.clearDragListeners();
   }
 }

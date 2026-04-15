@@ -3617,8 +3617,8 @@
       "workspace": "控制中心",
       "hero": {
         "badge": "主动微隔离控制面",
-        "title": "在同一个控制台里持续收敛开放端口、治理东西向访问，并交付零信任连接。",
-        "subtitle": "AMS4Muc 把运行时可视化、端口管理治理和零信任服务发布收进同一套 Kubernetes 运维工作流。",
+        "title": "非需端口尽关，攻击暴露尽减。合规链路尽通，违规连接尽断。",
+        "subtitle": "",
         "cards": {
           "visibility": {
             "title": "端口管理可视化",
@@ -3635,8 +3635,8 @@
         }
       },
       "form": {
-        "eyebrow": "运维入口",
-        "subtitle": "登录后进入 AMS4Muc 控制台，继续处理端口管理、漏洞治理、运行时防护和零信任接入。"
+        "eyebrow": "",
+        "subtitle": ""
       },
       "preview": {
         "eyebrow": "预览模式",

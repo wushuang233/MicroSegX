@@ -24,6 +24,9 @@ import { saveAs } from 'file-saver';
 
 @Injectable()
 export class UtilsService {
+  private readonly gridFitFrames = new WeakMap<object, number>();
+  private readonly gridFitTimers = new WeakMap<object, number>();
+
   private topBar: number = 65;
   private sectionPadding: number = 20 * 2;
   private verticalPadding: number = 15 * 2;
@@ -185,9 +188,32 @@ export class UtilsService {
   };
 
   private scheduleGridFit = api => {
-    [0, 120, 360, 900].forEach(delay => {
-      setTimeout(() => this.fitGrid(api), delay);
-    });
+    if (!api) return;
+    const frameId = this.gridFitFrames.get(api);
+    if (frameId !== undefined) {
+      window.cancelAnimationFrame(frameId);
+      this.gridFitFrames.delete(api);
+    }
+    const timerId = this.gridFitTimers.get(api);
+    if (timerId !== undefined) {
+      window.clearTimeout(timerId);
+      this.gridFitTimers.delete(api);
+    }
+
+    this.gridFitFrames.set(
+      api,
+      window.requestAnimationFrame(() => {
+        this.fitGrid(api);
+        this.gridFitFrames.delete(api);
+      })
+    );
+    this.gridFitTimers.set(
+      api,
+      window.setTimeout(() => {
+        this.fitGrid(api);
+        this.gridFitTimers.delete(api);
+      }, 160)
+    );
   };
 
   createGridOptions(columnDefs, win) {

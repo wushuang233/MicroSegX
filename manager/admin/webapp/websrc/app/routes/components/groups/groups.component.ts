@@ -5,6 +5,8 @@ import {
   Output,
   EventEmitter,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { MatDialog } from '@angular/material/dialog';
@@ -49,7 +51,7 @@ import * as $ from 'jquery';
   styleUrls: ['./groups.component.scss'],
   providers: [TitleCasePipe],
 })
-export class GroupsComponent implements OnInit, OnDestroy {
+export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() isScoreImprovement: boolean = false;
   @Input() isExposure: boolean = false;
   @Input() source!: string;
@@ -58,6 +60,10 @@ export class GroupsComponent implements OnInit, OnDestroy {
   @Input() isShowingSystemGroups: boolean = true;
   @Output() selectedGroup = new EventEmitter<Group | null>();
   @Output() refreshing = new EventEmitter<boolean>();
+  private allGroups: Array<Group> = [];
+  private agGridResizeHandler?: () => void;
+  private gridFitFrameId: number | null = null;
+  private gridFitTimerId: number | null = null;
   isRefreshing: boolean = false;
   groups: Array<Group> = [];
   groupsErr: boolean = false;
@@ -86,14 +92,34 @@ export class GroupsComponent implements OnInit, OnDestroy {
     return this.groups.length;
   }
 
-  private scheduleGridFit = (api?: GridApi) => {
-    [0, 120, 360, 900].forEach(delay => {
-      setTimeout(() => {
-        try {
-          api?.sizeColumnsToFit();
-        } catch (error) {}
-      }, delay);
+  private fitGrid = (api: GridApi | undefined = this.gridApi) => {
+    if (!api) {
+      return;
+    }
+    try {
+      api.sizeColumnsToFit();
+    } catch (error) {}
+  };
+
+  private scheduleGridFit = (api: GridApi | undefined = this.gridApi) => {
+    if (!api) {
+      return;
+    }
+    const win = GlobalVariable.window;
+    if (this.gridFitFrameId !== null) {
+      win.cancelAnimationFrame(this.gridFitFrameId);
+    }
+    if (this.gridFitTimerId !== null) {
+      win.clearTimeout(this.gridFitTimerId);
+    }
+    this.gridFitFrameId = win.requestAnimationFrame(() => {
+      this.fitGrid(api);
+      this.gridFitFrameId = null;
     });
+    this.gridFitTimerId = win.setTimeout(() => {
+      this.fitGrid(api);
+      this.gridFitTimerId = null;
+    }, 160);
   };
 
   constructor(
@@ -112,6 +138,20 @@ export class GroupsComponent implements OnInit, OnDestroy {
     public federatedConfigurationService: FederatedConfigurationService
   ) {}
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.isShowingSystemGroups &&
+      !changes.isShowingSystemGroups.firstChange
+    ) {
+      this.applyGroupVisibility();
+      this.setDefaultSelection();
+      this.scheduleGridFit();
+    }
+    if (changes.linkedGroup && !changes.linkedGroup.firstChange) {
+      this.setDefaultSelection();
+    }
+  }
+
   ngOnInit(): void {
     this.isWriteGroupAuthorized =
       this.source === this.navSource.FED_POLICY
@@ -122,68 +162,36 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.route.paramMap.pipe().subscribe(rep => {
       this.preselectedGroupName = String(rep.get('groupName'));
       this.navFrom = String(rep.get('from'));
-      console.log('this.preselectedGroupName', this.preselectedGroupName);
     });
     this.gridOptions4Groups = this.groupsService.prepareGrid4Groups(
       this.isScoreImprovement,
       this.source === this.navSource.FED_POLICY
     );
     this.gridOptions4Groups.onGridReady = params => {
-      const $win = $(GlobalVariable.window);
       if (params && params.api) {
         this.gridApi = params.api;
       }
+      if (!this.agGridResizeHandler) {
+        this.agGridResizeHandler = () => {
+          this.scheduleGridFit(params?.api);
+        };
+        $(GlobalVariable.window).on(
+          GlobalConstant.AG_GRID_RESIZE,
+          this.agGridResizeHandler
+        );
+      }
       this.scheduleGridFit(params?.api);
-      $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        this.scheduleGridFit(params?.api);
-      });
+      this.setDefaultSelection();
     };
     this.gridOptions4Groups.getRowId = params => params.data.name;
     this.gridOptions4Groups.onSelectionChanged = () => {
-      this.selectedGroups = [];
-      setTimeout(() => {
-        this.selectedGroups = this.gridApi!.getSelectedRows();
-        this.selectedGroups = this.groups.filter(group =>
-          this.selectedGroups.find(
-            selectedGroup => selectedGroup.name === group.name
-          )
-        );
-        this.gridApi!.redrawRows();
-        this.highlightDisplayedGroup();
-        this.selectedGroup.emit(
-          this.selectedGroups.length > 0 ? this.selectedGroups[0] : null
-        );
-        this.hasModeCapGroups = this.selectedGroups.some(
-          group => group.cap_change_mode
-        );
-        this.hasScoredCapGroups = this.selectedGroups.some(
-          group => group.cap_scorable
-        );
-        this.allScorable =
-          this.selectedGroups.filter(
-            group => group.not_scored && group.cap_scorable
-          ).length === 0;
-        this.someScorable =
-          this.selectedGroups.filter(group => !group.not_scored).length <
-            this.selectedGroups.length &&
-          this.selectedGroups.filter(group => !group.not_scored).length > 0;
-        let nonScorableGroups = this.selectedGroups
-          .filter(group => !group.cap_scorable)
-          .map(group => group.name);
-        this.hasNonScorable = nonScorableGroups.length > 0;
-        this.hasNonScorableMsg = `${this.translate.instant(
-          'group.SCORED_DISABLED'
-        )}: ${nonScorableGroups}`;
-        let counts = this.getModeCounts();
-        this.baselineProfile = this.getDefaultBaseline(counts.baselineCount);
-        if (this.source === GlobalConstant.NAV_SOURCE.FED_POLICY) {
-          this.federatedConfigurationService.activeTabIndex4Group =
-            this.federatedConfigurationService.activeTabIndex4Group || 0;
-        } else {
-          this.groupsService.activeTabIndex =
-            this.groupsService.activeTabIndex || 0;
-        }
-      }, 0);
+      if (!this.gridApi) {
+        this.resetSelectionState();
+        return;
+      }
+      this.updateSelectionState(
+        (this.gridApi.getSelectedRows() || []) as Array<Group>
+      );
     };
     if (this.isScoreImprovement) {
       this.gridOptions4Groups.getRowId = params => params.data.name;
@@ -212,6 +220,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.agGridResizeHandler) {
+      $(GlobalVariable.window).off(
+        GlobalConstant.AG_GRID_RESIZE,
+        this.agGridResizeHandler
+      );
+    }
+    if (this.gridFitFrameId !== null) {
+      GlobalVariable.window.cancelAnimationFrame(this.gridFitFrameId);
+    }
+    if (this.gridFitTimerId !== null) {
+      GlobalVariable.window.clearTimeout(this.gridFitTimerId);
+    }
     if (this.source === this.navSource.FED_POLICY) {
       this.ruleDetailModalService.ruleDialog?.close(false);
       this.ruleDetailModalService.isDialogOpen = false;
@@ -228,10 +248,11 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   getExposureGroups = () => {
     this.groups = [];
+    this.allGroups = [];
     this.groupsErr = false;
     this.groupsService.getServices().subscribe({
       next: services => {
-        this.groups = services
+        this.allGroups = services
           .map(service => {
             service.name =
               service.name === 'nodes' ? service.name : 'nv.' + service.name;
@@ -242,16 +263,12 @@ export class GroupsComponent implements OnInit, OnDestroy {
           )
           .map(service => serviceToGroup(service));
         this.isAllProtectMode =
-          this.groups.filter(
+          this.allGroups.filter(
             service =>
               service.policy_mode?.toLowerCase() !== 'protect' ||
               service.profile_mode?.toLowerCase() !== 'protect'
           ).length === 0;
-        this.gridApi!.setGridOption(
-          'rowData',
-          this.groups.filter(p => !p.platform_role)
-        );
-        this.filteredCount = this.groups.length;
+        this.applyGroupVisibility();
         this.setDefaultSelection();
       },
       error: ({ error }: { error: ErrorResponse }) => {
@@ -266,21 +283,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   getLocalGroups = () => {
     this.groups = [];
+    this.allGroups = [];
     this.groupsErr = false;
     this.groupsService.getLocalGroups().subscribe({
       next: groups => {
-        this.groups = groups.filter(g => g.cap_change_mode);
+        this.allGroups = groups.filter(g => g.cap_change_mode);
         this.isAllProtectMode =
-          this.groups.filter(
+          this.allGroups.filter(
             service =>
               service.policy_mode?.toLowerCase() !== 'protect' ||
               service.profile_mode?.toLowerCase() !== 'protect'
           ).length === 0;
-        this.gridApi!.setGridOption(
-          'rowData',
-          this.groups.filter(g => !g.platform_role)
-        );
-        this.filteredCount = this.groups.length;
+        this.applyGroupVisibility();
         this.setDefaultSelection();
       },
       error: ({ error }: { error: ErrorResponse }) => {
@@ -296,6 +310,8 @@ export class GroupsComponent implements OnInit, OnDestroy {
   getGroups = () => {
     this.refreshing.emit(true);
     this.groups = [];
+    this.allGroups = [];
+    this.resetSelectionState();
     this.groupsErr = false;
     this.utils.loadPagedDataFinalize(
       PathConstant.GROUP_URL,
@@ -329,10 +345,29 @@ export class GroupsComponent implements OnInit, OnDestroy {
   };
 
   setDefaultSelection = () => {
-    if (this.selectedGroups.length > 0) {
-      this.gridApi!.getRowNode(this.selectedGroups[0].name)?.setSelected(true);
-    } else {
-      this.gridApi!.getDisplayedRowAtIndex(0)?.setSelected(true);
+    if (!this.gridApi) {
+      return;
+    }
+    if (this.groups.length === 0) {
+      this.resetSelectionState();
+      return;
+    }
+    const targetName =
+      this.linkedGroup ||
+      this.preselectedGroupName ||
+      this.selectedGroups[0]?.name;
+    const targetNode = targetName
+      ? this.gridApi.getRowNode(targetName)
+      : undefined;
+
+    if (targetNode) {
+      targetNode.setSelected(true, true);
+      this.gridApi.ensureNodeVisible(targetNode);
+      return;
+    }
+
+    if ((this.gridApi.getSelectedRows()?.length || 0) === 0) {
+      this.gridApi.getDisplayedRowAtIndex(0)?.setSelected(true, true);
     }
   };
 
@@ -534,7 +569,12 @@ export class GroupsComponent implements OnInit, OnDestroy {
   };
 
   onResize(): void {
-    this.gridApi!.sizeColumnsToFit();
+    this.scheduleGridFit();
+  }
+
+  onRowDataChanged(): void {
+    this.scheduleGridFit();
+    this.setDefaultSelection();
   }
 
   filterCountChanged(results: number) {
@@ -544,62 +584,88 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   renderGroups = (data, options) => {
     this.eof = data.length < MapConstant.PAGE.GROUPS;
-    this.groups = options.isHardReloaded ? this.groups.concat(data) : data;
-    if (!this.isShowingSystemGroups) {
-      this.groups = this.groups.filter(function (item) {
-        return !item.platform_role;
-      });
-    }
-    console.log('this.groups', this.groups);
-    this.gridApi!.setGridOption('rowData', this.groups);
-    this.filteredCount = options.isHardReloaded
-      ? this.groups.length
-      : this.filteredCount;
+    this.allGroups = options.isHardReloaded
+      ? this.allGroups.concat(data)
+      : data;
+    this.applyGroupVisibility();
     if (this.eof) this.refreshing.emit(false);
-    console.log('this.linkedGroup:', this.linkedGroup);
-    setTimeout(() => {
-      this.gridApi!.sizeColumnsToFit();
-      this.gridApi!.forEachNode((node, index) => {
-        node.setSelected(false);
-        if (this.selectedGroups.length === 1) {
-          if (node.data.name === this.selectedGroups[0].name) {
-            node.setSelected(true);
-            this.gridApi!.ensureNodeVisible(node);
-          }
-        }
-        if (this.linkedGroup) {
-          if (this.linkedGroup === node.data.name) {
-            node.setSelected(true);
-            this.gridApi!.ensureNodeVisible(node);
-          }
-        }
-      });
-    }, 200);
-  };
-
-  private highlightDisplayedGroup = () => {
-    if (!this.selectedGroups || this.selectedGroups.length === 0) return;
-    let index = this.groups.findIndex(
-      group => group.name === this.selectedGroups[0].name
-    );
-    let rowNode = this.gridApi!.getDisplayedRowAtIndex(index);
-    let groupGridEl = document.querySelector(
-      '#groups-grid .ag-center-cols-container'
-    );
-    if (groupGridEl) {
-      Array.from(groupGridEl!.children).forEach((el, index) => {
-        if (index === rowNode?.rowIndex) {
-          el.classList.add('ag-row-highlight');
-        } else {
-          el.classList.remove('ag-row-highlight');
-        }
-      });
-    }
+    this.scheduleGridFit();
+    this.setDefaultSelection();
   };
 
   private handleError = () => {
     this.groupsErr = true;
-    this.renderGroups([], { isHardReloaded: true });
+    this.allGroups = [];
+    this.applyGroupVisibility();
+    this.refreshing.emit(false);
+  };
+
+  private applyGroupVisibility = () => {
+    this.groups = this.isShowingSystemGroups
+      ? [...this.allGroups]
+      : this.allGroups.filter(item => !item.platform_role);
+    this.filteredCount = this.groups.length;
+  };
+
+  private resetSelectionState = () => {
+    this.selectedGroups = [];
+    this.selectedGroup.emit(null);
+    this.hasModeCapGroups = false;
+    this.hasScoredCapGroups = false;
+    this.allScorable = false;
+    this.someScorable = false;
+    this.hasNonScorable = false;
+    this.hasNonScorableMsg = '';
+    this.baselineProfile = '';
+  };
+
+  private updateSelectionState = (selectedRows: Array<Group>) => {
+    const selectedNames = new Set(
+      (selectedRows || [])
+        .filter(Boolean)
+        .map(group => group?.name)
+        .filter(Boolean)
+    );
+    this.selectedGroups = this.groups.filter(group =>
+      selectedNames.has(group.name)
+    );
+    if (this.selectedGroups.length === 0) {
+      this.resetSelectionState();
+      return;
+    }
+    this.selectedGroup.emit(
+      this.selectedGroups.length > 0 ? this.selectedGroups[0] : null
+    );
+    this.hasModeCapGroups = this.selectedGroups.some(
+      group => group.cap_change_mode
+    );
+    this.hasScoredCapGroups = this.selectedGroups.some(
+      group => group.cap_scorable
+    );
+    this.allScorable =
+      this.selectedGroups.filter(
+        group => group.not_scored && group.cap_scorable
+      ).length === 0;
+    this.someScorable =
+      this.selectedGroups.filter(group => !group.not_scored).length <
+        this.selectedGroups.length &&
+      this.selectedGroups.filter(group => !group.not_scored).length > 0;
+    const nonScorableGroups = this.selectedGroups
+      .filter(group => !group.cap_scorable)
+      .map(group => group.name);
+    this.hasNonScorable = nonScorableGroups.length > 0;
+    this.hasNonScorableMsg = `${this.translate.instant(
+      'group.SCORED_DISABLED'
+    )}: ${nonScorableGroups}`;
+    const counts = this.getModeCounts();
+    this.baselineProfile = this.getDefaultBaseline(counts.baselineCount);
+    if (this.source === GlobalConstant.NAV_SOURCE.FED_POLICY) {
+      this.federatedConfigurationService.activeTabIndex4Group =
+        this.federatedConfigurationService.activeTabIndex4Group || 0;
+    } else {
+      this.groupsService.activeTabIndex =
+        this.groupsService.activeTabIndex || 0;
+    }
   };
 
   private getModeCounts = () => {
