@@ -56,13 +56,11 @@ func parseEndpoint(endpoint string) (string, string, error) {
 func parseEndpointWithFallbackProtocol(endpoint string, fallbackProtocol string) (protocol string, addr string, err error) {
 	if protocol, addr, err = parseEndpoint(endpoint); err != nil && protocol == "" {
 		fallbackEndpoint := fallbackProtocol + "://" + endpoint
-		log.Warningf("Using %q as endpoint is deprecated, please consider using full url format %q.", endpoint, fallbackEndpoint)
 		protocol, addr, err = parseEndpoint(fallbackEndpoint)
 		if err == nil {
 			log.Warningf("Using %q as endpoint is deprecated, please consider using full url format %q.", endpoint, fallbackEndpoint)
 		}
 	}
-	log.Warningf("no error %v %v.", protocol, addr)
 	return
 }
 

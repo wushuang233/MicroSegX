@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   EventEmitter,
   Inject,
@@ -16,7 +15,6 @@ import { MapConstant } from '@common/constants/map.constant';
 import { User } from '@common/types';
 import { passwordValidator } from '@common/validators';
 import { GlobalVariable } from '@common/variables/global.variable';
-import { TranslatorService } from '@core/translator/translator.service';
 import { GroupDomainRoleTableComponent } from 'app/routes/settings/common/group-domain-role/group-domain-role-table/group-domain-role-table.component';
 import { Subject } from 'rxjs';
 import { UsersGridComponent } from '../users-grid.component';
@@ -70,9 +68,6 @@ export class AddEditUserDialogComponent implements OnInit {
   }
   get selectedRole(): string {
     return this.form.get('role')?.value;
-  }
-  get languages(): { code: string; text: string }[] {
-    return this.tr.getAvailableLanguages();
   }
   get dialogPrefix() {
     return this.data.isEdit
@@ -133,9 +128,7 @@ export class AddEditUserDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<UsersGridComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: AddEditUserDialog,
-    private tr: TranslatorService,
-    private cd: ChangeDetectorRef
+    @Inject(MAT_DIALOG_DATA) public data: AddEditUserDialog
   ) {}
 
   ngOnInit(): void {
@@ -174,7 +167,7 @@ export class AddEditUserDialogComponent implements OnInit {
         role: [this.data.globalRoles[0]],
       });
       if (!this.data.isEdit) {
-        this.form.addControl('locale', this.fb.control(this.languages[0].code));
+        this.form.addControl('locale', this.fb.control('zh_cn'));
         this.form.addControl('password', this.fb.control(''));
         this.form.addControl(
           'passwordForm',
@@ -214,10 +207,6 @@ export class AddEditUserDialogComponent implements OnInit {
         }
       }
     }
-  }
-
-  updateTable(): void {
-    this.cd.detectChanges();
   }
 
   onNoClick(): void {

@@ -7,6 +7,7 @@ import {
   OnInit,
   Renderer2,
   TemplateRef,
+  ViewEncapsulation,
 } from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
 
@@ -39,6 +40,7 @@ export class ContainerTwoDirective {
   selector: 'app-adjustable-div',
   templateUrl: './adjustable-div.component.html',
   styleUrls: ['./adjustable-div.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class AdjustableDivComponent implements OnInit, OnDestroy {
   @ContentChild(ContainerOneDirective, { static: true })

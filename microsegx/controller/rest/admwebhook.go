@@ -1558,7 +1558,8 @@ func restartWebhookServer(svcName string) error {
 
 		return nil
 	} else {
-		return fmt.Errorf("not supported(%s)", svcName)
+		log.WithFields(log.Fields{"svcName": svcName}).Info("webhook server is not running yet, skip restart")
+		return nil
 	}
 }
 

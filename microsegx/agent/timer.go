@@ -92,7 +92,12 @@ func statsLoop(bPassiveContainerDetect bool) {
 		log.WithFields(log.Fields{"Controlled_Limit": agentEnv.memoryLimit, "Controlled_At": memStatsEnforcerResetMark}).Info("Memory Resource")
 		go func() {
 			if err := global.SYS.MonitorMemoryPressureEvents(memStatsEnforcerResetMark, memoryPressureNotification); err != nil {
-				log.WithFields(log.Fields{"error": err}).Error("Runtime: MonitorMemoryPressureEvents Failed")
+				fields := log.Fields{"error": err}
+				if err.Error() == "not supported" {
+					log.WithFields(fields).Info("Memory pressure notifications are not supported on this node")
+				} else {
+					log.WithFields(fields).Error("Runtime: MonitorMemoryPressureEvents Failed")
+				}
 			}
 		}()
 	}

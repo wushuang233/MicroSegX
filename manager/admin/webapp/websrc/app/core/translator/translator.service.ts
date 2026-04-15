@@ -7,12 +7,9 @@ const LOCALE_STORAGE_KEY = 'nv-ui-locale';
   providedIn: 'root',
 })
 export class TranslatorService {
-  private readonly defaultLanguage = 'en';
+  private readonly defaultLanguage = 'zh_cn';
 
-  private readonly availablelangs = [
-    { code: 'en', text: 'English' },
-    { code: 'zh_cn', text: '中文' },
-  ];
+  private readonly availablelangs = [{ code: 'zh_cn', text: '中文' }];
 
   constructor(public translate: TranslateService) {
     this.translate.addLangs(this.availablelangs.map(lang => lang.code));
@@ -49,12 +46,6 @@ export class TranslatorService {
 
     if (this.isSupported(preferredLang)) {
       return preferredLang;
-    }
-
-    const browserLang =
-      typeof navigator !== 'undefined' ? navigator.language.toLowerCase() : '';
-    if (browserLang.startsWith('zh')) {
-      return 'zh_cn';
     }
 
     return this.defaultLanguage;

@@ -30,6 +30,10 @@ export class ExposedServicepodConvGridComponent implements OnInit {
   @Input() set exposures(exposure: Array<HierarchicalExposure>) {
     this._exposures = exposure;
     this.displayedExposure = this.preprocessHierarchicalData(this._exposures);
+    setTimeout(() => {
+      this.gridApi?.sizeColumnsToFit();
+      this.gridApi?.resetRowHeights();
+    });
   }
 
   gridOptions!: GridOptions;
@@ -158,6 +162,10 @@ export class ExposedServicepodConvGridComponent implements OnInit {
       },
       onColumnResized: params => {
         if (params && params.api) params.api.resetRowHeights();
+      },
+      onFirstDataRendered: params => {
+        params.api.sizeColumnsToFit();
+        params.api.resetRowHeights();
       },
       isExternalFilterPresent: () => true,
       doesExternalFilterPass: params =>

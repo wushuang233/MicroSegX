@@ -43,7 +43,8 @@ export class RuleActionButtonsComponent implements ICellRendererAngularComp {
 
   editRule = rule => {
     const addEditDialogRef = this.dialog.open(AddEditRuleModalComponent, {
-      width: '80%',
+      width: '1120px',
+      maxWidth: 'calc(100vw - 48px)',
       data: {
         sensor: this.params.context.componentParent.selectedSensor,
         rule: rule,

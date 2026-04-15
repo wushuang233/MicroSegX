@@ -98,7 +98,7 @@ func NewFsnCenter(p *Probe, rtStorageDriver string) (*FileNotificationCtr, bool)
 	case "btrfs":
 		fsn.storageDrv = drv_btrfs
 	default:
-		log.WithFields(log.Fields{"driver": rtStorageDriver}).Error("FSN: not support")
+		log.WithFields(log.Fields{"driver": rtStorageDriver}).Info("FSN: storage driver is not explicitly supported, fall back to overlayfs")
 		fsn.storageDrv = drv_overlayfs // assume
 	}
 

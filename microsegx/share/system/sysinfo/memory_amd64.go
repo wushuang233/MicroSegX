@@ -59,10 +59,16 @@ func epsValid(eps []byte) bool {
 	return false
 }
 
+func shouldLogMunmapError(err error) bool {
+	return err != nil && !errors.Is(err, syscall.EINVAL)
+}
+
 func getStructureTableAddressEFI(f *os.File) (address int64, length int, err error) {
 	systab, err := openFile("/sys/firmware/efi/systab")
 	if err != nil {
-		log.WithFields(log.Fields{"err": err}).Error("systab")
+		if !os.IsNotExist(err) {
+			log.WithFields(log.Fields{"err": err}).Debug("EFI systab is unavailable")
+		}
 		return 0, 0, err
 	}
 	defer systab.Close()
@@ -86,7 +92,7 @@ func getStructureTableAddressEFI(f *os.File) (address int64, length int, err err
 			return 0, 0, err
 		}
 		defer func() {
-			if err := syscall.Munmap(eps); err != nil {
+			if err := syscall.Munmap(eps); shouldLogMunmapError(err) {
 				log.WithFields(log.Fields{"err": err}).Error("Munmap")
 			}
 		}()
@@ -113,7 +119,7 @@ func getStructureTableAddress(f *os.File) (address int64, length int, err error)
 		return 0, 0, err
 	}
 	defer func() {
-		if err := syscall.Munmap(mem); err != nil {
+		if err := syscall.Munmap(mem); shouldLogMunmapError(err) {
 			log.WithFields(log.Fields{"err": err}).Error("Munmap")
 		}
 	}()
@@ -212,7 +218,7 @@ func (si *SysInfo) getMemoryInfo() {
 		return
 	}
 	defer func() {
-		if err := syscall.Munmap(mem); err != nil {
+		if err := syscall.Munmap(mem); shouldLogMunmapError(err) {
 			log.WithFields(log.Fields{"err": err}).Error("Munmap")
 		}
 	}()

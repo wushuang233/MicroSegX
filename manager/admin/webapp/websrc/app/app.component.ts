@@ -8,6 +8,7 @@ import {
 import { GlobalVariable } from '@common/variables/global.variable';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { TranslatorService } from '@core/translator/translator.service';
+import { NavigationEnd, Router } from '@angular/router';
 import {
   LOCAL_STORAGE,
   SESSION_STORAGE,
@@ -21,6 +22,8 @@ import { SettingsService } from '@services/settings.service';
 import { MultiClusterService } from '@services/multi-cluster.service';
 import { Cluster, ClusterData } from '@common/types';
 import { MapConstant } from '@common/constants/map.constant';
+import { filter } from 'rxjs/operators';
+import * as $ from 'jquery';
 
 @Component({
   standalone: false,
@@ -43,7 +46,8 @@ export class AppComponent implements OnInit {
     private summaryService: SummaryService,
     private authService: AuthService,
     private commonHttpService: CommonHttpService,
-    private multiClusterService: MultiClusterService
+    private multiClusterService: MultiClusterService,
+    private router: Router
   ) {
     this.win = GlobalVariable.window;
     this.initTimer = new Date().getTime();
@@ -90,7 +94,24 @@ export class AppComponent implements OnInit {
     return this.switchers.getFrameSwitcher('isCollapsedText');
   }
 
+  private triggerGridResize = () => {
+    const $win = $(this.win);
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => {
+        this.win.dispatchEvent(new Event('resize'));
+        $win.trigger(GlobalConstant.AG_GRID_RESIZE);
+      }, delay);
+    });
+  };
+
   ngOnInit() {
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.triggerGridResize();
+      });
+    this.triggerGridResize();
+
     this.multiClusterService.getClusters().subscribe({
       next: (data: ClusterData | null) => {
         const fedRole = data?.fed_role || '';
@@ -157,6 +178,7 @@ export class AppComponent implements OnInit {
                   summaryInfo.summary.platform === GlobalConstant.RANCHER;
                 GlobalVariable.summary = summaryInfo.summary;
                 this.isSummaryDone = true;
+                this.triggerGridResize();
               });
             }
           },
@@ -169,6 +191,7 @@ export class AppComponent implements OnInit {
         );
     } else {
       this.isSummaryDone = true;
+      this.triggerGridResize();
     }
   }
 

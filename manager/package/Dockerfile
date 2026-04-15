@@ -26,24 +26,17 @@ ENV HTTP_PROXY= \
 
 RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
     zypper refresh && \
-    zypper install -y wget curl zip git awk nodejs22 npm22 && \
+    zypper install -y wget curl zip unzip git awk nodejs22 npm22 && \
     npm install -g npm@10.9.2 && \
     hash -r
 
 ARG VERSION
 
-ARG CS_VERSION=v2.1.18
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    curl --proxy "" -fL https://github.com/coursier/coursier/releases/download/${CS_VERSION}/cs-x86_64-pc-${TARGETOS}.gz | gzip -d > cs; \
-  elif [ "$TARGETARCH" = "arm64" ]; then \
-    curl --proxy "" -fL https://github.com/VirtusLab/coursier-m1/releases/download/${CS_VERSION}/cs-aarch64-pc-${TARGETOS}.gz | gzip -d > cs; \
-  else \
-    echo "Unsupported architecture: $ARCH"; \
-    exit 1; \
-  fi && \
-    chmod +x cs && \
-    export PATH="$PATH:/root/.local/share/coursier/bin" && \
-    ./cs install scala:3.3.5 sbt:1.10.2 --install-dir /usr/local/bin
+ARG SBT_VERSION=1.10.2
+RUN cp /src/package/vendor/sbt-${SBT_VERSION}.zip /tmp/sbt.zip && \
+    unzip -q /tmp/sbt.zip -d /opt && \
+    ln -sf /opt/sbt/bin/sbt /usr/local/bin/sbt && \
+    rm -f /tmp/sbt.zip
 
 RUN unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy && \
     npm config delete proxy || true && \

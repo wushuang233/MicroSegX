@@ -179,7 +179,12 @@ func restoreRegistry(ch chan<- error, importInfo fedRulesRevInfo) {
 		// assign random numbers to RegConfigRev, ScannedRegRevs & ScannedRepoRev on managed clusters so that the first scan data polling is always triggered
 		files, err := os.ReadDir(registryDataDir)
 		if err != nil {
-			log.WithFields(log.Fields{"fedRole": importInfo.fedRole}).Error("Failed to read registry directory")
+			fields := log.Fields{"fedRole": importInfo.fedRole, "path": registryDataDir, "error": err}
+			if os.IsNotExist(err) {
+				log.WithFields(fields).Info("Registry data directory not found, skip restore")
+			} else {
+				log.WithFields(fields).Error("Failed to read registry directory")
+			}
 		} else {
 			if scanRevs.ScannedRegRevs == nil {
 				scanRevs.ScannedRegRevs = make(map[string]uint64)

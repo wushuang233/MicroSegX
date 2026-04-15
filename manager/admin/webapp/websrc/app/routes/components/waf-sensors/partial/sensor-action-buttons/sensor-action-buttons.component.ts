@@ -34,7 +34,6 @@ export class SensorActionButtonsComponent implements ICellRendererAngularComp {
 
   agInit(params: ICellRendererParams): void {
     this.params = params;
-    console.log('this.params', this.params);
   }
 
   refresh(params: ICellRendererParams): boolean {
@@ -43,7 +42,8 @@ export class SensorActionButtonsComponent implements ICellRendererAngularComp {
 
   editSensor = sensor => {
     const addEditDialogRef = this.dialog.open(AddEditSensorModalComponent, {
-      width: '80%',
+      width: '760px',
+      maxWidth: 'calc(100vw - 48px)',
       data: {
         sensor: sensor,
         opType: GlobalConstant.MODAL_OP.EDIT,

@@ -83,10 +83,18 @@ trait ClientSslConfig extends LazyLogging {
               logger.info(s"Received Response - Success\n$response")
               Future.successful(response)
             case status                                               =>
-              logger.info(
-                s"Received Response - Failure\nStatusCode: ${status.intValue()} Reason: ${status.reason()}\n Exception: ${Unmarshal(response.entity).to[String]}"
-              )
-              Future.failed(HttpResponseException(status.intValue(), status.reason(), response))
+              Unmarshal(response.entity).to[String].recover { case _ => "" }.flatMap { body =>
+                val details =
+                  if (body.nonEmpty) {
+                    s"\nBody: $body"
+                  } else {
+                    ""
+                  }
+                logger.info(
+                  s"Received Response - Failure\nStatusCode: ${status.intValue()} Reason: ${status.reason()}$details"
+                )
+                Future.failed(HttpResponseException(status.intValue(), status.reason(), response))
+              }
           }
         case (Failure(exception), _)              =>
           logger.info(s"Received Response - Failure\n$exception")

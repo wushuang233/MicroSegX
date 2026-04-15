@@ -76,7 +76,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   public hasCustomHeader: boolean = false;
   public passwordReset = new Subject();
   public isPreviewMode: boolean = environment.previewMode;
-  public languageOptions: { code: string; text: string }[] = [];
 
   constructor(
     @Inject(SESSION_STORAGE) private sessionStorage: StorageService,
@@ -109,7 +108,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.oidcEnabled = false;
     this.now = new Date();
     this.app = this.switchersService.getAppSwitcher('');
-    this.languageOptions = this.translatorService.getAvailableLanguages();
     this.localStorage.set('login_time', this.now.toString());
     this.originalUrl = this.localStorage.get(
       GlobalConstant.LOCAL_STORAGE_ORIGINAL_URL
@@ -332,14 +330,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.previewModeService.enterPreview();
   }
 
-  setLanguage(code: string): void {
-    this.translatorService.useLanguage(code);
-  }
-
-  get currentLanguage(): string {
-    return this.translate.currentLang || 'en';
-  }
-
   private clearToken() {
     this.clearLocalStorage();
     GlobalVariable.user = null;
@@ -392,7 +382,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.localStorage.get(GlobalConstant.LOCAL_STORAGE_TIMEOUT)
           );
           if (this.localStorage.get(GlobalConstant.LOCAL_STORAGE_TIMEOUT)) {
-            this.authMsg = 'Session has expired. Please login.'; //this.translate.instant("login.SESSION_TIMEOUT");
+            this.authMsg = '会话已过期，请重新登录。'; //this.translate.instant("login.SESSION_TIMEOUT");
           }
         }
       }

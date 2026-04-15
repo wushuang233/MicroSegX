@@ -22,7 +22,7 @@ $scrollbar-wd: 17px;
   display: flex;
   flex-direction: column;
   margin-top: 0;
-  height: auto;
+  height: 100%;
   max-height: 100%;
   margin: 0 14px;
   padding: 18px 14px;
@@ -335,29 +335,40 @@ $tablet-landscape: 1025px;
 .left-side-collapsed,
 .left-side-collapsed-text {
   .sidebar {
+    min-width: 0;
+    margin: 0 10px;
+    padding: 14px 8px;
     overflow-x: hidden;
+
+    .sidebar-workspace-card {
+      display: none !important;
+    }
 
     > .sidebar-nav {
       .sidebar-nav,
       > .nav-heading,
-      .sidebar-workspace-card,
       > li > .nav-item > span,
-      > li > a > span {
+      > li > a > span,
+      > li > .nav-item > .menu-arrow,
+      > li > a > .menu-arrow {
         display: none !important;
       }
 
       > li {
-        width: $left-side-wd-collapsed - 1;
+        width: 100%;
 
         > a,
         > .nav-item {
-          text-indent: -$sidebar-item-border-wd;
-          padding: 14px 0;
+          justify-content: center;
+          text-indent: 0;
+          padding: 12px 0;
           text-align: center;
+          gap: 0;
 
           > em {
-            font-size: 1.5em;
-            width: auto;
+            font-size: 1.35em;
+            width: 32px;
+            height: 32px;
           }
 
           &:focus {
@@ -384,19 +395,26 @@ $tablet-landscape: 1025px;
 
 .left-side-collapsed-text {
   .sidebar {
+    padding: 14px 10px;
+
     > .sidebar-nav {
       > li > .nav-item > span,
       > li > a > span {
         display: block !important;
         font-size: 11px;
         line-height: 1.2;
+        white-space: normal;
       }
 
       > li {
-        width: $left-side-wd-collapsed-text - 2;
+        width: 100%;
 
-        > a {
-          padding: 12px 0;
+        > a,
+        > .nav-item {
+          flex-direction: column;
+          justify-content: center;
+          padding: 12px 6px;
+          gap: 8px;
 
           > em {
             font-size: 1.4em;

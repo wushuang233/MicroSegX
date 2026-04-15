@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wushuang233/MicroSegX/microsegx/controller/access"
 	"github.com/wushuang233/MicroSegX/microsegx/controller/api"
 	"github.com/wushuang233/MicroSegX/microsegx/controller/cache"
@@ -36,7 +37,6 @@ import (
 	scanUtils "github.com/wushuang233/MicroSegX/microsegx/share/scan"
 	"github.com/wushuang233/MicroSegX/microsegx/share/system"
 	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 var Host share.CLUSHost = share.CLUSHost{
@@ -1185,7 +1185,12 @@ func main() {
 		// for allinone and controller
 		go func() {
 			if err := global.SYS.MonitorMemoryPressureEvents(memStatsControllerResetMark, memoryPressureNotification); err != nil {
-				log.WithFields(log.Fields{"error": err}).Error("MonitorMemoryPressureEvents")
+				fields := log.Fields{"error": err}
+				if err.Error() == "not supported" {
+					log.WithFields(fields).Info("Memory pressure notifications are not supported on this node")
+				} else {
+					log.WithFields(fields).Error("MonitorMemoryPressureEvents")
+				}
 			}
 		}()
 		for {

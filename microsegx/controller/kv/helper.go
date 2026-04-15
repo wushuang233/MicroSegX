@@ -2550,10 +2550,15 @@ func (m clusterHelper) GetObjectCertRev(cn string) (*share.CLUSX509Cert, uint64,
 	key := share.CLUSObjectCertKey(cn)
 	value, rev, err := m.get(key)
 	if err == nil && value == nil {
-		err = fmt.Errorf("cert %s is not set", key)
+		err = cluster.ErrKeyNotFound
 	}
 	if err != nil {
-		log.WithFields(log.Fields{"cn": cn, "error": err}).Error()
+		fields := log.Fields{"cn": cn, "error": err}
+		if errors.Is(err, cluster.ErrKeyNotFound) {
+			log.WithFields(fields).Debug("certificate not found in cluster store")
+		} else {
+			log.WithFields(fields).Error()
+		}
 		return nil, rev, err
 	} else {
 		var cert share.CLUSX509Cert

@@ -13,33 +13,11 @@
         {{ 'dashboard.TITLE' | translate }}
       </div>
       <h1 class="dashboard-hero-shell__title" id="events-title">
-        {{ 'dashboard.heading.SECURITY_RISK_SCORE' | translate }}
+        {{ 'customUi.header.routes.dashboard' | translate }}
       </h1>
       <p class="dashboard-hero-shell__copy">
         {{ 'customUi.header.captions.dashboard' | translate }}
       </p>
-
-      <div class="dashboard-hero-shell__chips">
-        <span class="dashboard-hero-shell__chip">
-          {{
-            summaryInfo && summaryInfo.platform
-              ? summaryInfo.platform
-              : 'Kubernetes'
-          }}
-        </span>
-        <span class="dashboard-hero-shell__chip">
-          {{ 'dashboard.heading.CVE_DB_VERSION' | translate }}
-          {{ cveDbVersion }}
-        </span>
-        <span class="dashboard-hero-shell__chip">
-          {{ 'scan.AUTO' | translate }}
-          {{
-            details?.autoScanConfig
-              ? ('policy.status.ENABLED' | translate)
-              : ('policy.status.DISABLED' | translate)
-          }}
-        </span>
-      </div>
 
       <div class="dashboard-hero-shell__metric-grid">
         <article class="dashboard-metric-card dashboard-metric-card--primary">
@@ -55,25 +33,13 @@
           <strong>{{ servicesCount }}</strong>
         </article>
         <article class="dashboard-metric-card">
-          <span>{{ 'enum.QUARANTINED' | translate }}</span>
-          <strong>{{ quarantinedContainersCount }}</strong>
+          <span>{{ 'enum.PROTECT' | translate }}</span>
+          <strong>{{ protectedContainersCount }}</strong>
         </article>
       </div>
     </div>
 
     <div class="dashboard-hero-shell__rail">
-      <div class="dashboard-score-callout">
-        <span class="dashboard-score-callout__label">
-          {{ 'dashboard.heading.SECURITY_RISK_SCORE' | translate }}
-        </span>
-        <strong class="dashboard-score-callout__value">
-          {{ riskScoreValue }}
-        </strong>
-        <p class="dashboard-score-callout__copy">
-          {{ 'dashboard.heading.IMPROVE_SCORE' | translate }}
-        </p>
-      </div>
-
       <div class="dashboard-rail-grid">
         <article class="dashboard-rail-card">
           <span>{{
@@ -88,21 +54,19 @@
           <small>{{ 'dashboard.heading.LAST_7_DAYS' | translate }}</small>
         </article>
         <article class="dashboard-rail-card">
-          <span>{{ 'dashboard.body.panel_title.EXPOSURES' | translate }}</span>
+          <span>对外暴露流向</span>
           <strong>{{ ingressExposureCount + egressExposureCount }}</strong>
-          <small
-            >Ingress {{ ingressExposureCount }} / Egress
-            {{ egressExposureCount }}</small
-          >
+          <small>
+            入站暴露 {{ ingressExposureCount }} 项，出站暴露
+            {{ egressExposureCount }} 项
+          </small>
         </article>
         <article class="dashboard-rail-card dashboard-rail-card--wide">
-          <span>{{
-            'dashboard.body.panel_title.TOP_VULNERABILITY' | translate
-          }}</span>
+          <span>当前高风险工作负载</span>
           <strong>{{ leadRiskContainer?.display_name || '-' }}</strong>
           <small>
-            H {{ leadRiskContainer?.high4Dashboard || 0 }} / M
-            {{ leadRiskContainer?.medium4Dashboard || 0 }}
+            高危漏洞 {{ leadRiskContainer?.high4Dashboard || 0 }} 项，中危漏洞
+            {{ leadRiskContainer?.medium4Dashboard || 0 }} 项
           </small>
         </article>
       </div>
@@ -219,109 +183,6 @@
         </a>
       </div>
     </article>
-
-    <article class="dashboard-focus-card dashboard-focus-card--ziti">
-      <div class="dashboard-focus-card__headline">
-        <div>
-          <div class="dashboard-focus-card__eyebrow">
-            {{ 'MICROSEGX.ZITI.TITLE' | translate }}
-          </div>
-          <strong class="dashboard-focus-card__value">
-            {{
-              microsegxFabricAvailable
-                ? microsegxPublishedServices
-                : ('customUi.microsegx.dashboard.notConfigured' | translate)
-            }}
-          </strong>
-        </div>
-        <span class="dashboard-focus-card__badge">
-          {{ 'customUi.microsegx.dashboard.publishedServices' | translate }}
-        </span>
-      </div>
-      <p class="dashboard-focus-card__copy">
-        {{ 'customUi.microsegx.dashboard.zeroTrustSummary' | translate }}
-      </p>
-      <p class="dashboard-focus-card__subcopy">
-        {{
-          microsegxFabricAvailable
-            ? microsegxControllerUrl
-            : ('customUi.microsegx.dashboard.fabricHint' | translate)
-        }}
-      </p>
-      <div class="dashboard-focus-card__metrics">
-        <div class="dashboard-focus-card__metric">
-          <span>{{ 'MICROSEGX.ZITI.Routers.TITLE' | translate }}</span>
-          <strong>{{
-            microsegxFabricAvailable ? microsegxAliveRouters : 0
-          }}</strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{ 'MICROSEGX.ZITI.SERVICES.TITLE' | translate }}</span>
-          <strong>{{
-            microsegxFabricAvailable ? microsegxPublishedServices : 0
-          }}</strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{
-            'customUi.microsegx.dashboard.connectedIdentities' | translate
-          }}</span>
-          <strong>
-            {{ microsegxFabricAvailable ? microsegxConnectedIdentities : 0 }}
-          </strong>
-        </div>
-        <div class="dashboard-focus-card__metric">
-          <span>{{
-            'customUi.microsegx.dashboard.terminators' | translate
-          }}</span>
-          <strong>{{
-            microsegxFabricAvailable ? microsegxTerminatorCount : 0
-          }}</strong>
-        </div>
-      </div>
-      <div class="dashboard-focus-card__actions">
-        <a
-          mat-button
-          class="dashboard-inline-link"
-          [routerLink]="['/microsegx/ziti']">
-          {{ 'customUi.microsegx.dashboard.openFabric' | translate }}
-        </a>
-      </div>
-    </article>
-  </section>
-
-  <section class="dashboard-lead-grid">
-    <app-security-risk-panel
-      *ngIf="scoreInfo && summaryInfo && isShowingScore"
-      class="dashboard-panel-host"
-      [scoreInfo]="scoreInfo"
-      [details]="details"
-      [summaryInfo]="summaryInfo">
-    </app-security-risk-panel>
-
-    <div class="dashboard-panel-stack">
-      <app-security-events-panel
-        class="dashboard-panel-host"
-        [securityEvents]="securityEvents">
-      </app-security-events-panel>
-
-      <ng-container
-        *ngIf="
-          details &&
-            !details.autoScanConfig &&
-            details.highPriorityVulnerabilities &&
-            details.highPriorityVulnerabilities.containers.top5Containers
-              .length === 0 &&
-            details.highPriorityVulnerabilities.nodes.top5Nodes.length === 0;
-          else topVulnerableAssets
-        ">
-        <app-top-vulnerable-assets-panel
-          class="dashboard-panel-host"
-          assetType="assets"
-          [isScanOff]="!details.autoScanConfig"
-          [details]="details">
-        </app-top-vulnerable-assets-panel>
-      </ng-container>
-    </div>
   </section>
 
   <app-exposure-panel
@@ -329,23 +190,6 @@
     class="dashboard-panel-host dashboard-panel-host--full"
     [scoreInfo]="scoreInfo">
   </app-exposure-panel>
-
-  <section class="dashboard-analytics-grid">
-    <app-top-security-events-panel
-      class="dashboard-panel-host"
-      direction="source"
-      [securityEvents]="securityEvents">
-    </app-top-security-events-panel>
-    <app-top-security-events-panel
-      class="dashboard-panel-host"
-      direction="destination"
-      [securityEvents]="securityEvents">
-    </app-top-security-events-panel>
-    <app-application-protocols-panel
-      class="dashboard-panel-host"
-      [details]="details">
-    </app-application-protocols-panel>
-  </section>
 
   <section class="dashboard-policy-grid">
     <app-policy-mode-panel
@@ -364,18 +208,3 @@
     </app-policy-mode-panel>
   </section>
 </div>
-
-<ng-template #topVulnerableAssets>
-  <div class="dashboard-vulnerability-split">
-    <app-top-vulnerable-assets-panel
-      class="dashboard-panel-host"
-      assetType="containers"
-      [details]="details">
-    </app-top-vulnerable-assets-panel>
-    <app-top-vulnerable-assets-panel
-      class="dashboard-panel-host"
-      assetType="nodes"
-      [details]="details">
-    </app-top-vulnerable-assets-panel>
-  </div>
-</ng-template>

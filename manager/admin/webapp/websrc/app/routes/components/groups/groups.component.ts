@@ -86,6 +86,16 @@ export class GroupsComponent implements OnInit, OnDestroy {
     return this.groups.length;
   }
 
+  private scheduleGridFit = (api?: GridApi) => {
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => {
+        try {
+          api?.sizeColumnsToFit();
+        } catch (error) {}
+      }, delay);
+    });
+  };
+
   constructor(
     private utils: UtilsService,
     private groupsService: GroupsService,
@@ -123,17 +133,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
       if (params && params.api) {
         this.gridApi = params.api;
       }
-      setTimeout(() => {
-        if (params && params.api) {
-          params.api.sizeColumnsToFit();
-        }
-      }, 300);
+      this.scheduleGridFit(params?.api);
       $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 100);
+        this.scheduleGridFit(params?.api);
       });
     };
     this.gridOptions4Groups.getRowId = params => params.data.name;

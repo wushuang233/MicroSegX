@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/wushuang233/k8s"
 	log "github.com/sirupsen/logrus"
+	"github.com/wushuang233/k8s"
 	admregv1 "k8s.io/api/admissionregistration/v1"
 	admregv1b1 "k8s.io/api/admissionregistration/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -1503,7 +1503,12 @@ func (d *kubernetes) RegisterResource(rt string) error {
 		}
 	}
 	if err != nil {
-		log.WithFields(log.Fields{"resource": rt, "error": err}).Error("fail to register")
+		fields := log.Fields{"resource": rt, "error": err}
+		if rt == RscTypeImage {
+			log.WithFields(fields).Info("optional resource is unavailable")
+		} else {
+			log.WithFields(fields).Error("fail to register")
+		}
 	}
 
 	return err
@@ -2353,7 +2358,12 @@ func getMicrosegxSvcAccount() {
 				// enforcer is not deployed. do not include its sa in the rbac checking/alert
 				enforcerSubjectWanted = ""
 			}
-			log.WithFields(log.Fields{"name": objName, "rt": rt, "err": err}).Error("resource no found")
+			fields := log.Fields{"name": objName, "rt": rt, "err": err}
+			if objName == "microsegx-registry-adapter-pod" {
+				log.WithFields(fields).Info("optional resource not found")
+			} else {
+				log.WithFields(fields).Error("resource no found")
+			}
 			continue
 		}
 		switch objName {

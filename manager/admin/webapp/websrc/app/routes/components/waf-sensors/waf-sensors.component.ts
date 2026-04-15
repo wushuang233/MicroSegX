@@ -57,6 +57,19 @@ export class WafSensorsComponent implements OnInit {
   $win: any;
   serverErrorMessage: SafeHtml = '';
 
+  private scheduleGridFit = (api?: GridApi) => {
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => {
+        try {
+          api?.sizeColumnsToFit();
+        } catch (error) {}
+        try {
+          api?.resetRowHeights?.();
+        } catch (error) {}
+      }, delay);
+    });
+  };
+
   get wafSensorsCount() {
     if (this.wafSensors?.length) return this.wafSensors.length;
     else return 0;
@@ -89,17 +102,9 @@ export class WafSensorsComponent implements OnInit {
       if (params && params.api) {
         this.gridApi4Sensors = params.api;
       }
-      setTimeout(() => {
-        if (params && params.api) {
-          params.api.sizeColumnsToFit();
-        }
-      }, 300);
+      this.scheduleGridFit(params?.api);
       $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 100);
+        this.scheduleGridFit(params?.api);
       });
     };
     this.gridOptions4Rules = this.gridOptions.gridOptions4Rules;
@@ -108,17 +113,9 @@ export class WafSensorsComponent implements OnInit {
       if (params && params.api) {
         this.gridApi4Rules = params.api;
       }
-      setTimeout(() => {
-        if (params && params.api) {
-          params.api.sizeColumnsToFit();
-        }
-      }, 300);
+      this.scheduleGridFit(params?.api);
       $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 100);
+        this.scheduleGridFit(params?.api);
       });
     };
     this.gridOptions4Patterns = this.gridOptions.gridOptions4Patterns;
@@ -127,17 +124,9 @@ export class WafSensorsComponent implements OnInit {
       if (params && params.api) {
         this.gridApi4Patterns = params.api;
       }
-      setTimeout(() => {
-        if (params && params.api) {
-          params.api.sizeColumnsToFit();
-        }
-      }, 300);
+      this.scheduleGridFit(params?.api);
       $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 100);
+        this.scheduleGridFit(params?.api);
       });
     };
     this.gridOptions4EditPatterns = this.gridOptions.gridOptions4EditPatterns;
@@ -154,7 +143,8 @@ export class WafSensorsComponent implements OnInit {
 
   openAddEditWafSensorModal = () => {
     const addEditDialogRef = this.dialog.open(AddEditSensorModalComponent, {
-      width: '80%',
+      width: '760px',
+      maxWidth: 'calc(100vw - 48px)',
       data: {
         source: this.source,
         opType: GlobalConstant.MODAL_OP.ADD,
@@ -166,7 +156,8 @@ export class WafSensorsComponent implements OnInit {
 
   openAddWafRuleModal = () => {
     const addEditDialogRef = this.dialog.open(AddEditRuleModalComponent, {
-      width: '80%',
+      width: '1120px',
+      maxWidth: 'calc(100vw - 48px)',
       data: {
         sensor: this.selectedSensor,
         opType: GlobalConstant.MODAL_OP.ADD,
@@ -326,6 +317,7 @@ export class WafSensorsComponent implements OnInit {
         let rowNode = this.gridApi4Rules!.getDisplayedRowAtIndex(0);
         rowNode!.setSelected(true);
         this.gridApi4Rules!.sizeColumnsToFit();
+        this.gridApi4Rules!.resetRowHeights();
       }
     }, 200);
   };
@@ -337,6 +329,7 @@ export class WafSensorsComponent implements OnInit {
     );
     setTimeout(() => {
       this.gridApi4Patterns!.sizeColumnsToFit();
+      this.gridApi4Patterns!.resetRowHeights();
     }, 200);
   };
 }

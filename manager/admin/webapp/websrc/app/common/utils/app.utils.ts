@@ -174,6 +174,22 @@ export class UtilsService {
     );
   }
 
+  private fitGrid = api => {
+    if (!api) return;
+    try {
+      api.sizeColumnsToFit();
+    } catch (error) {}
+    try {
+      api.resetRowHeights?.();
+    } catch (error) {}
+  };
+
+  private scheduleGridFit = api => {
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => this.fitGrid(api), delay);
+    });
+  };
+
   createGridOptions(columnDefs, win) {
     let option: GridOptions;
     option = {
@@ -209,18 +225,37 @@ export class UtilsService {
         sortDescending: '<em class="fa fa-sort-alpha-up"></em>',
       },
       onGridReady: params => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 300);
+        this.scheduleGridFit(params?.api);
         win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-          setTimeout(() => {
-            if (params && params.api) {
-              params.api.sizeColumnsToFit();
-            }
-          }, 100);
+          this.scheduleGridFit(params?.api);
         });
+      },
+      onFirstDataRendered: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onGridSizeChanged: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onDisplayedColumnsChanged: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onModelUpdated: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onRowDataUpdated: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onColumnVisible: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onFilterChanged: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onSortChanged: params => {
+        this.scheduleGridFit(params?.api);
+      },
+      onPaginationChanged: params => {
+        this.scheduleGridFit(params?.api);
       },
       overlayNoRowsTemplate: `<span class="overlay">${this.translate.instant(
         'general.NO_ROWS'

@@ -759,7 +759,12 @@ func (s *SystemTools) registerCGroupMemoryPressureNotifier() (int, int, int, err
 func (s *SystemTools) MonitorMemoryPressureEvents(threshold uint64, callback MemoryPressureCallback) error {
 	ctlfd, watchfd, eventfd, err := s.registerCGroupMemoryPressureNotifier()
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Error()
+		fields := log.Fields{"error": err}
+		if errors.Is(err, errUnsupported) {
+			log.WithFields(fields).Info("Memory pressure event notifier is not supported on this node")
+		} else {
+			log.WithFields(fields).Error()
+		}
 		return err
 	}
 

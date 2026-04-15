@@ -1,0 +1,21 @@
+.rule-actions-cell,
+.rule-actions-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 100%;
+}
+
+.rule-actions-collapse {
+  display: none;
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--saas-primary);
+  line-height: 1;
+}

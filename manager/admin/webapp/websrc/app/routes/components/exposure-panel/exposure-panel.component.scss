@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  min-width: 0;
+  height: 100%;
+}
+
+.exposure-panel-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.exposure-panel-card__title {
+  gap: 16px;
+}
+
+.exposure-panel-card__content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+  min-width: 0;
+}
+
+.exposure-panel-card__chart,
+.exposure-panel-card__grid {
+  min-width: 0;
+  width: 100%;
+}
+
+.exposure-panel-card__chart {
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8ff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.exposure-panel-card__grid {
+  padding: 0;
+}
+
+:host ::ng-deep app-exposure-chart,
+:host ::ng-deep app-exposure-grid {
+  display: block;
+  min-width: 0;
+}
+
+@media screen and (max-width: 767px) {
+  .exposure-panel-card__title {
+    align-items: flex-start !important;
+    flex-direction: column;
+  }
+}

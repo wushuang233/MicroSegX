@@ -1,0 +1,15 @@
+.rule-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--saas-primary);
+  line-height: 1;
+}

@@ -178,13 +178,14 @@
   font-family: Poppins, sans-serif;
   font-size: 20px;
   font-weight: 700;
-  line-height: 1.5;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .dashboard-rail-card small {
   color: var(--saas-text-secondary);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .dashboard-rail-card--microsegx {
@@ -215,7 +216,7 @@
 
 .dashboard-focus-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   align-items: start;
 }
@@ -243,12 +244,6 @@
   background:
     radial-gradient(circle at top right, rgba(250, 173, 20, 0.16), transparent 36%),
     linear-gradient(180deg, #ffffff 0%, #fffdf5 100%);
-}
-
-.dashboard-focus-card--ziti {
-  background:
-    radial-gradient(circle at top right, rgba(22, 119, 255, 0.16), transparent 36%),
-    linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
 }
 
 .dashboard-focus-card__headline {
@@ -351,7 +346,7 @@
 
 .dashboard-lead-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: start;
 }
@@ -381,6 +376,12 @@
   display: block;
   min-width: 0;
   align-self: start;
+}
+
+.dashboard-panel-host--full {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 :host ::ng-deep .dashboard-page .dashboard-card {

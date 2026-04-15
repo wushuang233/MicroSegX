@@ -30,6 +30,9 @@ export class ExposedServicePodGridComponent implements OnInit {
   @Input() set exposures(exposure: Array<HierarchicalExposure>) {
     this._exposures = exposure;
     this.displayedExposure = this.preprocessHierarchicalData(this._exposures);
+    setTimeout(() => {
+      this.gridApi?.sizeColumnsToFit();
+    });
   }
   get exposures() {
     return this._exposures;
@@ -163,6 +166,9 @@ export class ExposedServicePodGridComponent implements OnInit {
       getRowId: params =>
         params.data.isParent ? params.data.service : params.data.id,
       onGridReady: this.onGridReady.bind(this),
+      onFirstDataRendered: params => {
+        params.api.sizeColumnsToFit();
+      },
       isExternalFilterPresent: () => true,
       doesExternalFilterPass: this.isVisible.bind(this),
       suppressMaintainUnsortedOrder: true,

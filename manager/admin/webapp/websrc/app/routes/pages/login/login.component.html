@@ -19,16 +19,6 @@
             {{ app.name }}
           </span>
         </div>
-        <div class="login-shell__language">
-          <button
-            type="button"
-            *ngFor="let language of languageOptions"
-            class="login-language-button"
-            [class.active]="currentLanguage === language.code"
-            (click)="setLanguage(language.code)">
-            {{ language.text }}
-          </button>
-        </div>
       </div>
 
       <section class="login-showcase">
@@ -79,7 +69,7 @@
                   'openID-saml-eula':
                     !isEulaAccepted && servers && servers.length === 2,
                 }">
-                <div class="login-brand-mark">MC</div>
+                <div class="login-brand-mark">AMS</div>
                 <div class="login-brand-copy">
                   <div class="login-brand-title">{{ app.name }}</div>
                   <div class="login-brand-subtitle">{{ app.description }}</div>
@@ -168,9 +158,7 @@
                     class="password-toggle"
                     *ngIf="loginForm.controls['password'].value"
                     (click)="showPassword = !showPassword"
-                    [attr.aria-label]="
-                      showPassword ? 'Hide password' : 'Show password'
-                    ">
+                    [attr.aria-label]="showPassword ? '隐藏密码' : '显示密码'">
                     <i class="eos-icons">
                       {{ showPassword ? 'visibility_off' : 'visibility' }}
                     </i>

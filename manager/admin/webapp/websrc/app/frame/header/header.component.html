@@ -8,7 +8,7 @@
       [attr.aria-label]="switchers.getAppSwitcher('name')">
       <span class="brand-mark">
         <span class="brand-mark__dot"></span>
-        <span class="brand-mark__text">MC</span>
+        <span class="brand-mark__text">AMS</span>
       </span>
       <div class="brand-copy">
         <span class="brand-title">{{ switchers.getAppSwitcher('name') }}</span>
@@ -16,7 +16,7 @@
           {{ switchers.getAppSwitcher('description') }}
         </span>
       </div>
-      <span class="brand-copy-collapsed">MC</span>
+      <span class="brand-copy-collapsed">AMS</span>
     </a>
   </div>
 
@@ -60,32 +60,11 @@
         type="button"
         class="nav-icon-button"
         (click)="openNavSearch($event)"
-        aria-label="Search">
+        aria-label="搜索">
         <mat-icon>search</mat-icon>
       </button>
 
       <app-global-notifications class="my-auto"></app-global-notifications>
-
-      <button
-        mat-stroked-button
-        type="button"
-        #languageMenuTrigger="matMenuTrigger"
-        [matMenuTriggerFor]="languageMenu"
-        class="nav-chip nav-language-button">
-        <span>{{ activeLanguageLabel }}</span>
-        <mat-icon>
-          {{ languageMenuTrigger.menuOpen ? 'expand_less' : 'expand_more' }}
-        </mat-icon>
-      </button>
-
-      <mat-menu #languageMenu="matMenu">
-        <button
-          *ngFor="let language of languages"
-          mat-menu-item
-          (click)="setLanguage(language.code)">
-          {{ language.text }}
-        </button>
-      </mat-menu>
 
       <div
         *ngIf="

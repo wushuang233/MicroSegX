@@ -54,6 +54,10 @@ func wrapIntoErrorString(err error) error {
 	return errors.New(err.Error())
 }
 
+func isContainerdNotFoundError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "not found")
+}
+
 func containerdConnect(endpoint string, sys *system.SystemTools) (Runtime, error) {
 	log.WithFields(log.Fields{"endpoint": endpoint}).Debug("Connecting to containerd")
 
@@ -191,7 +195,12 @@ func (d *containerdDriver) getSpecs(ctx context.Context, c ctr.Container) (*cont
 
 	info, err := c.Info(ctx)
 	if err != nil {
-		log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()}).Error("Failed to get container info")
+		entry := log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()})
+		if isContainerdNotFoundError(err) {
+			entry.Debug("Container disappeared during inspection")
+		} else {
+			entry.Error("Failed to get container info")
+		}
 		return nil, nil, 0, nil, 0, wrapIntoErrorString(err)
 	}
 
@@ -370,7 +379,9 @@ func (d *containerdDriver) ListContainers(runningOnly bool) ([]*ContainerMeta, e
 	for _, c := range containers {
 		info, spec, pid, status, attempt, err := d.getSpecs(ctx, c)
 		if err != nil {
-			log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()}).Error("Failed to get container info")
+			if !isContainerdNotFoundError(err) {
+				log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()}).Error("Failed to get container info")
+			}
 			continue
 		}
 
@@ -390,13 +401,20 @@ func (d *containerdDriver) GetContainer(id string) (*ContainerMetaExtra, error) 
 	defer cancel()
 	c, err := d.client.LoadContainer(ctx, id)
 	if err != nil {
-		log.WithFields(log.Fields{"error": err.Error()}).Error("Failed to get container")
+		entry := log.WithFields(log.Fields{"id": id, "error": err.Error()})
+		if isContainerdNotFoundError(err) {
+			entry.Debug("Container was not found")
+		} else {
+			entry.Error("Failed to get container")
+		}
 		return nil, wrapIntoErrorString(err)
 	}
 
 	info, spec, pid, status, attempt, err := d.getSpecs(ctx, c)
 	if err != nil {
-		log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()}).Error("Failed to get container info")
+		if !isContainerdNotFoundError(err) {
+			log.WithFields(log.Fields{"id": c.ID(), "error": err.Error()}).Error("Failed to get container info")
+		}
 		return nil, wrapIntoErrorString(err)
 	}
 
@@ -701,7 +719,12 @@ func (d *containerdDriver) GetContainerCriSupplement(id string) (*ContainerMetaE
 		// an APP container
 		cs, err2 := criContainerStatus(d.criClient, ctx, id)
 		if err2 != nil || cs.Status == nil || cs.Info == nil {
-			log.WithFields(log.Fields{"id": id, "error": err2, "cs": cs}).Error("Fail to get container")
+			entry := log.WithFields(log.Fields{"id": id, "error": err2, "cs": cs})
+			if isContainerdNotFoundError(err2) {
+				entry.Debug("Container disappeared during CRI lookup")
+			} else {
+				entry.Error("Fail to get container")
+			}
 			return nil, 0, 0, err2
 		}
 

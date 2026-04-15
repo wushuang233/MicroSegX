@@ -131,7 +131,8 @@ export class GroupDlpComponent implements OnInit, OnChanges {
   openEditGroupSensorModal = (warning = '') => {
     setTimeout(() => {
       const addEditDialogRef = this.dialog.open(GroupDlpConfigModalComponent, {
-        width: '80%',
+        width: '920px',
+        maxWidth: 'calc(100vw - 48px)',
         data: {
           configuredSensors: this.groupDlpSensors,
           groupName: this.groupName,

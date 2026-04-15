@@ -1050,8 +1050,7 @@ export class MicrosegxZitiComponent
   getRouterEndpoint(router: EdgeRouter): string {
     const workload = this.getRouterWorkload(router);
     if (workload?.publicHost) {
-      const port =
-        workload.advertisedPort || workload.nodePort || workload.servicePort;
+      const port = this.getRouterPublicPort(workload);
       return `${workload.publicHost}:${port || '-'}`;
     }
 
@@ -1143,10 +1142,54 @@ export class MicrosegxZitiComponent
     if (!workload) {
       return '-';
     }
-    const host = workload.publicHost
-      ? `${workload.publicHost}:${workload.advertisedPort || workload.nodePort || '-'}`
-      : `${workload.readyReplicas || 0}/${workload.replicas || 0}`;
-    return `${workload.deploymentName || workload.serviceName || router.name} · ${host}`;
+    const endpoint =
+      workload.publicHost && this.getRouterPublicPort(workload)
+        ? `${workload.publicHost}:${this.getRouterPublicPort(workload)}`
+        : workload.nodePort
+          ? `NodePort ${workload.nodePort}`
+          : workload.servicePort
+            ? `服务 ${workload.servicePort}`
+            : `${workload.readyReplicas || 0}/${workload.replicas || 0}`;
+    return `${workload.deploymentName || workload.serviceName || router.name} · ${endpoint}`;
+  }
+
+  getRouterPortSummary(router: EdgeRouter): string {
+    const workload = this.getRouterWorkload(router);
+    if (!workload) {
+      return '未部署到 Kubernetes';
+    }
+
+    const parts: string[] = [];
+    if (workload.publicHost) {
+      parts.push(
+        `公网入口 ${workload.publicHost}:${this.getRouterPublicPort(workload) || '-'}`
+      );
+    }
+    if (workload.nodePort) {
+      parts.push(`端口管理入口 ${workload.nodePort}`);
+    }
+    if (workload.servicePort) {
+      parts.push(`集群服务端口 ${workload.servicePort}`);
+    }
+    if (
+      !workload.nodePort &&
+      !workload.servicePort &&
+      workload.advertisedPort
+    ) {
+      parts.push(`路由器宣告端口 ${workload.advertisedPort}`);
+    }
+
+    return parts.length > 0 ? parts.join(' · ') : '等待生成公网入口';
+  }
+
+  private getRouterPublicPort(workload?: RouterWorkload): number | null {
+    if (!workload) {
+      return null;
+    }
+
+    const port =
+      workload.nodePort || workload.advertisedPort || workload.servicePort;
+    return typeof port === 'number' && port > 0 ? port : null;
   }
 
   getServiceConfigNames(service: ZitiService): string[] {

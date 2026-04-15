@@ -227,6 +227,21 @@ func getVersion(tag string, verToGet int, useToken bool) (string, error) {
 	return version, err
 }
 
+func isBenignOpenShiftProbeError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	msg := err.Error()
+	if !strings.Contains(msg, "tag=oc") {
+		return false
+	}
+
+	return strings.Contains(msg, "code=401") ||
+		strings.Contains(msg, "code=403") ||
+		strings.Contains(msg, "code=404")
+}
+
 func GetK8sVersion(reGetK8sVersion, reGetOcVersion bool) (string, string) {
 	var k8sVer string
 	var ocVer string
@@ -254,7 +269,7 @@ func GetK8sVersion(reGetK8sVersion, reGetOcVersion bool) (string, string) {
 				break
 			}
 		}
-		if ocVer == "" && err != nil && !strings.HasPrefix(err.Error(), "Read File fail") {
+		if ocVer == "" && err != nil && !strings.HasPrefix(err.Error(), "Read File fail") && !isBenignOpenShiftProbeError(err) {
 			log.Error(err.Error())
 		}
 	}

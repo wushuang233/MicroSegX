@@ -558,6 +558,31 @@ button {
   box-shadow: var(--saas-card-shadow);
 }
 
+ag-grid-angular,
+.ag-theme-balham,
+.ag-theme-alpine {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+}
+
+.ag-theme-balham .ag-root-wrapper,
+.ag-theme-balham .ag-root-wrapper-body,
+.ag-theme-balham .ag-root,
+.ag-theme-balham .ag-body,
+.ag-theme-balham .ag-body-viewport,
+.ag-theme-balham .ag-center-cols-viewport,
+.ag-theme-alpine .ag-root-wrapper,
+.ag-theme-alpine .ag-root-wrapper-body,
+.ag-theme-alpine .ag-root,
+.ag-theme-alpine .ag-body,
+.ag-theme-alpine .ag-body-viewport,
+.ag-theme-alpine .ag-center-cols-viewport {
+  width: 100%;
+  min-width: 0;
+}
+
 .ag-theme-alpine .ag-header,
 .ag-theme-alpine .ag-root-wrapper,
 .ag-theme-alpine .ag-header-cell,

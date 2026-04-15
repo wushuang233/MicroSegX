@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"github.com/wushuang233/MicroSegX/microsegx/share/cluster"
 	"github.com/wushuang233/MicroSegX/microsegx/share/container"
 	"github.com/wushuang233/MicroSegX/microsegx/share/global"
 	"github.com/wushuang233/MicroSegX/microsegx/share/system"
 	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 // const LogFile string = "/var/log/ranger/monitor.log"
@@ -357,16 +357,12 @@ func putLocalInfo() {
 
 	value, _ := json.Marshal(Host)
 	key := share.CLUSHostKey(Host.ID, "agent")
-	if err := cluster.Put(key, value); err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("")
-	}
+	_ = cluster.Put(key, value)
 
 	Agent.ClusterIP = selfAddr
 	value, _ = json.Marshal(Agent)
 	key = share.CLUSAgentKey(Host.ID, Agent.ID)
-	if err := cluster.Put(key, value); err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("")
-	}
+	_ = cluster.Put(key, value)
 }
 
 func putHostIfInfo() {
@@ -374,9 +370,7 @@ func putHostIfInfo() {
 
 	value, _ := json.Marshal(Host)
 	key := share.CLUSHostKey(Host.ID, "agent")
-	if err := cluster.Put(key, value); err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("")
-	}
+	_ = cluster.Put(key, value)
 }
 
 func deleteAgentInfo() {

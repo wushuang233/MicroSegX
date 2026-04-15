@@ -1,10 +1,12 @@
 import { Component, OnInit, Input, AfterViewInit } from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
+import { GlobalVariable } from '@common/variables/global.variable';
 import { GroupsService } from '@common/services/groups.service';
 import { FormControl } from '@angular/forms';
 import { QuickFilterService } from '@components/quick-filter/quick-filter.service';
 import { tap } from 'rxjs/operators';
 import { AuthUtilsService } from '@common/utils/auth.utils';
+import * as $ from 'jquery';
 
 export const groupDetailsTabs = [
   'member',
@@ -53,6 +55,17 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit {
   public navSource!: string;
   filter = new FormControl('');
 
+  private triggerGridResize = () => {
+    const win = GlobalVariable.window;
+    const $win = $(win);
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => {
+        win.dispatchEvent(new Event('resize'));
+        $win.trigger(GlobalConstant.AG_GRID_RESIZE);
+      }, delay);
+    });
+  };
+
   constructor(
     public groupsService: GroupsService,
     private quickFilterService: QuickFilterService,
@@ -96,6 +109,7 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit {
     ];
     if (!TAB_VISIBLE_MATRIX[this.groupsService.activeTabIndex])
       this.groupsService.activeTabIndex = 0;
+    this.triggerGridResize();
   }
 
   isIncludingGroundRule = () => {
@@ -147,6 +161,7 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit {
 
   activateTab = event => {
     this.groupsService.activeTabIndex = event.index;
+    this.triggerGridResize();
   };
 
   getServiceName = (name: string) => {

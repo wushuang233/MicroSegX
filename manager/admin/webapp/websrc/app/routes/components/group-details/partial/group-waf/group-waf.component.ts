@@ -43,6 +43,19 @@ export class GroupWafComponent implements OnInit, OnChanges {
   isWriteWafAuthorized: boolean;
   CFG_TYPE = GlobalConstant.CFG_TYPE;
 
+  private scheduleGridFit = (api?: GridApi) => {
+    [0, 120, 360, 900].forEach(delay => {
+      setTimeout(() => {
+        try {
+          api?.sizeColumnsToFit();
+        } catch (error) {}
+        try {
+          api?.resetRowHeights?.();
+        } catch (error) {}
+      }, delay);
+    });
+  };
+
   constructor(
     private groupsService: GroupsService,
     private dialog: MatDialog,
@@ -62,26 +75,18 @@ export class GroupWafComponent implements OnInit, OnChanges {
       if (params && params.api) {
         this.gridApi = params.api;
       }
-      setTimeout(() => {
-        if (params && params.api) {
-          if (this.useQuickFilterService) {
-            this.quickFilterService.textInput$.subscribe((value: string) => {
-              this.quickFilterService.onFilterChange(
-                value,
-                this.gridOptions4GroupWafSensors,
-                this.gridApi
-              );
-            });
-          }
-          params.api.sizeColumnsToFit();
-        }
-      }, 300);
+      if (this.useQuickFilterService) {
+        this.quickFilterService.textInput$.subscribe((value: string) => {
+          this.quickFilterService.onFilterChange(
+            value,
+            this.gridOptions4GroupWafSensors,
+            this.gridApi
+          );
+        });
+      }
+      this.scheduleGridFit(params?.api);
       $win.on(GlobalConstant.AG_GRID_RESIZE, () => {
-        setTimeout(() => {
-          if (params && params.api) {
-            params.api.sizeColumnsToFit();
-          }
-        }, 100);
+        this.scheduleGridFit(params?.api);
       });
     };
     this.gridOptions4GroupWafSensors.onSelectionChanged = () => {
@@ -131,7 +136,8 @@ export class GroupWafComponent implements OnInit, OnChanges {
   openEditGroupSensorModal = (warning = '') => {
     setTimeout(() => {
       const addEditDialogRef = this.dialog.open(GroupWafConfigModalComponent, {
-        width: '80%',
+        width: '920px',
+        maxWidth: 'calc(100vw - 48px)',
         data: {
           configuredSensors: this.groupWafSensors,
           groupName: this.groupName,

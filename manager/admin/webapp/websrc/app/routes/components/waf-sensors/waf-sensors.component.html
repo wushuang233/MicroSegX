@@ -1,11 +1,11 @@
-<div class="screen-area">
+<div class="screen-area waf-page">
   <div
     *ngIf="source !== navSource['FED_POLICY']"
-    class="d-flex justify-content-between align-items-center">
+    class="waf-page__header d-flex justify-content-between align-items-center">
     <h1 class="font-weight-light">
       {{ 'sidebar.nav.WAF_SENSORS' | translate }}
     </h1>
-    <div class="d-flex align-items-center justify-content-end">
+    <div class="waf-sensors-toolbar">
       <button
         mat-button
         aria-label="export WAF SENSORS"
@@ -39,13 +39,15 @@
   <ng-container>
     <app-adjustable-div
       [source]="source"
-      [minHeightOne]="163"
-      [minHeightTwo]="140">
+      [minHeightOne]="190"
+      [minHeightTwo]="260">
       <ng-container *appContainerOne="let height">
-        <mat-card [ngStyle]="{ height: height + 'px' }" class="pt-0">
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex justify-content-start align-items-center">
-              <span class="font-weight-bold text-info">
+        <mat-card
+          [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
+          class="waf-card waf-card--list">
+          <div class="waf-card__toolbar">
+            <div class="waf-card__toolbar-meta">
+              <span class="font-weight-bold text-info waf-card__count">
                 <span *ngIf="filtered">
                   {{ 'enum.FOUND' | translate }}
                   {{ filteredCount }}&nbsp;/
@@ -56,8 +58,10 @@
                 {{ wafSensorsCount }}
               </span>
             </div>
-            <div class="d-flex justify-content-end align-items-center">
-              <div *ngIf="source === navSource['FED_POLICY']">
+            <div class="waf-card__toolbar-actions">
+              <div
+                *ngIf="source === navSource['FED_POLICY']"
+                class="waf-card__toolbar-batch">
                 <button
                   mat-button
                   aria-label="export WAF SENSORS"
@@ -78,14 +82,14 @@
               <button
                 mat-stroked-button
                 aria-label="add sensor"
-                class="me-4"
+                class="waf-card__toolbar-button"
                 (click)="openAddEditWafSensorModal()"
                 *appDisplayControl="'write_waf_rule'">
                 <em class="eos-icons icon-18">add_circle</em>
                 {{ 'admissionControl.INSERT' | translate }}
               </button>
               <app-quick-filter
-                class=""
+                class="waf-card__filter"
                 [gridOptions]="gridOptions4Sensors"
                 [gridApi]="gridApi4Sensors"
                 (filterCountChange)="filterCountChanged($event)"
@@ -93,11 +97,10 @@
               </app-quick-filter>
             </div>
           </div>
-          <div class="clearfix">
+          <div class="waf-card__grid">
             <ag-grid-angular
               id="waf-sensors-grid"
-              style="width: 100%"
-              [ngStyle]="{ height: height - 90 + 'px' }"
+              style="width: 100%; height: 100%"
               class="ag-theme-balham"
               [gridOptions]="gridOptions4Sensors"
               [rowData]="wafSensors"
@@ -107,49 +110,64 @@
         </mat-card>
       </ng-container>
       <ng-container *appContainerTwo="let height">
-        <mat-card [ngStyle]="{ height: height + 'px' }" *ngIf="selectedSensor">
-          <div>
+        <mat-card
+          [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
+          *ngIf="selectedSensor"
+          class="waf-card waf-card--detail">
+          <div class="waf-card__detail-title">
             <label class="panel-text-title mt-sm">
               {{ selectedSensor.name | shortenFromMiddle: 30 }}
             </label>
           </div>
-          <div class="row margin-top-m">
-            <div class="col-sm-3" style="position: relative">
-              <button
-                *ngIf="
-                  !isPredefine &&
-                  isWriteWAFSensorAuthorized &&
-                  ((source !== navSource.FED_POLICY &&
-                    selectedSensor.cfg_type !== CFG_TYPE.FED) ||
-                    (source === navSource.FED_POLICY &&
-                      selectedSensor.cfg_type === CFG_TYPE.FED))
-                "
-                style="position: absolute; z-index: 10; right: 17px; top: 4px"
-                (click)="openAddWafRuleModal()">
-                <em
-                  class="eos-icons icon-18 d-flex justify-content-center align-items-center"
-                  >add</em
-                >
-              </button>
-              <ag-grid-angular
-                id="waf-rules-grid"
-                style="width: 100%"
-                [ngStyle]="{ height: height - 90 + 'px' }"
-                class="ag-theme-balham"
-                [gridOptions]="gridOptions4Rules"
-                [context]="context">
-              </ag-grid-angular>
-            </div>
-            <div class="col-sm-9">
-              <ag-grid-angular
-                id="waf-patterns-grid"
-                style="width: 100%"
-                [ngStyle]="{ height: height - 90 + 'px' }"
-                class="ag-theme-balham"
-                [gridOptions]="gridOptions4Patterns"
-                [context]="context">
-              </ag-grid-angular>
-            </div>
+          <div class="waf-detail-grid">
+            <section
+              class="waf-detail-grid__column waf-detail-grid__column--rules">
+              <div class="waf-detail-grid__header">
+                <span class="waf-detail-grid__title">规则</span>
+                <button
+                  *ngIf="
+                    !isPredefine &&
+                    isWriteWAFSensorAuthorized &&
+                    ((source !== navSource.FED_POLICY &&
+                      selectedSensor.cfg_type !== CFG_TYPE.FED) ||
+                      (source === navSource.FED_POLICY &&
+                        selectedSensor.cfg_type === CFG_TYPE.FED))
+                  "
+                  mat-stroked-button
+                  class="waf-detail-grid__add"
+                  (click)="openAddWafRuleModal()">
+                  <em
+                    class="eos-icons icon-18 d-flex justify-content-center align-items-center"
+                    >add</em
+                  >
+                  新增规则
+                </button>
+              </div>
+              <div class="waf-detail-grid__table">
+                <ag-grid-angular
+                  id="waf-rules-grid"
+                  style="width: 100%; height: 100%"
+                  class="ag-theme-balham"
+                  [gridOptions]="gridOptions4Rules"
+                  [context]="context">
+                </ag-grid-angular>
+              </div>
+            </section>
+            <section
+              class="waf-detail-grid__column waf-detail-grid__column--patterns">
+              <div class="waf-detail-grid__header">
+                <span class="waf-detail-grid__title">规则内容</span>
+              </div>
+              <div class="waf-detail-grid__table">
+                <ag-grid-angular
+                  id="waf-patterns-grid"
+                  style="width: 100%; height: 100%"
+                  class="ag-theme-balham"
+                  [gridOptions]="gridOptions4Patterns"
+                  [context]="context">
+                </ag-grid-angular>
+              </div>
+            </section>
           </div>
         </mat-card>
       </ng-container>

@@ -1,11 +1,12 @@
 <section class="screen-area" id="groups-section">
-  <div class="d-flex flex-row align-items-center justify-content-between">
-    <div class="d-flex">
+  <div
+    class="groups-page__header d-flex flex-row align-items-center justify-content-between">
+    <div class="groups-page__header-main d-flex">
       <h1 class="font-weight-light" id="groups-title">
         {{ 'sidebar.nav.GROUP' | translate }}
       </h1>
       <div
-        class="d-flex flex-column margin-left-m margin-top-s"
+        class="groups-page__header-status d-flex flex-column margin-left-m margin-top-s"
         *ngIf="netServiceStatus !== undefined">
         <div>
           <span class="text-muted">
@@ -42,7 +43,8 @@
         >
       </div>
     </div>
-    <div class="d-flex align-items-center justify-content-end">
+    <div
+      class="groups-page__header-actions d-flex align-items-center justify-content-end">
       <button
         mat-button
         (click)="openImportGroupsDialog()"
@@ -79,11 +81,13 @@
     </div>
   </div>
   <ng-container>
-    <app-adjustable-div [minHeightOne]="163" [minHeightTwo]="140">
+    <app-adjustable-div [minHeightOne]="163" [minHeightTwo]="220">
       <ng-container *appContainerOne="let height">
-        <mat-card [ngStyle]="{ height: height + 'px' }" class="pt-0">
+        <mat-card
+          [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
+          class="groups-page__split-card groups-page__split-card--list">
           <app-groups
-            class="clearfix"
+            class="clearfix groups-page__split-content"
             [source]="navSource"
             [height]="height"
             [isShowingSystemGroups]="isShowingSystemGroups"
@@ -93,10 +97,11 @@
       </ng-container>
       <ng-container *appContainerTwo="let height">
         <mat-card
-          [ngStyle]="{ height: height + 'px' }"
-          *ngIf="groupsView && groupsView.selectedGroups.length > 0">
+          [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
+          *ngIf="groupsView && groupsView.selectedGroups.length > 0"
+          class="groups-page__split-card groups-page__split-card--detail">
           <app-group-details
-            class="clearfix"
+            class="clearfix groups-page__split-content"
             [resizableHeight]="height"
             [selectedGroupName]="groupsView.selectedGroups[0].name"
             [members]="groupsView.selectedGroups[0].members"
@@ -106,9 +111,10 @@
           </app-group-details>
         </mat-card>
         <mat-card
-          [ngStyle]="{ height: height + 'px' }"
-          *ngIf="groupsView && groupsView.selectedGroups.length === 0">
-          <mat-card-content>
+          [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
+          *ngIf="groupsView && groupsView.selectedGroups.length === 0"
+          class="groups-page__split-card groups-page__split-card--detail">
+          <mat-card-content class="groups-page__empty-state">
             <div class="hint-info">
               <em class="eos-icons hint-info-signal me-2" aria-hidden="true"
                 >info</em

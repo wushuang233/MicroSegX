@@ -31,7 +31,6 @@ import { SettingsService } from '@services/settings.service';
 import { switchMap, take } from 'rxjs/operators';
 import { FrameService } from '../frame.service';
 import { environment } from '../../../environments/environment';
-import { TranslatorService } from '@core/translator/translator.service';
 
 @Component({
   standalone: false,
@@ -180,7 +179,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public notificationService: NotificationService,
     public multiClusterService: MultiClusterService,
     public translateService: TranslateService,
-    public translatorService: TranslatorService,
     public switchers: SwitchersService,
     public authUtilsService: AuthUtilsService,
     public injector: Injector,
@@ -325,23 +323,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getNavSearchVisible() {
     return this.isNavSearchVisible;
-  }
-
-  get languages(): { code: string; text: string }[] {
-    return this.translatorService.getAvailableLanguages();
-  }
-
-  get activeLanguageLabel(): string {
-    const current = this.translateService.currentLang || 'en';
-    return (
-      this.languages.find(language => language.code === current)?.text ||
-      'English'
-    );
-  }
-
-  setLanguage(lang: string): void {
-    this.translatorService.useLanguage(lang);
-    this.refreshRouteContext();
   }
 
   toggleOffsidebar() {

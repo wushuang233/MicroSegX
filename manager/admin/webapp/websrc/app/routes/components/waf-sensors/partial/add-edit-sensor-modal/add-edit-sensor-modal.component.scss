@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.nv-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+}
+
+[mat-dialog-content] {
+  width: 100%;
+  box-sizing: border-box;
+  max-height: calc(100vh - 240px);
+  overflow-y: auto;
+}
+
+.sensor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sensor-form__grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 12px 16px;
+}
+
+.sensor-form__field,
+[mat-dialog-content] .mat-mdc-form-field {
+  width: 100%;
+}
+
+.sensor-form__field--compact {
+  min-width: 0;
+}
+
+.sensor-form__actions {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media screen and (max-width: 1199px) {
+  .sensor-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

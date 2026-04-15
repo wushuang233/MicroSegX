@@ -1,16 +1,24 @@
-<div (window:resize)="onResize()" [ngStyle]="{ height: gridHeight + 'px' }">
-  <ng-container
-    *ngTemplateOutlet="containerOneTpl; context: containerOneHeightContext">
-  </ng-container>
-  <div class="d-flex justify-content-center align-items-center">
+<div
+  class="adjustable-div"
+  (window:resize)="onResize()"
+  [ngStyle]="{ height: gridHeight + 'px' }">
+  <div class="adjustable-div__pane">
+    <ng-container
+      *ngTemplateOutlet="containerOneTpl; context: containerOneHeightContext">
+    </ng-container>
+  </div>
+  <div
+    class="adjustable-div__handle d-flex justify-content-center align-items-center">
     <i
       (mousedown)="startResize()"
-      class="eos-icons no-select"
+      class="eos-icons no-select adjustable-div__handle-icon"
       style="cursor: row-resize">
       drag_handle
     </i>
   </div>
-  <ng-container
-    *ngTemplateOutlet="containerTwoTpl; context: containerTwoHeightContext">
-  </ng-container>
+  <div class="adjustable-div__pane">
+    <ng-container
+      *ngTemplateOutlet="containerTwoTpl; context: containerTwoHeightContext">
+    </ng-container>
+  </div>
 </div>

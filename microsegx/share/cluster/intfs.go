@@ -731,6 +731,25 @@ func put(key string, value []byte) error {
 	return driver.Put(key, value)
 }
 
+func isTransientKVUnavailableError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "No known Consul servers") ||
+		(strings.Contains(errMsg, "127.0.0.1:8500") && strings.Contains(errMsg, "connect: connection refused"))
+}
+
+func logPutFailure(key string, err error) {
+	entry := log.WithFields(log.Fields{"key": key, "error": err})
+	if isTransientKVUnavailableError(err) {
+		entry.Info("KV store is not ready yet")
+		return
+	}
+	entry.Error("Failed to put key")
+}
+
 func putBinary(key string, value []byte) error {
 	// Logging should be done at the caller code
 	err := put(key, value)
@@ -745,7 +764,7 @@ func putBinary(key string, value []byte) error {
 		}
 	}
 	if err != nil {
-		log.WithFields(log.Fields{"key": key, "error": err}).Error("Failed to put key")
+		logPutFailure(key, err)
 	}
 	return err
 }
@@ -763,7 +782,7 @@ func putRev(key string, value []byte, rev uint64) error {
 		}
 	}
 	if err != nil {
-		log.WithFields(log.Fields{"key": key, "error": err}).Error("Failed to put key")
+		logPutFailure(key, err)
 	}
 	return err
 }

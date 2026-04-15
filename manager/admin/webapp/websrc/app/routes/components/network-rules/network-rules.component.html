@@ -17,7 +17,8 @@
         {{ 'policy.head.TITLE' | translate }}
       </h1>
 
-      <div class="d-flex justify-content-end align-items-center">
+      <div
+        class="network-rules-page-actions d-flex justify-content-end align-items-center">
         <button
           *ngIf="eof && networkRules.length > 1 && !isNetworkRuleDirty()"
           class=""
@@ -55,11 +56,11 @@
       }">
       <div [ngClass]="{ 'panel-body': source === navSource['SELF'] }">
         <div
-          style="height: 71px"
+          class="network-rules-toolbar"
           *ngIf="
             source !== navSource['GROUP'] && source !== navSource['FED_GROUP']
           ">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="network-rules-toolbar__meta">
             <div class="d-flex justify-content-start align-items-center">
               <span class="font-weight-bold text-info">
                 <span *ngIf="filtered">
@@ -72,7 +73,10 @@
                 {{ ruleCount }}
               </span>
             </div>
-            <div class="d-flex justify-content-end align-items-center">
+          </div>
+          <div class="network-rules-toolbar__actions">
+            <div
+              class="network-rules-toolbar__action-row d-flex justify-content-end align-items-center flex-wrap">
               <button
                 *ngIf="
                   selectedNetworkRules.length > 0 &&
@@ -141,13 +145,15 @@
                 {{ 'policy.toolBar.INSERT_TO_TOP' | translate }}
               </button>
               <app-quick-filter
-                class="pull-right"
+                class="network-rules-toolbar__filter"
                 (filterCountChange)="filterCountChanged($event)"
                 [gridOptions]="gridOptions"
                 [gridApi]="gridApi"
                 [showCount]="false">
               </app-quick-filter>
-              <div *ngIf="filteredCount <= 1" style="height: 71px"></div>
+              <div
+                *ngIf="filteredCount <= 1"
+                class="network-rules-toolbar__spacer"></div>
               <ng-container
                 *ngIf="
                   (eof || networkRuleErr) &&

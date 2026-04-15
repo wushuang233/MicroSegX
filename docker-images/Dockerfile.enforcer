@@ -95,16 +95,16 @@ COPY microsegx/agent/nvbench/kubecis_ocp_4_3.rem /usr/local/bin/scripts/rem/
 
 # Copy utils and CIS yamls
 COPY microsegx/agent/nvbench/utils/ /usr/local/bin/scripts/utils/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.6.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.23/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.24/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.8.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-k3s-1.8.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/gke-1.4.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/aks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/eks-1.4.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-rke2-1.8.0/ /usr/local/bin/scripts/cis_yamls/
-COPY microsegx/agent/nvbench/ocp/rh-1.4.0/ /usr/local/bin/scripts/cis_yamls/
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.6.0 /usr/local/bin/scripts/cis_yamls/cis-1.6.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.23 /usr/local/bin/scripts/cis_yamls/cis-1.23
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.24 /usr/local/bin/scripts/cis_yamls/cis-1.24
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-1.8.0 /usr/local/bin/scripts/cis_yamls/cis-1.8.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-k3s-1.8.0 /usr/local/bin/scripts/cis_yamls/cis-k3s-1.8.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/gke-1.4.0 /usr/local/bin/scripts/cis_yamls/gke-1.4.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/aks-1.4.0 /usr/local/bin/scripts/cis_yamls/aks-1.4.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/eks-1.4.0 /usr/local/bin/scripts/cis_yamls/eks-1.4.0
+COPY microsegx/agent/nvbench/kubernetes-cis-benchmark/cis-rke2-1.8.0 /usr/local/bin/scripts/cis_yamls/cis-rke2-1.8.0
+COPY microsegx/agent/nvbench/ocp/rh-1.4.0 /usr/local/bin/scripts/cis_yamls/rh-1.4.0
 
 ARG VERSION=dev
 ARG COMMIT=local

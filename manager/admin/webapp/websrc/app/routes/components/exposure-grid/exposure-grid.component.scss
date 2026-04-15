@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep .exposure-grid-tabs {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep .exposure-grid-tabs .mat-mdc-tab-body-wrapper,
+:host ::ng-deep .exposure-grid-tabs .mat-tab-body-wrapper {
+  min-height: 420px;
+}
+
+:host ::ng-deep .exposure-grid-tabs .mat-mdc-tab-body-content,
+:host ::ng-deep .exposure-grid-tabs .mat-tab-body-content {
+  overflow: visible;
+}
+
+:host ::ng-deep .exposure-grid-tabs .mat-mdc-tab-body,
+:host ::ng-deep .exposure-grid-tabs .mat-tab-body {
+  min-width: 0;
+}

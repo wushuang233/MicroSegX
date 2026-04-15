@@ -62,16 +62,7 @@ export class SwitchersService {
   }
 
   private syncAppMetadata(): void {
-    const activeLanguage =
-      this.translateService.currentLang ||
-      this.translateService.getFallbackLang() ||
-      'en';
-    const isChinese = activeLanguage === 'zh_cn';
-    this.app.name = isChinese
-      ? '面向多云环境的主动微隔离系统'
-      : 'Active Microsegmentation System for Multi-cloud Environments';
-    this.app.description = isChinese
-      ? '多云安全与主动微隔离控制台'
-      : 'Multi-cloud security and active microsegmentation workspace';
+    this.app.name = 'AMS4Muc';
+    this.app.description = '面向多云环境的主动微隔离系统';
   }
 }

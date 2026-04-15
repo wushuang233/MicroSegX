@@ -14,9 +14,9 @@ import (
 	"time"
 	"unsafe"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wushuang233/MicroSegX/microsegx/share"
 	"github.com/wushuang233/MicroSegX/microsegx/share/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 // TODO: The workflow need to be reworked.
@@ -52,7 +52,7 @@ func dpClientUnlock() {
 // With lock hold
 func dpSendMsgExSilent(msg []byte, timeout int, cb DPCallback, param interface{}) int {
 	if dpConn == nil {
-		log.Error("Data path not connected")
+		log.Debug("Data path not connected")
 		if cb != nil && param != nil {
 			cb(nil, param)
 		}

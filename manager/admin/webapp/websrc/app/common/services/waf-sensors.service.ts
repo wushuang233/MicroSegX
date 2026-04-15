@@ -37,14 +37,18 @@ export class WafSensorsService {
         field: 'name',
         headerCheckboxSelection: true,
         headerCheckboxSelectionFilteredOnly: true,
-        width: 100,
-        minWidth: 100,
+        minWidth: 180,
+        flex: 1.1,
+        wrapText: true,
+        autoHeight: true,
       },
       {
         headerName: this.translate.instant('waf.gridHeader.COMMENT'),
         field: 'comment',
-        width: 420,
-        minWidth: 420,
+        minWidth: 220,
+        flex: 1.5,
+        wrapText: true,
+        autoHeight: true,
       },
       {
         headerName: this.translate.instant('waf.gridHeader.GROUPS'),
@@ -58,7 +62,10 @@ export class WafSensorsService {
           }
           return '';
         },
-        width: 200,
+        minWidth: 220,
+        flex: 1.35,
+        wrapText: true,
+        autoHeight: true,
       },
       {
         headerName: this.translate.instant('admissionControl.TYPE'),
@@ -81,13 +88,14 @@ export class WafSensorsService {
         maxWidth: 110,
       },
       {
+        headerName: '操作',
         cellClass: 'grid-right-align',
         sortable: false,
         cellRenderer: SensorActionButtonsComponent,
         hide: !isWriteWAFSensorAuthorized,
-        width: 60,
-        minWidth: 60,
-        maxWidth: 60,
+        width: 92,
+        minWidth: 92,
+        maxWidth: 92,
       },
     ];
 
@@ -107,17 +115,20 @@ export class WafSensorsService {
       {
         headerName: this.translate.instant('waf.gridHeader.PATTERN_NAME'),
         field: 'name',
-        width: 150,
-        minWidth: 120,
+        minWidth: 220,
+        flex: 1,
+        wrapText: true,
+        autoHeight: true,
       },
       {
+        headerName: '操作',
         cellClass: 'grid-right-align',
         sortable: false,
         cellRenderer: RuleActionButtonsComponent,
         hide: !isWriteWAFSensorAuthorized,
-        width: 60,
-        minWidth: 60,
-        maxWidth: 60,
+        width: 92,
+        minWidth: 92,
+        maxWidth: 92,
       },
     ];
 
@@ -133,9 +144,9 @@ export class WafSensorsService {
           }
           return '';
         },
-        width: 120,
-        maxWidth: 120,
-        minWidth: 120,
+        width: 118,
+        maxWidth: 118,
+        minWidth: 118,
       },
       {
         headerName: this.translate.instant('waf.patternGrid.PATTERN'),
@@ -150,26 +161,28 @@ export class WafSensorsService {
           return '';
         },
         sortable: false,
-        width: 450,
-        minWidth: 350,
+        minWidth: 320,
+        flex: 1,
+        wrapText: true,
+        autoHeight: true,
       },
       {
         headerName: this.translate.instant('waf.patternGrid.CONTEXT'),
         field: 'context',
-        width: 100,
-        maxWidth: 100,
-        minWidth: 100,
+        width: 120,
+        maxWidth: 120,
+        minWidth: 120,
       },
     ];
 
     const editPatternColumn = [
       {
-        headerName: '',
+        headerName: '操作',
         cellRenderer: PatternActionButtonsComponent,
         hide: !isWriteWAFSensorAuthorized,
-        width: 30,
-        maxWidth: 30,
-        minWidth: 30,
+        width: 72,
+        maxWidth: 72,
+        minWidth: 72,
       },
     ];
 
@@ -190,6 +203,15 @@ export class WafSensorsService {
     };
 
     grids.gridOptions.rowSelection = 'multiple';
+    [
+      grids.gridOptions,
+      grids.gridOptions4Rules,
+      grids.gridOptions4Patterns,
+      grids.gridOptions4EditPatterns,
+    ].forEach(grid => {
+      grid.headerHeight = 38;
+      grid.rowHeight = 40;
+    });
 
     grids.gridOptions.rowClassRules = {
       'disabled-row': params => {

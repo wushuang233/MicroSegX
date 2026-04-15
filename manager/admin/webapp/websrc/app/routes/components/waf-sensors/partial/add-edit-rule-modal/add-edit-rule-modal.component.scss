@@ -1,0 +1,121 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.nv-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+}
+
+[mat-dialog-content] {
+  width: 100%;
+  box-sizing: border-box;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.rule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rule-form__grid {
+  display: grid;
+  gap: 12px 16px;
+}
+
+.rule-form__grid--meta {
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+}
+
+.rule-form__grid--name {
+  grid-template-columns: 1fr;
+}
+
+.rule-form__field,
+[mat-dialog-content] .mat-mdc-form-field {
+  width: 100%;
+}
+
+.rule-form__field--compact {
+  min-width: 0;
+}
+
+.rule-pattern-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rule-pattern-editor__fields {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 0.5fr)
+    minmax(0, 1.6fr)
+    minmax(140px, 0.6fr)
+    auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.rule-form__field--operator,
+.rule-form__field--context {
+  min-width: 0;
+}
+
+.rule-pattern-editor__pattern {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  min-width: 0;
+  align-items: start;
+}
+
+.rule-pattern-editor__test-button,
+.rule-pattern-editor__add-button {
+  min-width: 72px;
+  min-height: 42px;
+  align-self: center;
+}
+
+.rule-pattern-editor__test-area {
+  width: 100%;
+}
+
+.rule-pattern-editor__grid {
+  display: grid;
+  gap: 10px;
+}
+
+.rule-pattern-editor__error {
+  padding: 0 2px;
+}
+
+.rule-form__actions {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep #waf-pattern-edit-grid .ag-root-wrapper {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+}
+
+@media screen and (max-width: 1199px) {
+  .rule-form__grid--meta,
+  .rule-form__grid--name,
+  .rule-pattern-editor__fields,
+  .rule-pattern-editor__pattern {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-pattern-editor__test-button,
+  .rule-pattern-editor__add-button {
+    width: 100%;
+  }
+}

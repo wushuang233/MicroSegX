@@ -1,162 +1,141 @@
 const DASHBOARD = {
-  text: 'Dashboard',
+  text: '总览',
   translate: 'sidebar.nav.DASHBOARD',
   link: '/dashboard',
   icon: 'performance',
 };
 const NETWORK_ACTIVITY = {
-  text: 'Network Activity',
+  text: '网络活动',
   translate: 'sidebar.nav.NETWORK_ACTIVITY',
   link: '/graph',
   icon: 'neural_network',
 };
 const MICROSEGX = {
-  text: 'MicroSegX',
-  translate: 'sidebar.nav.MICROSEGX',
+  text: '端口管理',
+  translate: 'sidebar.nav.PORT_EXPOSURE',
   icon: 'security',
-  submenu: [
-    {
-      text: 'Port Exposure',
-      translate: 'sidebar.nav.PORT_EXPOSURE',
-      link: '/microsegx/port-exposure',
-    },
-    {
-      text: 'Zero Trust',
-      translate: 'sidebar.nav.ZITI_FABRIC',
-      link: '/microsegx/ziti',
-    },
-  ],
+  link: '/microsegx/port-exposure',
 };
 const ASSETS = {
-  text: 'Assets',
+  text: '资产',
   translate: 'sidebar.nav.RESOURCE',
   icon: 'products',
   submenu: [
     {
-      text: 'Platform',
+      text: '平台',
       translate: 'scan.PLATFORM',
       link: '/platforms',
     },
     {
-      text: 'Namespaces',
+      text: '命名空间',
       translate: 'sidebar.nav.NAMESPACES',
       link: '/domains',
     },
     {
-      text: 'Nodes',
+      text: '节点',
       translate: 'sidebar.nav.NODES',
       link: '/hosts',
     },
     {
-      text: 'Containers',
+      text: '容器',
       translate: 'sidebar.nav.CONTAINERS',
       link: '/workloads',
     },
     {
-      text: 'Registries',
+      text: '镜像仓',
       translate: 'sidebar.nav.REG_SCAN',
       link: '/regScan',
     },
     {
-      text: 'Sigstore Verifiers',
-      translate: 'sidebar.nav.SIGSTORE_VERIFIERS',
-      link: '/signature-verifiers',
-    },
-    {
-      text: 'System Components',
+      text: '系统组件',
       translate: 'sidebar.nav.SYSTEM_COMPONENTS',
       link: '/controllers',
     },
   ],
 };
 const POLICY = {
-  text: 'Policy',
+  text: '策略',
   translate: 'sidebar.nav.SECURITY',
   icon: 'policy',
   submenu: [
     {
-      text: 'Admission Control',
+      text: '准入控制',
       translate: 'sidebar.nav.ADMISSION_CONTROL',
       link: '/admission-control',
     },
     {
-      text: 'Groups',
+      text: '分组',
       translate: 'sidebar.nav.GROUP',
       link: '/group',
     },
     {
-      text: 'Network Rules',
+      text: '网络规则',
       translate: 'sidebar.nav.POLICY',
       link: '/policy',
     },
     {
-      text: 'Response Rules',
+      text: '响应规则',
       translate: 'sidebar.nav.RESPONSE_POLICY',
       link: '/response-policy',
     },
     {
-      text: 'DLP Sensors',
-      translate: 'sidebar.nav.DLP_SENSORS',
-      link: '/dlp-sensors',
-    },
-    {
-      text: 'WAF Sensors',
+      text: 'WAF 传感器',
       translate: 'sidebar.nav.WAF_SENSORS',
       link: '/waf-sensors',
     },
   ],
 };
 const SECURITY_RISKS = {
-  text: 'Security Risks',
+  text: '风险治理',
   translate: 'sidebar.nav.RISK',
   icon: 'critical_bug',
   submenu: [
     {
-      text: 'Vulnerabilities',
+      text: '漏洞',
       translate: 'sidebar.nav.SCAN',
       link: '/scan',
     },
     {
-      text: 'Vulnerability Profile',
+      text: '漏洞档案',
       translate: 'cveProfile.TITLE',
       link: '/cveProfile',
     },
     {
-      text: 'Compliance',
+      text: '合规',
       translate: 'sidebar.nav.BENCH',
       link: '/bench',
     },
     {
-      text: 'Compliance Profile',
+      text: '合规档案',
       translate: 'cis.COMPLIANCE_PROFILE',
       link: '/cisProfile',
     },
   ],
 };
 const NOTIFICATIONS = {
-  text: 'Notifications',
+  text: '通知',
   translate: 'sidebar.nav.NOTIFICATIONS',
   icon: 'notifications_none',
   submenu: [
     {
-      text: 'Security Events',
+      text: '安全事件',
       translate: 'sidebar.nav.SECURITY_EVENT',
       link: '/security-event',
     },
     {
-      text: 'Risk Reports',
+      text: '风险报告',
       translate: 'sidebar.nav.AUDIT',
       link: '/audit',
     },
     {
-      text: 'Events',
+      text: '事件',
       translate: 'sidebar.nav.EVENT',
       link: '/event',
     },
   ],
 };
 const SETTINGS = {
-  text: 'Settings',
+  text: '设置',
   translate: 'sidebar.nav.SETTING',
   link: '/settings',
   icon: 'settings_suggest',
@@ -168,7 +147,6 @@ export const menu = [
   MICROSEGX,
   ASSETS,
   POLICY,
-  SECURITY_RISKS,
   NOTIFICATIONS,
   SETTINGS,
 ];

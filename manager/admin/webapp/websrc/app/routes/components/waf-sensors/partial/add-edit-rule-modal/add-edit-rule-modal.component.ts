@@ -168,9 +168,6 @@ export class AddEditRuleModalComponent implements OnInit {
         rules: this.data.sensor.rules,
       },
     };
-
-    console.log('this.data.index4Sensor', this.data.index4Sensor);
-
     this.wafSensorsService
       .updateWafSensorData(payload, GlobalConstant.MODAL_OP.EDIT)
       .subscribe(

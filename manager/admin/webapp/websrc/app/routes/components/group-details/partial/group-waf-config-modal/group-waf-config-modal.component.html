@@ -1,9 +1,9 @@
-<div class="nv-dialog">
-  <div class="d-flex align-items-center">
+<div class="nv-dialog group-waf-config">
+  <div class="group-waf-config__header d-flex align-items-center">
     <h4 mat-dialog-title class="mb-1">
       {{ 'group.waf.setting.TITLE' | translate }}
     </h4>
-    <section class="ms-4 status-section">
+    <section class="group-waf-config__status ms-4 status-section">
       <mat-slide-toggle
         class="me-2"
         id="group-waf-sensor-status-toggle"
@@ -21,16 +21,21 @@
         </span>
       </mat-slide-toggle>
     </section>
-    <div class="ms-auto align-items-center mb-1">
-      <button mat-icon-button aria-label="close">
-        <i class="eos-icons" (click)="onCancel()">close</i>
+    <div class="group-waf-config__close ms-auto align-items-center mb-1">
+      <button
+        type="button"
+        mat-icon-button
+        aria-label="close"
+        (click)="onCancel()">
+        <i class="eos-icons">close</i>
       </button>
     </div>
   </div>
   <hr class="fancy mb-0" />
-  <div class="clearfix">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="font-weight-bold text-info">
+  <div class="clearfix group-waf-config__body">
+    <div
+      class="group-waf-config__toolbar d-flex justify-content-between align-items-center">
+      <div class="font-weight-bold text-info group-waf-config__count">
         <span *ngIf="filtered">
           {{ 'enum.FOUND' | translate }}
           {{ filteredCount }}&nbsp;/
@@ -45,18 +50,20 @@
         [showCount]="false">
       </app-quick-filter>
     </div>
-    <ag-grid-angular
-      #groupWafSensorOptionGrid
-      id="group-waf-sensor-option-grid"
-      style="width: 100%; height: 400px"
-      class="ag-theme-balham"
-      [gridOptions]="gridOptions4WafSensorOption"
-      [context]="context">
-    </ag-grid-angular>
+    <div class="group-waf-config__grid">
+      <ag-grid-angular
+        #groupWafSensorOptionGrid
+        id="group-waf-sensor-option-grid"
+        style="width: 100%; height: 400px"
+        class="ag-theme-balham"
+        [gridOptions]="gridOptions4WafSensorOption"
+        [context]="context">
+      </ag-grid-angular>
+    </div>
   </div>
   <div
     mat-dialog-actions
-    class="d-flex justify-content-end align-content-center">
+    class="group-waf-config__actions d-flex justify-content-end align-content-center">
     <app-loading-button
       [appearance]="'mat-raised-button'"
       [color]="'primary'"

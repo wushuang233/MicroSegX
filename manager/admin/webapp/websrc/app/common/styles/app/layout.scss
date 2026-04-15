@@ -40,6 +40,7 @@ body {
   .left-side-container {
     position: absolute;
     width: $left-side-wd;
+    overflow: hidden;
 
     top: 0;
     left: 0;
@@ -52,7 +53,9 @@ body {
     .left-side {
       padding-top: $navbar-hg + 12px;
       width: $left-side-wd;
-      overflow: visible;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
     }
 
     .sidebar-floating {
@@ -87,6 +90,12 @@ body {
       margin: 0;
     }
   }
+}
+
+.footer-container:empty {
+  display: none;
+  height: 0;
+  padding: 0;
 }
 
 .modal-open .nv-frame .section-container {
@@ -157,19 +166,24 @@ body {
 
   .nv-frame {
     .left-side-container {
-      bottom: auto;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      height: 100vh;
 
       .left-side {
-        position: sticky;
-        top: 16px;
-        height: auto;
-        max-height: calc(100vh - 32px);
-        padding-top: 0;
+        position: relative;
+        top: 0;
+        height: 100%;
+        max-height: none;
+        padding-top: $navbar-hg + 12px;
       }
     }
 
     .section-container {
       margin-left: $left-side-wd;
+      min-height: 100vh;
     }
 
     .footer-container {
@@ -433,23 +447,49 @@ body {
       width: 100%;
       z-index: $z-index-main-section + 6;
     }
-    .left-side-container,
+    .left-side-container {
+      position: fixed;
+    }
+
     .offsidebar {
       position: absolute;
     }
 
     .left-side-container {
-      top: $navbar-hg + 8px;
-      height: auto;
+      top: 0;
+      height: 100vh;
       min-height: 0;
 
       .left-side {
-        top: 12px;
-        max-height: calc(100vh - 24px);
+        top: 0;
+        max-height: none;
+        padding-top: $navbar-hg + 12px;
       }
     }
     .section-container {
       margin-top: 0;
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .nv-frame {
+      .topnavbar-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(244, 249, 255, 0.96) 0%,
+          rgba(244, 249, 255, 0.82) 78%,
+          rgba(244, 249, 255, 0) 100%
+        );
+        backdrop-filter: blur(10px);
+      }
+
+      .section-container {
+        margin-top: calc(#{$navbar-hg} + 36px);
+      }
     }
   }
 }

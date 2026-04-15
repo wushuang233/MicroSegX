@@ -18,9 +18,9 @@
   </div>
   <hr class="fancy" />
   <div mat-dialog-content>
-    <form [formGroup]="addEditSensorForm">
-      <div class="row">
-        <mat-form-field class="col-sm-3">
+    <form [formGroup]="addEditSensorForm" class="sensor-form">
+      <div class="sensor-form__grid">
+        <mat-form-field class="sensor-form__field sensor-form__field--compact">
           <mat-label>{{ 'waf.sensorModal.SENSOR_NAME' | translate }}</mat-label>
           <input
             type="text"
@@ -37,7 +37,7 @@
             {{ 'dlp.msg.NAME_VALID' | translate }} "fed."
           </mat-error>
         </mat-form-field>
-        <mat-form-field class="col-sm-9">
+        <mat-form-field class="sensor-form__field">
           <mat-label>{{ 'waf.sensorModal.COMMENT' | translate }}</mat-label>
           <input
             type="text"
@@ -46,8 +46,10 @@
             [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
         </mat-form-field>
       </div>
-      <div class="d-flex justify-content-end align-items-center mt-2">
+      <div
+        class="sensor-form__actions d-flex justify-content-end align-items-center mt-2">
         <button
+          type="button"
           mat-stroked-button
           aria-label="cancel"
           class="me-2"

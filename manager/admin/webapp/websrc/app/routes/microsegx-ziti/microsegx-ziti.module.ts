@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { NvCommonModule } from '@common/nvCommon.module';
 import { MicrosegxZitiComponent } from './microsegx-ziti.component';
+import { MicrosegxZitiSharedModule } from './microsegx-ziti-shared.module';
 
 const routes: Routes = [
   {
@@ -11,8 +11,6 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [MicrosegxZitiComponent],
-  imports: [RouterModule.forChild(routes), NvCommonModule],
-  exports: [MicrosegxZitiComponent],
+  imports: [RouterModule.forChild(routes), MicrosegxZitiSharedModule],
 })
 export class MicrosegxZitiModule {}

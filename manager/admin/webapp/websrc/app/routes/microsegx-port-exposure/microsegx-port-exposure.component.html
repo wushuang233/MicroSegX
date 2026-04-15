@@ -49,7 +49,7 @@
             type="button"
             class="mode-switch__button"
             [class.is-active]="viewMode === 'exposure'"
-            (click)="viewMode = 'exposure'">
+            (click)="setViewMode('exposure')">
             <mat-icon>lan</mat-icon>
             <span>{{
               'MICROSEGX.PORT_EXPOSURE.VIEW_EXPOSURE' | translate
@@ -60,7 +60,7 @@
             type="button"
             class="mode-switch__button"
             [class.is-active]="viewMode === 'services'"
-            (click)="viewMode = 'services'">
+            (click)="setViewMode('services')">
             <mat-icon>shield</mat-icon>
             <span>{{
               'MICROSEGX.PORT_EXPOSURE.VIEW_SERVICES' | translate
@@ -911,6 +911,105 @@
         </div>
       </mat-card>
     </ng-container>
+
+    <section class="auxiliary-workspace">
+      <mat-card class="auxiliary-workspace__card">
+        <div class="auxiliary-workspace__header">
+          <div>
+            <span class="auxiliary-workspace__eyebrow">Workspace</span>
+            <h2>附加工作区</h2>
+            <p>
+              主视图固定用于端口暴露与服务治理，零信任放在这里作为补充能力，不再覆盖扫描页面。
+            </p>
+          </div>
+
+          <div class="auxiliary-workspace__tabs" role="tablist">
+            <button
+              type="button"
+              class="auxiliary-workspace__tab"
+              [class.is-active]="auxiliaryWorkspaceTab === 'summary'"
+              (click)="setAuxiliaryWorkspaceTab('summary')">
+              <mat-icon>radar</mat-icon>
+              <span>扫描摘要</span>
+            </button>
+
+            <button
+              type="button"
+              class="auxiliary-workspace__tab"
+              [class.is-active]="auxiliaryWorkspaceTab === 'ziti'"
+              (click)="setAuxiliaryWorkspaceTab('ziti')">
+              <mat-icon>verified_user</mat-icon>
+              <span>{{ 'MICROSEGX.ZITI.TITLE' | translate }}</span>
+            </button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="auxiliaryWorkspaceTab === 'summary'">
+          <div class="auxiliary-summary">
+            <div class="auxiliary-summary__stats">
+              <div class="auxiliary-summary__stat">
+                <span>{{
+                  'MICROSEGX.PORT_EXPOSURE.MANAGEABLE_OPEN_PORTS' | translate
+                }}</span>
+                <strong>{{ manageableOpenPortCount }}</strong>
+              </div>
+              <div class="auxiliary-summary__stat">
+                <span>{{
+                  'MICROSEGX.PORT_EXPOSURE.INFRASTRUCTURE_EXPOSURES' | translate
+                }}</span>
+                <strong>{{ infrastructureExposurePortCount }}</strong>
+              </div>
+              <div class="auxiliary-summary__stat">
+                <span>{{
+                  'MICROSEGX.PORT_EXPOSURE.NODE_LISTENERS' | translate
+                }}</span>
+                <strong>{{ nodeListenerPortCount }}</strong>
+              </div>
+              <div class="auxiliary-summary__stat">
+                <span>{{
+                  'MICROSEGX.PORT_EXPOSURE.VISIBLE_SERVICES' | translate
+                }}</span>
+                <strong>{{ serviceControls.length }}</strong>
+              </div>
+            </div>
+
+            <div
+              *ngIf="nodeExposureSummaries.length > 0"
+              class="auxiliary-summary__nodes">
+              <article
+                *ngFor="let node of nodeExposureSummaries | slice: 0 : 4"
+                class="auxiliary-summary__node">
+                <div>
+                  <h3>{{ node.name }}</h3>
+                  <p>开放端口 {{ node.totalOpenCount }}</p>
+                </div>
+
+                <div class="auxiliary-summary__node-tags">
+                  <span>
+                    {{ 'MICROSEGX.PORT_EXPOSURE.SCOPE_MANAGEABLE' | translate }}
+                    {{ node.businessCount }}
+                  </span>
+                  <span>
+                    {{ 'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM' | translate }}
+                    {{ node.platformCount }}
+                  </span>
+                  <span>
+                    {{ 'MICROSEGX.PORT_EXPOSURE.SCOPE_NODE' | translate }}
+                    {{ node.nodeCount }}
+                  </span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="auxiliaryWorkspaceTab === 'ziti'">
+          <div class="auxiliary-ziti">
+            <app-microsegx-ziti></app-microsegx-ziti>
+          </div>
+        </ng-container>
+      </mat-card>
+    </section>
   </ng-container>
 </div>
 

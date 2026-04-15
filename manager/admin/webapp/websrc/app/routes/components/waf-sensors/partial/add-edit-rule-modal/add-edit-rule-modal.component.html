@@ -18,19 +18,19 @@
   </div>
   <hr class="fancy" />
   <div mat-dialog-content>
-    <form [formGroup]="addEditRuleForm">
-      <div class="row">
-        <mat-form-field class="col-sm-3">
+    <form [formGroup]="addEditRuleForm" class="rule-form">
+      <div class="rule-form__grid rule-form__grid--meta">
+        <mat-form-field class="rule-form__field rule-form__field--compact">
           <mat-label>{{ 'waf.sensorModal.SENSOR_NAME' | translate }}</mat-label>
           <input type="text" matInput formControlName="sensorName" readonly />
         </mat-form-field>
-        <mat-form-field class="col-sm-9">
+        <mat-form-field class="rule-form__field">
           <mat-label>{{ 'waf.sensorModal.COMMENT' | translate }}</mat-label>
           <input type="text" matInput formControlName="comment" readonly />
         </mat-form-field>
       </div>
-      <div class="row">
-        <mat-form-field class="col-sm-3">
+      <div class="rule-form__grid rule-form__grid--name">
+        <mat-form-field class="rule-form__field rule-form__field--compact">
           <mat-label>{{ 'waf.ruleModal.PATTERN_NAME' | translate }}</mat-label>
           <input
             type="text"
@@ -41,76 +41,68 @@
         </mat-form-field>
       </div>
       <hr class="solid margin-top-s margin-bottom-s" />
-      <div class="row">
-        <mat-form-field class="col-sm-2">
-          <mat-label>{{
-            'waf.patternGrid.LOGIC_IS_NOT' | translate
-          }}</mat-label>
-          <mat-select
-            required
-            [(ngModel)]="pattern.op"
-            [ngModelOptions]="{ standalone: true }"
-            [(value)]="pattern.op">
-            <mat-option
-              *ngFor="let operator of operators"
-              [value]="operator.value">
-              {{ operator.viewValue }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field class="col-sm-7">
-          <mat-label>{{ 'waf.ruleModal.PATTERN' | translate }}</mat-label>
-          <input
-            style="position: relative; padding-right: 60px"
-            matInput
-            required
-            type="text"
-            [(ngModel)]="pattern.value"
-            [ngModelOptions]="{ standalone: true }"
-            (keyup)="initTestArea(pattern.value)"
-            [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+      <div class="rule-pattern-editor">
+        <div class="rule-pattern-editor__fields">
+          <mat-form-field class="rule-form__field rule-form__field--operator">
+            <mat-label>{{
+              'waf.patternGrid.LOGIC_IS_NOT' | translate
+            }}</mat-label>
+            <mat-select
+              required
+              [(ngModel)]="pattern.op"
+              [ngModelOptions]="{ standalone: true }"
+              [(value)]="pattern.op">
+              <mat-option
+                *ngFor="let operator of operators"
+                [value]="operator.value">
+                {{ operator.viewValue }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="rule-pattern-editor__pattern">
+            <mat-form-field class="rule-form__field">
+              <mat-label>{{ 'waf.ruleModal.PATTERN' | translate }}</mat-label>
+              <input
+                matInput
+                required
+                type="text"
+                [(ngModel)]="pattern.value"
+                [ngModelOptions]="{ standalone: true }"
+                (keyup)="initTestArea(pattern.value)"
+                [attr.maxlength]="'general.FILTER_MAX_LEN' | translate" />
+            </mat-form-field>
+            <button
+              type="button"
+              class="primary-button hightlighted-button rule-pattern-editor__test-button"
+              (click)="isShowingTestPattern = true"
+              [disabled]="!pattern.value">
+              {{ 'waf.sensorModal.TEST_BTN' | translate }}
+            </button>
+          </div>
+          <mat-form-field class="rule-form__field rule-form__field--context">
+            <mat-label>{{ 'waf.patternGrid.CONTEXT' | translate }}</mat-label>
+            <mat-select
+              matNativeControl
+              required
+              [(ngModel)]="pattern.context"
+              [ngModelOptions]="{ standalone: true }"
+              [(value)]="pattern.context">
+              <mat-option *ngFor="let context of contexts" [value]="context">
+                {{ context }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
           <button
-            aria-hidden="true"
-            class="primary-button hightlighted-button"
-            style="
-              position: absolute;
-              right: 0;
-              top: 10px;
-              line-height: 21px;
-              z-index: 10;
-              min-height: 24px;
-              min-width: 60px;
-            "
-            aria-hidden="true"
-            (click)="isShowingTestPattern = true"
-            [disabled]="!pattern.value">
-            {{ 'waf.sensorModal.TEST_BTN' | translate }}
-          </button>
-        </mat-form-field>
-        <mat-form-field class="col-sm-2">
-          <mat-label>{{ 'waf.patternGrid.CONTEXT' | translate }}</mat-label>
-          <mat-select
-            matNativeControl
-            required
-            [(ngModel)]="pattern.context"
-            [ngModelOptions]="{ standalone: true }"
-            [(value)]="pattern.context">
-            <mat-option *ngFor="let context of contexts" [value]="context">
-              {{ context }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <div class="col-sm-1">
-          <button
-            class="primary-button hightlighted-button pull-right"
-            style="margin-top: 20px"
+            type="button"
+            class="primary-button hightlighted-button rule-pattern-editor__add-button"
             (click)="addPattern()">
             <em class="eos-icons icon-18">add</em>
           </button>
         </div>
-      </div>
-      <div class="row" *ngIf="isShowingTestPattern">
-        <mat-form-field class="col-sm-12" appearance="outline">
+        <mat-form-field
+          *ngIf="isShowingTestPattern"
+          class="rule-form__field rule-pattern-editor__test-area"
+          appearance="outline">
           <mat-label>
             {{ 'waf.ruleModal.TEST' | translate }}
           </mat-label>
@@ -130,21 +122,25 @@
           </mat-hint>
         </mat-form-field>
       </div>
-      <div class="row">
+      <div class="rule-pattern-editor__grid">
         <ag-grid-angular
           #wafPatternEditGrid
           id="waf-pattern-edit-grid"
-          style="width: 100%; height: 200px"
-          class="ag-theme-balham col-sm-12"
+          style="width: 100%; height: 220px"
+          class="ag-theme-balham"
           [gridOptions]="gridOptions4EditPatterns"
           [context]="context">
         </ag-grid-angular>
-        <div *ngIf="patternErrorMsg" class="col-sm-12 text-danger">
+        <div
+          *ngIf="patternErrorMsg"
+          class="rule-pattern-editor__error text-danger">
           {{ patternErrorMsg }}
         </div>
       </div>
-      <div class="d-flex justify-content-end align-items-center mt-2">
+      <div
+        class="rule-form__actions d-flex justify-content-end align-items-center mt-2">
         <button
+          type="button"
           mat-stroked-button
           aria-label="cancel"
           class="me-2"

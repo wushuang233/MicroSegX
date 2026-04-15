@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.adjustable-div {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.adjustable-div__pane {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.adjustable-div__pane > * {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+}
+
+.adjustable-div__handle {
+  min-height: 20px;
+  width: 100%;
+}
+
+.adjustable-div__handle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: rgba(15, 23, 42, 0.5);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.adjustable-div__handle-icon:hover {
+  background: rgba(22, 119, 255, 0.12);
+  color: var(--saas-primary);
+}

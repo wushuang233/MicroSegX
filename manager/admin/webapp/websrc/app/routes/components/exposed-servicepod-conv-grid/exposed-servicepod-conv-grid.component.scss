@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.exposure-conversation-grid {
+  height: 440px;
+  min-height: 360px;
+  width: 100%;
+}
+
+:host ::ng-deep .exposure-conversation-grid .ag-root-wrapper,
+:host ::ng-deep .exposure-conversation-grid .ag-root-wrapper-body,
+:host ::ng-deep .exposure-conversation-grid .ag-root,
+:host ::ng-deep .exposure-conversation-grid .ag-center-cols-viewport {
+  width: 100% !important;
+}
+
+@media screen and (max-width: 767px) {
+  .exposure-conversation-grid {
+    height: 380px;
+    min-height: 320px;
+  }
+}

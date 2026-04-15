@@ -79,24 +79,6 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="user__field ms-3" *ngIf="!data.isEdit">
-        <mat-icon
-          aria-hidden="false"
-          aria-label="Language icon"
-          class="me-3 mb-3 user__icon"
-          >language
-        </mat-icon>
-        <mat-form-field class="w-25 mb-0">
-          <mat-label>{{ 'profile.LOCALE' | translate }}</mat-label>
-          <mat-select
-            (selectionChange)="updateTable()"
-            formControlName="locale">
-            <mat-option *ngFor="let lang of languages" [value]="lang.code">
-              {{ lang.text }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
     </div>
     <div class="user__formGroup" *ngIf="!data.isEdit">
       <app-password-panel [passwordForm]="passwordForm"></app-password-panel>

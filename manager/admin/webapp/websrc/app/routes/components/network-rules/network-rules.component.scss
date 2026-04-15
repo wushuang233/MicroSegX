@@ -1,3 +1,121 @@
 .save-button {
   background-color: #E4F6EE;
 }
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.screen-area {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.network-rules-page-actions {
+  gap: 10px;
+}
+
+:host ::ng-deep .panel {
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: var(--saas-card-shadow);
+}
+
+:host ::ng-deep .panel-body {
+  padding: 18px 20px 20px;
+}
+
+.network-rules-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 71px;
+  padding: 6px 0 14px;
+}
+
+.network-rules-toolbar__meta,
+.network-rules-toolbar__actions {
+  min-width: 0;
+}
+
+.network-rules-toolbar__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+}
+
+.network-rules-toolbar__action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
+}
+
+.network-rules-toolbar__filter {
+  margin-left: auto;
+  min-width: 220px;
+  flex: 0 0 auto;
+}
+
+.network-rules-toolbar__meta .font-weight-bold {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 2px;
+}
+
+.network-rules-toolbar__spacer {
+  width: 1px;
+  min-height: 40px;
+}
+
+:host ::ng-deep .ag-theme-balham {
+  min-width: 0;
+}
+
+:host ::ng-deep #policy-grid {
+  display: block;
+  margin-top: 6px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+:host ::ng-deep #policy-grid .ag-root-wrapper {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+
+:host ::ng-deep .ag-theme-balham .ag-header-cell-label {
+  white-space: normal !important;
+  line-height: 1.45;
+}
+
+:host ::ng-deep .ag-theme-balham .ag-cell-wrapper {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 1199px) {
+  .network-rules-toolbar {
+    flex-direction: column;
+  }
+
+  .network-rules-toolbar__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .network-rules-toolbar__action-row {
+    flex-wrap: wrap;
+  }
+
+  .network-rules-toolbar__filter {
+    margin-left: 0;
+  }
+}

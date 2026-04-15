@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: port-audit-image-importer
+  namespace: port-audit
+spec:
+  restartPolicy: Never
+  nodeName: wushuang-vmware-virtual-platform
+  priorityClassName: system-node-critical
+  tolerations:
+    - operator: Exists
+  containers:
+    - name: importer
+      image: alpine:3.20
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+          ephemeral-storage: 16Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+          ephemeral-storage: 512Mi
+      securityContext:
+        privileged: true
+      command:
+        - /bin/sh
+        - -c
+        - >-
+          /host-bin/ctr -a /run/k3s/containerd/containerd.sock -n k8s.io images import /images/k8s-port-audit-0.2.2.tar
+      volumeMounts:
+        - name: host-bin
+          mountPath: /host-bin
+          readOnly: true
+        - name: k3s-run
+          mountPath: /run/k3s/containerd
+        - name: images
+          mountPath: /images
+          readOnly: true
+  volumes:
+    - name: host-bin
+      hostPath:
+        path: /var/lib/rancher/k3s/data/current/bin
+        type: Directory
+    - name: k3s-run
+      hostPath:
+        path: /run/k3s/containerd
+        type: Directory
+    - name: images
+      hostPath:
+        path: /home/wushuang/MicroSegX/.artifacts
+        type: Directory

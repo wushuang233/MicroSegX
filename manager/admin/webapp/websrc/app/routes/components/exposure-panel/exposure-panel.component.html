@@ -1,5 +1,6 @@
-<mat-card class="margin-bottom-m dashboard-card">
-  <mat-card-title class="d-flex align-items-center justify-content-between">
+<mat-card class="margin-bottom-m dashboard-card exposure-panel-card">
+  <mat-card-title
+    class="d-flex align-items-center justify-content-between exposure-panel-card__title">
     <div class="d-flex align-items-center justify-content-start">
       {{ 'dashboard.body.panel_title.CONTAINER_SEC' | translate }}
       <ng-container *ngIf="isIpMapReady">
@@ -26,18 +27,20 @@
       [instructions]="instructions">
     </app-panel-instruction-curtain>
   </mat-card-title>
-  <mat-card-content class="row" style="display: flex">
-    <app-exposure-chart
-      class="col-sm-4"
-      [ingress]="hierarchicalIngressList"
-      [egress]="hierarchicalEgressList">
-    </app-exposure-chart>
-    <app-exposure-grid
-      class="col-sm-8"
-      [isIpMapReady]="isIpMapReady"
-      [source]="'exposure-panel'"
-      [ingress]="hierarchicalIngressList"
-      [egress]="hierarchicalEgressList">
-    </app-exposure-grid>
+  <mat-card-content class="exposure-panel-card__content">
+    <div class="exposure-panel-card__chart">
+      <app-exposure-chart
+        [ingress]="hierarchicalIngressList"
+        [egress]="hierarchicalEgressList">
+      </app-exposure-chart>
+    </div>
+    <div class="exposure-panel-card__grid">
+      <app-exposure-grid
+        [isIpMapReady]="isIpMapReady"
+        [source]="'exposure-panel'"
+        [ingress]="hierarchicalIngressList"
+        [egress]="hierarchicalEgressList">
+      </app-exposure-grid>
+    </div>
   </mat-card-content>
 </mat-card>

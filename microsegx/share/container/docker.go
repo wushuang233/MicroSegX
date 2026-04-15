@@ -45,6 +45,15 @@ type dockerDriver struct {
 	eventCancel  context.CancelFunc
 }
 
+func isExpectedDockerProbeError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "malformed HTTP response")
+}
+
 func _connect(endpoint string) (*dockerClient.Client, *dockerTypes.Version, *dockerSystem.Info, error) {
 	var ver dockerTypes.Version
 	var info dockerSystem.Info
@@ -63,7 +72,12 @@ func _connect(endpoint string) (*dockerClient.Client, *dockerTypes.Version, *doc
 	}
 
 	if ver, err = client.ServerVersion(context.Background()); err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("Failed to get version")
+		entry := log.WithFields(log.Fields{"error": err, "endpoint": endpoint})
+		if isExpectedDockerProbeError(err) {
+			entry.Debug("Docker probe did not match this socket")
+		} else {
+			entry.Error("Failed to get version")
+		}
 		return client, nil, nil, err
 	}
 

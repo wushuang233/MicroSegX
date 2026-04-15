@@ -1,6 +1,6 @@
 <ng-container [ngSwitch]="activeTab" *ngIf="!isScoreImprovement">
   <ng-container *ngSwitchCase="'member'">
-    <div class="filter" style="position: absolute; right: 20px; top: 5px">
+    <div class="group-details-toolbar group-details-toolbar--filter-only">
       <mat-form-field>
         <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
         <input [formControl]="filter" matInput />
@@ -8,7 +8,7 @@
     </div>
   </ng-container>
   <ng-container *ngSwitchCase="'custom check'">
-    <div class="filter" style="position: absolute; right: 20px; top: 5px">
+    <div class="group-details-toolbar group-details-toolbar--filter-only">
       <mat-form-field>
         <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
         <input [formControl]="filter" matInput />
@@ -16,9 +16,7 @@
     </div>
   </ng-container>
   <ng-container *ngSwitchCase="'process profile rules'">
-    <div
-      style="position: absolute; right: 20px; top: 5px"
-      class="d-flex align-items-center justify-content-end">
+    <div class="group-details-toolbar group-details-toolbar--actions">
       <button
         *ngIf="isWriteGroupAuthorized && cfgType !== CFG_TYPE.FED"
         mat-button
@@ -71,7 +69,7 @@
           </button>
         </div>
       </mat-menu>
-      <div class="filter">
+      <div class="filter group-details-toolbar__filter">
         <mat-form-field>
           <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
           <input [formControl]="filter" matInput />
@@ -80,9 +78,7 @@
     </div>
   </ng-container>
   <ng-container *ngSwitchCase="'file access rules'">
-    <div
-      style="position: absolute; right: 20px; top: 5px"
-      class="d-flex align-items-center justify-content-end">
+    <div class="group-details-toolbar group-details-toolbar--actions">
       <button
         *ngIf="isWriteFileAccessRuleAuthorized || cfgType === CFG_TYPE.GROUND"
         mat-button
@@ -140,85 +136,7 @@
           </button>
         </div>
       </mat-menu>
-      <div class="filter">
-        <mat-form-field>
-          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
-          <input [formControl]="filter" matInput />
-        </mat-form-field>
-      </div>
-    </div>
-  </ng-container>
-  <ng-container *ngSwitchCase="'network rules'">
-    <div class="filter" style="position: absolute; right: 20px; top: 5px">
-      <mat-form-field>
-        <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
-        <input [formControl]="filter" matInput />
-      </mat-form-field>
-    </div>
-  </ng-container>
-  <ng-container *ngSwitchCase="'response rules'">
-    <div class="filter" style="position: absolute; right: 20px; top: 5px">
-      <mat-form-field>
-        <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
-        <input [formControl]="filter" matInput />
-      </mat-form-field>
-    </div>
-  </ng-container>
-  <ng-container *ngSwitchCase="'DLP'">
-    <div
-      *ngIf="isWriteGroupAuthorized && cfgType !== CFG_TYPE.FED"
-      style="position: absolute; right: 20px; top: 5px"
-      class="d-flex align-items-center justify-content-end">
-      <button
-        mat-button
-        class="me-2 mt-1 mb-3"
-        [matMenuTriggerFor]="menu"
-        aria-label="Action menu">
-        <mat-icon>more_vert</mat-icon>
-        {{ 'policy.ACTIONS' | translate }}
-      </button>
-      <mat-menu #menu="matMenu">
-        <button
-          mat-button
-          *ngIf="cfgType !== CFG_TYPE.GROUND && isWriteDlpAuthorized"
-          class="hand"
-          (click)="editGroupSensorModal()">
-          <em class="eos-icons">edit</em>
-          {{ 'group.CONFIG' | translate }}
-        </button>
-      </mat-menu>
-      <div class="filter">
-        <mat-form-field>
-          <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
-          <input [formControl]="filter" matInput />
-        </mat-form-field>
-      </div>
-    </div>
-  </ng-container>
-  <ng-container *ngSwitchCase="'WAF'">
-    <div
-      *ngIf="isWriteGroupAuthorized && cfgType !== CFG_TYPE.FED"
-      style="position: absolute; right: 20px; top: 5px"
-      class="d-flex align-items-center justify-content-end">
-      <button
-        mat-button
-        class="me-2 mt-1 mb-3"
-        [matMenuTriggerFor]="menu"
-        aria-label="Action menu">
-        <mat-icon>more_vert</mat-icon>
-        {{ 'policy.ACTIONS' | translate }}
-      </button>
-      <mat-menu #menu="matMenu">
-        <button
-          mat-button
-          *ngIf="cfgType !== CFG_TYPE.GROUND && isWriteWafAuthorized"
-          class="hand"
-          (click)="editGroupSensorModal()">
-          <em class="eos-icons">edit</em>
-          {{ 'group.CONFIG' | translate }}
-        </button>
-      </mat-menu>
-      <div class="filter">
+      <div class="filter group-details-toolbar__filter">
         <mat-form-field>
           <mat-label>{{ 'enum.FILTER' | translate }}</mat-label>
           <input [formControl]="filter" matInput />
@@ -305,7 +223,7 @@
       *ngIf="groupsService.activeTabIndex === 4"
       [source]="navSource"
       [groupName]="selectedGroupName"
-      [useQuickFilterService]="true"
+      [useQuickFilterService]="false"
       [resizableHeight]="resizableHeight">
     </app-network-rules>
   </mat-tab>
@@ -314,7 +232,7 @@
       *ngIf="groupsService.activeTabIndex === 5"
       [source]="navSource"
       [groupName]="selectedGroupName"
-      [useQuickFilterService]="true"
+      [useQuickFilterService]="false"
       [resizableHeight]="resizableHeight">
     </app-response-rules>
   </mat-tab>
@@ -329,7 +247,7 @@
       [source]="navSource"
       [groupName]="selectedGroupName"
       [cfgType]="cfgType"
-      [useQuickFilterService]="true"
+      [useQuickFilterService]="false"
       [resizableHeight]="resizableHeight">
     </app-group-dlp>
   </mat-tab>
@@ -344,7 +262,7 @@
       [source]="navSource"
       [cfgType]="cfgType"
       [groupName]="selectedGroupName"
-      [useQuickFilterService]="true"
+      [useQuickFilterService]="false"
       [resizableHeight]="resizableHeight">
     </app-group-waf>
   </mat-tab>

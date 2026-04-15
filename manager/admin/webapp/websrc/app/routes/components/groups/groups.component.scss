@@ -1,3 +1,72 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.groups-toolbar {
+  align-items: flex-start !important;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.groups-toolbar__meta {
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.groups-toolbar__actions {
+  flex: 1 1 520px;
+  gap: 10px 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.groups-toolbar__button {
+  min-width: 104px;
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.groups-toolbar__button--wide {
+  min-width: 132px;
+}
+
+.groups-toolbar__checkbox {
+  margin: 0;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.groups-toolbar__filter {
+  min-width: 220px;
+}
+
 .score-improvement-header {
-  margin-top: -15px;
+  margin-top: 0;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep #groups-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media screen and (max-width: 1199px) {
+  .groups-toolbar__actions {
+    justify-content: flex-start !important;
+    flex-basis: 100%;
+  }
+
+  .groups-toolbar__filter {
+    width: 100%;
+    min-width: 0;
+  }
 }

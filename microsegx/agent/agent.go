@@ -458,7 +458,7 @@ func main() {
 		log.Info("Not running in container.")
 	}
 
-	if platform == share.PlatformKubernetes {
+	if platform == share.PlatformKubernetes && selfID != "" {
 		if selfID, err = global.IdentifyK8sContainerID(selfID); err != nil {
 			log.WithFields(log.Fields{"selfID": selfID, "error": err}).Error("lookup")
 		}

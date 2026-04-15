@@ -1,8 +1,8 @@
 <div
-  class="d-flex align-items-center justify-content-between"
+  class="groups-toolbar d-flex align-items-center justify-content-between"
   *ngIf="!isScoreImprovement; else scoreImprovementHeader">
   <div
-    class="d-flex align-items-center justify-content-start"
+    class="groups-toolbar__meta d-flex align-items-center justify-content-start"
     *ngIf="!groupsErr">
     <span class="text-info font-weight-bold me-2">
       <span *ngIf="filtered">
@@ -19,10 +19,12 @@
       {{ selectedGroups.length }}
     </span>
   </div>
-  <div class="d-flex align-items-center justify-content-end ms-auto">
+  <div
+    class="groups-toolbar__actions d-flex align-items-center justify-content-end ms-auto">
     <div *ngIf="source === navSource['FED_POLICY']">
       <button
         mat-button
+        class="groups-toolbar__button groups-toolbar__button--wide"
         (click)="openImportFedGroupsDialog()"
         *appDisplayControl="'write_group'">
         <i class="eos-icons icon-18">upload</i>
@@ -33,7 +35,7 @@
       mat-button
       [disabled]="!selectedGroups || selectedGroups.length === 0"
       (click)="exportGroups()"
-      class="me-3">
+      class="groups-toolbar__button groups-toolbar__button--wide">
       <em class="eos-icons icon-18">download</em>
       {{ 'group.export.TITLE' | translate }}
     </button>
@@ -42,7 +44,7 @@
         isWriteGroupAuthorized && selectedGroups.length > 0 && hasModeCapGroups
       "
       (click)="openSwitchModeModal()"
-      class="d-flex align-items-center justify-content-start px-2 me-2"
+      class="groups-toolbar__button groups-toolbar__button--wide d-flex align-items-center justify-content-start"
       id="switch-mode-dialog"
       mat-stroked-button>
       <em class="eos-icons">change_circle</em>
@@ -51,7 +53,7 @@
     <button
       *ngIf="isWriteGroupAuthorized"
       (click)="openAddGroupModal()"
-      class="d-flex align-items-center justify-content-start px-2 me-2"
+      class="groups-toolbar__button d-flex align-items-center justify-content-start"
       id="groups-add-dialog"
       mat-stroked-button>
       <em class="eos-icons">add_circle</em>
@@ -70,10 +72,11 @@
       [checked]="allScorable"
       [indeterminate]="someScorable"
       (change)="toggleScorable($event)"
-      class="me-3 mt-2">
+      class="groups-toolbar__checkbox">
       {{ 'group.SWITCH_SCORABLE' | translate }}
     </mat-checkbox>
     <app-quick-filter
+      class="groups-toolbar__filter"
       [gridOptions]="gridOptions4Groups"
       [gridApi]="gridApi"
       (filterCountChange)="filterCountChanged($event)"

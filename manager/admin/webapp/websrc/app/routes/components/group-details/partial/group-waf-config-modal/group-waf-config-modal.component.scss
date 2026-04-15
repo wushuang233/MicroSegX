@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.nv-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: min(920px, calc(100vw - 48px));
+}
+
+.group-waf-config__header,
+.group-waf-config__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.group-waf-config__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.group-waf-config__count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 2px;
+}
+
+.group-waf-config__grid {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.clearfix {
+  min-width: 0;
+}
+
+[mat-dialog-actions] {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+:host ::ng-deep .ag-theme-balham .ag-header-cell-label {
+  white-space: normal !important;
+  line-height: 1.45;
+}
+
+:host ::ng-deep .ag-theme-balham .ag-cell-wrapper {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+:host ::ng-deep #group-waf-sensor-option-grid .ag-root-wrapper {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+}

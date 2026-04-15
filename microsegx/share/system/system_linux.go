@@ -207,7 +207,7 @@ func (s *SystemTools) CallNamespaceFunc(nsid int, nstypes []string, cb NSCallbac
 			}
 		}()
 
-		log.WithFields(log.Fields{"namespace": ns, "pid": nsid}).Error("Switch to")
+		log.WithFields(log.Fields{"namespace": ns, "pid": nsid}).Debug("Switched to namespace")
 	}
 
 	cb(params)

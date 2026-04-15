@@ -10,3 +10,27 @@
   margin-top: 5px;
   margin-right: 8px;
 }
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+:host ::ng-deep .ag-theme-balham .ag-header-cell-label {
+  white-space: normal !important;
+  line-height: 1.45;
+}
+
+:host ::ng-deep .ag-theme-balham .ag-cell-wrapper {
+  align-items: flex-start;
+  line-height: 1.5;
+}

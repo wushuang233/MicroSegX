@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NvCommonModule } from '@common/nvCommon.module';
 import { Routes, RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
-import { SecurityRiskPanelModule } from '@components/security-risk-panel/security-risk-panel.module';
 import { ExposurePanelModule } from '@components/exposure-panel/exposure-panel.module';
 import { SecurityEventsPanelModule } from '@components/security-events-panel/security-events-panel.module';
 import { TopSecurityEventsPanelModule } from '@components/top-security-events-panel/top-security-events-panel.module';
@@ -40,7 +39,6 @@ const routes: Routes = [
   imports: [
     CommonModule,
     NvCommonModule,
-    SecurityRiskPanelModule,
     ExposurePanelModule,
     SecurityEventsPanelModule,
     TopSecurityEventsPanelModule,

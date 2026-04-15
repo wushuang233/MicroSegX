@@ -1,0 +1,76 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+#groups-section {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.groups-page__header {
+  gap: 16px;
+  align-items: flex-start !important;
+  flex-wrap: wrap;
+}
+
+.groups-page__header-main,
+.groups-page__header-actions {
+  min-width: 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.groups-page__header-status {
+  min-width: 0;
+}
+
+.groups-page__split-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: var(--saas-card-shadow);
+}
+
+.groups-page__split-content {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.groups-page__split-card--detail .groups-page__split-content {
+  overflow: hidden;
+}
+
+:host ::ng-deep .groups-page__split-card--detail app-group-details,
+:host ::ng-deep .groups-page__split-card--list app-groups {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+
+.groups-page__empty-state {
+  height: 100%;
+  padding: 28px !important;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .groups-page__split-card .mat-mdc-card-content,
+:host ::ng-deep .groups-page__split-card .mat-card-content {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 1199px) {
+  .groups-page__header-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+}

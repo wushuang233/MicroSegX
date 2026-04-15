@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NvCommonModule } from '@common/nvCommon.module';
 import { MicrosegxPortExposureComponent } from './microsegx-port-exposure.component';
+import { MicrosegxZitiSharedModule } from '../microsegx-ziti/microsegx-ziti-shared.module';
 
 const routes: Routes = [
   {
@@ -12,7 +13,11 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [MicrosegxPortExposureComponent],
-  imports: [RouterModule.forChild(routes), NvCommonModule],
+  imports: [
+    RouterModule.forChild(routes),
+    NvCommonModule,
+    MicrosegxZitiSharedModule,
+  ],
   exports: [MicrosegxPortExposureComponent],
 })
 export class MicrosegxPortExposureModule {}

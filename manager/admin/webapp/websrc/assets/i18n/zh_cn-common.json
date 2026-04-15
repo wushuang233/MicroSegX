@@ -48,6 +48,7 @@
     "REPORT_TOC": "内容",
     "TYPE_PRESS_TXT": "输入后回车",
     "SUBMIT": "更新",
+    "CONFIRM": "确认",
     "CANCEL": "取消",
     "CLOSE": "关闭",
     "PROCESSING": "处理中",
@@ -484,7 +485,7 @@
         "CLUSTERROLEBINDING_ALERTS": "集群角色绑定",
         "ROLEBINDING_ALERTS": "角色绑定",
         "ROLE_ALERTS": "Role",
-        "MICROSEGX_CRD_ALERTS": "MicroSegX CRD",
+        "MICROSEGX_CRD_ALERTS": "AMS4Muc CRD",
         "CERTIFICATE_ALERTS": "TLS自签名证书",
         "OTHER_ALERTS": "其他"
       }
@@ -877,7 +878,7 @@
       "POLICY": "网络规则",
       "SIGSTORE_VERIFIERS": "Sigstore校验器",
       "RESPONSE_POLICY": "应对规则",
-      "DLP_SENSORS": "DLP 检测器",
+      "DLP_SENSORS": "数据防护检测器",
       "WAF_SENSORS": "WAF 检测器",
       "ADMISSION_CONTROL": "准入控制",
       "POLICY_GRAPH": "图视",
@@ -895,8 +896,8 @@
       "NETWORK_TRAFFIC": "网络流量",
       "SETTING": "设置",
       "SUPPORT": "获取支持",
-      "MICROSEGX": "MicroSegX",
-      "PORT_EXPOSURE": "端口暴露",
+      "MICROSEGX": "访问治理",
+      "PORT_EXPOSURE": "端口管理",
       "ZITI_FABRIC": "零信任",
       "PROFILE": "个人资料",
       "USERS": "用户 & 角色",
@@ -3616,11 +3617,11 @@
       "workspace": "控制中心",
       "hero": {
         "badge": "主动微隔离控制面",
-        "title": "在同一个控制台里持续收敛端口暴露面、治理东西向访问，并交付零信任连接。",
-        "subtitle": "MicroSegX 把运行时可视化、端口暴露治理和零信任服务发布收进同一套 Kubernetes 运维工作流。",
+        "title": "在同一个控制台里持续收敛开放端口、治理东西向访问，并交付零信任连接。",
+        "subtitle": "AMS4Muc 把运行时可视化、端口管理治理和零信任服务发布收进同一套 Kubernetes 运维工作流。",
         "cards": {
           "visibility": {
-            "title": "端口暴露可视化",
+            "title": "端口管理可视化",
             "desc": "先看清对外服务、节点监听和实际流量，再决定哪些暴露面需要继续收口。"
           },
           "policy": {
@@ -3629,13 +3630,13 @@
           },
           "operations": {
             "title": "零信任交付",
-            "desc": "围绕身份、服务、路由器和策略完成零信任发布，减少不必要的对外暴露。"
+            "desc": "围绕身份、服务、路由器和策略完成零信任发布，减少不必要的对外开放。"
           }
         }
       },
       "form": {
         "eyebrow": "运维入口",
-        "subtitle": "登录后进入 MicroSegX 控制台，继续处理端口暴露、漏洞治理、运行时防护和零信任接入。"
+        "subtitle": "登录后进入 AMS4Muc 控制台，继续处理端口管理、漏洞治理、运行时防护和零信任接入。"
       },
       "preview": {
         "eyebrow": "预览模式",
@@ -3696,7 +3697,7 @@
     },
     "microsegx": {
       "shared": {
-        "workspace": "MicroSegX 工作台",
+        "workspace": "AMS4Muc 工作台",
         "embedded": "嵌入式工作页",
         "openNewTab": "新标签打开"
       },
@@ -3718,26 +3719,26 @@
         "publishedServices": "已发布服务",
         "zeroTrustSummary": "零信任卡片优先显示已经真正发布成功的服务数量，再补充路由器、在线身份和 terminator 情况。",
         "connectedIdentities": "在线身份",
-        "terminators": "Terminator",
-        "openPortExposure": "进入端口暴露",
+        "terminators": "终结点",
+        "openPortExposure": "进入端口管理",
         "openFabric": "进入零信任"
       },
       "portExposure": {
-        "title": "端口暴露",
-        "subtitle": "把服务暴露、节点监听与开放端口运营统一放进同一个 MicroSegX 工作台。",
-        "gotoZiti": "进入 Ziti Fabric",
+        "title": "端口管理",
+        "subtitle": "把服务暴露、节点监听与开放端口运营统一放进同一个 AMS4Muc 工作台。",
+        "gotoZiti": "进入零信任",
         "heroTitle": "先看清暴露面，再决定怎么收口。",
-        "heroCopy": "这里保留了原有 port-audit 的真实控制能力，但整体接进了 manager 壳层，让暴露治理与后续 Fabric 编排在一套工作流里完成。",
+        "heroCopy": "这里保留了原有端口审计后端的真实控制能力，但整体已经接进控制台壳层，让端口管理与后续零信任编排在一套工作流里完成。",
         "guideTitle": "这页怎么用",
         "guideCopy": "先看上面的卡片确认当前暴露面规模，再在下面的嵌入页面里真正执行开放、关闭和重新扫描。",
         "sideTitle": "联动上下文",
-        "sideCopy": "这里的数字会跟随 live port-audit 后端变化，方便你判断哪些暴露面会继续进入 Ziti 发布链路。",
-        "sideFabric": "Fabric 联动",
-        "workspaceTitle": "实时端口暴露工作页",
-        "workspaceCopy": "下面嵌入的页面仍然直接调用 live port-audit 后端，开放、关闭、扫描都是真操作。",
+        "sideCopy": "这里的数字会跟随端口审计后端变化，方便你判断哪些开放面会继续进入零信任发布链路。",
+        "sideFabric": "零信任联动",
+        "workspaceTitle": "实时端口管理工作页",
+        "workspaceCopy": "下面嵌入的页面仍然直接调用 port-audit 后端，开放、关闭、扫描都是真操作。",
         "cards": {
           "managedServices": "受控服务",
-          "managedServicesDesc": "当前已经纳入 MicroSegX 业务 Service 暴露治理的服务数量。",
+          "managedServicesDesc": "当前已经纳入 AMS4Muc 业务 Service 暴露治理的服务数量。",
           "openPorts": "开放端口",
           "openPortsDesc": "当前通过节点暴露流程真正打开的端口数量。",
           "exposedTargets": "暴露目标",
@@ -3758,31 +3759,31 @@
             "desc": "下面的嵌入页仍然执行真实的开放、关闭和重扫动作，不是示意页面。"
           },
           "three": {
-            "title": "最后衔接到 Ziti",
-            "desc": "当某个服务确定需要发布时，再进入 Ziti Fabric 去定义谁可以访问它。"
+            "title": "最后衔接到零信任",
+            "desc": "当某个服务确定需要发布时，再进入零信任页面去定义谁可以访问它。"
           }
         }
       },
       "ziti": {
         "title": "零信任",
-        "subtitle": "在同一个 MicroSegX 控制面里管理身份、服务、路由器、配置与策略。",
-        "gotoPortExposure": "进入端口暴露",
+        "subtitle": "在同一个 AMS4Muc 控制面里管理身份、服务、路由器、配置与策略。",
+        "gotoPortExposure": "进入端口管理",
         "heroTitle": "从“看见暴露面”走到“治理谁能访问”。",
-        "heroCopy": "端口暴露告诉你什么东西已经能被碰到；Ziti Fabric 让你继续定义谁该访问它、经过哪台 router、使用哪类身份和策略。",
+        "heroCopy": "端口管理告诉你哪些对象已经能被访问；零信任页面让你继续定义谁该访问它、经过哪台路由器、使用哪类身份和策略。",
         "guideTitle": "这页在整体流程里的位置",
-        "guideCopy": "下面的 live 工作页保留了原有 Ziti 管理能力，创建、编辑、删除、JWT 和 router 部署都是真操作。",
+        "guideCopy": "下面的工作页保留了原有 Ziti 管理能力，创建、编辑、删除、JWT 和路由器部署都是真操作。",
         "sideTitle": "控制器上下文",
         "sideCopy": "上面的摘要卡片与下面嵌入的工作页指向的是同一个 OpenZiti controller。",
-        "sidePortExposure": "端口暴露联动",
+        "sidePortExposure": "端口管理联动",
         "workspaceTitle": "实时 Ziti 管理工作页",
-        "workspaceCopy": "身份、服务、配置、策略、路由器部署与 JWT 流程都仍然通过 live Ziti management API 执行。",
+        "workspaceCopy": "身份、服务、配置、策略、路由器部署与 JWT 流程都仍然通过 Ziti 管理 API 执行。",
         "cards": {
-          "controller": "Controller",
+          "controller": "控制器",
           "credentials": "默认凭据",
           "routers": "在线路由器",
-          "routersDesc": "当前 controller 可见且在线的 router 数量。",
+          "routersDesc": "当前控制器可见且在线的路由器数量。",
           "services": "服务",
-          "servicesDesc": "当前 controller 下管理的 Ziti service 数量。",
+          "servicesDesc": "当前控制器下管理的零信任服务数量。",
           "identities": "身份",
           "identitiesDesc": "当前可用于 dial / bind 的客户端与主机身份数量。",
           "configs": "配置",
@@ -3795,11 +3796,11 @@
           },
           "two": {
             "title": "再配身份与策略",
-            "desc": "通过 service policy 和 router policy 定义谁能 dial、谁能 bind、谁能走哪台 router。"
+            "desc": "通过服务策略和路由器策略定义谁能接入、谁能托管、谁能经过哪台路由器。"
           },
           "three": {
-            "title": "按需部署 router",
-            "desc": "嵌入页里仍然支持真实的 K8s router 部署、重签和删除。"
+            "title": "按需部署路由器",
+            "desc": "嵌入页里仍然支持真实的 K8s 路由器部署、重签和删除。"
           }
         }
       }
@@ -3815,14 +3816,14 @@
     "SCAN_TIME": "最近扫描",
     "HIDE_K8S_SYSTEM": "隐藏 Kubernetes 系统命名空间",
     "PORT_EXPOSURE": {
-      "TITLE": "端口暴露",
-      "SUBTITLE": "在同一个 MicroSegX 工作台里统一管理服务暴露、节点监听与开放端口。",
+      "TITLE": "端口管理",
+      "SUBTITLE": "在同一个 AMS4Muc 工作台里统一管理服务暴露、节点监听与开放端口。",
       "HERO_EYEBROW": "暴露面收敛工作台",
       "HERO_COPY": "先确认哪些服务已经对外可达、哪些端口仍在暴露，再在同一张操作台里继续完成收口与验证。",
       "VIEW_SERVICES": "服务治理",
-      "VIEW_EXPOSURE": "暴露清单",
+      "VIEW_EXPOSURE": "端口暴露",
       "CONTROL_DISABLED": "服务暴露治理能力未启用",
-      "CONTROL_DISABLED_DESC": "当前仍可查看实时暴露清单，但开放和关闭端口动作需要 service-control 后端已经启用。",
+      "CONTROL_DISABLED_DESC": "当前仍可查看实时暴露清单，但开放和关闭端口动作需要服务治理后端已经启用。",
       "OPEN_PORTS": "开放端口",
       "TRAFFIC_EVIDENCE": "观测到流量",
       "EXPOSED_OBJECTS": "暴露对象",
@@ -3875,14 +3876,14 @@
       "NODE_PORT_USED": "这个 NodePort 已被占用。",
       "SUGGESTED_PORTS": "建议端口",
       "SERVICE_VIEW_TITLE": "服务暴露治理",
-      "SERVICE_VIEW_DESC": "逐个检查服务当前发布了哪些端口，并直接在 manager 里完成开放、关闭和批量收口。",
+      "SERVICE_VIEW_DESC": "逐个检查服务当前发布了哪些端口，并直接在控制台里完成开放、关闭和批量收口。",
       "EXPOSURE_VIEW_TITLE": "对外暴露清单",
       "EXPOSURE_VIEW_DESC": "查看当前仍可从集群外触达的地址与端口，优先处理仍处于开放状态的服务和监听器。",
-      "PORT_TOGGLE_FAILED": "端口暴露更新失败。",
+      "PORT_TOGGLE_FAILED": "端口管理更新失败。",
       "CONTROL_BLOCKED": "当前不可治理",
       "QUICK_ACTIONS": "快速动作",
       "QUICK_ACTIONS_DESC": "先触发扫描或刷新当前视图，再决定要开放还是收口哪些服务端口。",
-      "MODE_SWITCH_DESC": "在“服务治理”和“对外暴露清单”之间快速切换，聚焦当前要处理的工作面。",
+      "MODE_SWITCH_DESC": "在“端口暴露”“服务治理”“零信任”三个并行工作面之间快速切换，默认先进入端口暴露。",
       "OPEN_PORTS_DESC": "当前仍通过受控服务对外发布的端口数量。",
       "MANAGEABLE_SERVICES": "可治理服务",
       "MANAGEABLE_OPEN_PORTS": "可治理开放端口",
@@ -3946,26 +3947,26 @@
     },
     "ZITI": {
       "TITLE": "零信任",
-      "SUBTITLE": "在同一个 MicroSegX 工作台里统一管理身份、服务、路由器、配置与策略。",
+      "SUBTITLE": "在同一个 AMS4Muc 工作台里统一管理身份、服务、路由器、配置与策略。",
       "HERO_EYEBROW": "身份与连接治理",
       "HERO_COPY": "把“发现暴露服务”继续推进成“治理谁能访问、通过哪台路由器访问、使用哪组身份和策略访问”的完整零信任交付流程。",
       "SEARCH_PLACEHOLDER": "搜索路由器、服务、身份、配置和策略匹配关系",
       "NOT_CONFIGURED": "零信任控制器尚未配置",
-      "NOT_CONFIGURED_DESC": "请先配置默认 OpenZiti controller 凭据，再回到这里管理身份、服务、路由器和访问策略。",
+      "NOT_CONFIGURED_DESC": "请先配置默认 OpenZiti 控制器凭据，再回到这里管理身份、服务、路由器和访问策略。",
       "SESSION_READY": "控制器会话尚未就绪",
-      "LOGIN_FAILED": "自动登录 controller 未完成。请先确认默认 controller 凭据正确，再刷新页面。",
+      "LOGIN_FAILED": "自动登录控制器未完成。请先确认默认控制器凭据正确，再刷新页面。",
       "LOAD_FAILED": "零信任数据加载失败。",
       "ACTION_FAILED": "操作执行失败。",
       "JWT_FAILED": "生成客户端 enrollment JWT 失败。",
       "JSON_INVALID": "必须是合法 JSON。",
-      "CONTROLLER": "Controller",
+      "CONTROLLER": "控制器",
       "IDENTITY": "身份",
       "EXPIRES": "过期时间",
       "SESSION_TITLE": "控制器会话",
-      "SESSION_DESC": "让零信任工作台始终绑定到你当前浏览器里已经建立好的 controller 会话。",
+      "SESSION_DESC": "让零信任工作台始终绑定到你当前浏览器里已经建立好的控制器会话。",
       "SESSION_ACTIVE": "会话已连接",
       "CURRENT_OPERATOR": "当前操作人",
-      "FABRIC_HEALTH": "Fabric 健康度",
+      "FABRIC_HEALTH": "零信任健康度",
       "K8S_INTEGRATION": "Kubernetes 联动",
       "WORKSPACE_TITLE": "零信任工作台",
       "ROUTER_STATUS_FILTER": "路由器状态",
@@ -4018,10 +4019,11 @@
         "DELETE_K8S": "删除 K8s 部署",
         "DELETE_ROUTER": "删除路由器",
         "DEPLOY_DIALOG_TITLE": "部署路由器工作负载",
-        "DEPLOY_DIALOG_DESC": "把当前路由器部署到 Kubernetes，或更新它现有的零信任接入工作负载。",
+        "DEPLOY_DIALOG_DESC": "把当前路由器部署到 Kubernetes，或更新它现有的零信任接入工作负载。公网主机名用于生成对外入口，NodePort 可留空让集群自动分配，也可以手动固定。",
         "ROUTER_NAME": "路由器名称",
         "PUBLIC_HOST": "公网主机名",
         "NODE_PORT": "NodePort",
+        "NODE_PORT_HINT": "留空时由 Kubernetes 自动分配；手动填写时，端口管理页会按这个公网入口端口显示。",
         "COST": "成本",
         "DISABLED": "禁用路由器",
         "NO_TRAVERSAL": "禁止 traversal",

@@ -266,8 +266,16 @@ func NewFileWatcher(config *FileMonitorConfig) (*FileWatch, error) {
 }
 
 func bIgnoredErrors(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if os.IsNotExist(err) || errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.EBADF) {
+		return true
+	}
+
 	err = errors.Unwrap(err)
-	return os.IsNotExist(err) || errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.EBADF)
+	return err != nil && (os.IsNotExist(err) || errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.EBADF))
 }
 
 func (w *FileWatch) sendMsg(cid string, path string, event uint32, pInfo []*ProcInfo, mode string) {

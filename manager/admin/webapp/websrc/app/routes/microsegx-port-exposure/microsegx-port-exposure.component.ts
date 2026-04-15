@@ -218,6 +218,7 @@ export class MicrosegxPortExposureComponent
 
   exposureTypes: string[] = [];
   viewMode: 'exposure' | 'services' = 'exposure';
+  auxiliaryWorkspaceTab: 'summary' | 'ziti' = 'summary';
   private dialogBodyLocked = false;
   private autoRefreshTimer: number | null = null;
   private scanStatusTimer: number | null = null;
@@ -239,6 +240,7 @@ export class MicrosegxPortExposureComponent
   ) {}
 
   ngOnInit(): void {
+    this.setViewMode('exposure');
     this.refresh();
     this.startAutoRefresh();
   }
@@ -251,6 +253,19 @@ export class MicrosegxPortExposureComponent
     this.stopAutoRefresh();
     this.clearScanStatusTimer();
     this.releaseDialogBodyState();
+  }
+
+  setViewMode(nextMode: 'exposure' | 'services'): void {
+    this.viewMode = nextMode;
+
+    if (nextMode !== 'services') {
+      this.closeServiceCreateDialog();
+      this.closeServiceDeleteDialog();
+    }
+  }
+
+  setAuxiliaryWorkspaceTab(nextTab: 'summary' | 'ziti'): void {
+    this.auxiliaryWorkspaceTab = nextTab;
   }
 
   private getHeaders(): HttpHeaders {
@@ -1203,7 +1218,7 @@ export class MicrosegxPortExposureComponent
         next: () => {
           this.serviceCreateLoading = false;
           this.closeServiceCreateDialog();
-          this.viewMode = 'services';
+          this.setViewMode('services');
           this.refresh();
         },
         error: err => {
