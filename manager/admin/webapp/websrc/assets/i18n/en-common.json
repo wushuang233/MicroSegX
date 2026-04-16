@@ -3626,16 +3626,16 @@
         "subtitle": "MicroSegX brings together runtime visibility, port exposure operations, and zero-trust service delivery for Kubernetes environments.",
         "cards": {
           "visibility": {
-            "title": "Port exposure visibility",
-            "desc": "Review exposed services, node listeners, and observed traffic before drift turns into attack surface."
+            "title": "云主机安全防护",
+            "desc": "统一识别云主机的暴露面、风险状态与防护策略，持续降低主机被攻击和横向渗透风险。"
           },
           "policy": {
-            "title": "Microsegmentation policy",
-            "desc": "Coordinate runtime controls, admission policy, and access governance with clearer operational context."
+            "title": "多云代理的统一管理",
+            "desc": "集中纳管分布在不同云环境中的代理节点，统一完成接入、监测、策略下发与运维编排。"
           },
           "operations": {
-            "title": "Zero-trust delivery",
-            "desc": "Create identities, services, routers, and policies that shrink exposed surfaces without breaking delivery flows."
+            "title": "多云工作负载的访问控制",
+            "desc": "基于身份、服务与策略对多云工作负载访问进行细粒度控制，确保跨环境通信安全可控。"
           }
         }
       },

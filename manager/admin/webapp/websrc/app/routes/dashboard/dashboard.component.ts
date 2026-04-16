@@ -56,9 +56,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get podsCount(): number {
     return this.summaryInfo?.running_pods || 0;
   }
-  get servicesCount(): number {
-    return this.details?.services?.length || 0;
-  }
   get protectedContainersCount(): number {
     return (this.details?.containers || []).filter(
       container => container.state === 'protect'
