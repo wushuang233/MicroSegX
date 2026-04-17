@@ -132,6 +132,10 @@ export class EdgeDetailsComponent implements AfterViewInit, OnInit, OnChanges {
     if (changes.conversationDetail) {
       this.prepareGridData();
       setTimeout(() => {
+        if (!this.gridApi) {
+          return;
+        }
+
         let nodes = this.gridApi.getRenderedNodes();
         if (nodes.length) {
           nodes[0].setSelected(true); //selects the first row in the rendered view
@@ -160,6 +164,14 @@ export class EdgeDetailsComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   private prepareGridData() {
+    if (!this._conversationDetail?.entries?.length || !this.gridApi) {
+      this.gridApi?.setGridOption(
+        'rowData',
+        this._conversationDetail?.entries || []
+      );
+      return;
+    }
+
     const ELEM_CONV_HISTORY = document.getElementById('conversationHistory');
     // this.entriesGridHeight = Math.max(
     //   this.entriesGridHeight,
@@ -204,13 +216,27 @@ export class EdgeDetailsComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   onTrafficChanged() {
+    if (!this.gridApi) {
+      return;
+    }
+
     let selectedRows = this.gridApi.getSelectedRows();
-    this.traffic = selectedRows[0];
+    this.traffic = selectedRows?.[0];
+    if (!this.traffic) {
+      this.showRuleId = false;
+      this.ruleId = '';
+      this.sessionCount = '';
+      this.onThreat = false;
+      this.onViolation = false;
+      this.onRule = false;
+      return;
+    }
+
     this.showRuleId = true;
     this.ruleId = this.traffic.policy_id;
 
     this.sessionCount =
-      this.traffic.sessions + '/' + this.conversationDetail.sessions;
+      this.traffic.sessions + '/' + (this.conversationDetail?.sessions ?? 0);
     this.onThreat = !!this.traffic.severity;
     this.onViolation =
       this.traffic.policy_action === 'violate' ||

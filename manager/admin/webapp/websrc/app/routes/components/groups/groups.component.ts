@@ -64,6 +64,7 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
   private agGridResizeHandler?: () => void;
   private gridFitFrameId: number | null = null;
   private gridFitTimerId: number | null = null;
+  private lastSelectedGroupName: string = '';
   isRefreshing: boolean = false;
   groups: Array<Group> = [];
   groupsErr: boolean = false;
@@ -189,9 +190,19 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
         this.resetSelectionState();
         return;
       }
+      const focusedCell = this.gridApi.getFocusedCell();
+      const focusedGroupName =
+        focusedCell &&
+        this.gridApi.getDisplayedRowAtIndex(focusedCell.rowIndex)?.data?.name;
       this.updateSelectionState(
-        (this.gridApi.getSelectedRows() || []) as Array<Group>
+        (this.gridApi.getSelectedRows() || []) as Array<Group>,
+        this.lastSelectedGroupName || focusedGroupName || ''
       );
+    };
+    this.gridOptions4Groups.onRowSelected = event => {
+      if (event?.node?.isSelected() && event.data?.name) {
+        this.lastSelectedGroupName = event.data.name;
+      }
     };
     if (this.isScoreImprovement) {
       this.gridOptions4Groups.getRowId = params => params.data.name;
@@ -355,6 +366,7 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
     const targetName =
       this.linkedGroup ||
       this.preselectedGroupName ||
+      this.lastSelectedGroupName ||
       this.selectedGroups[0]?.name;
     const targetNode = targetName
       ? this.gridApi.getRowNode(targetName)
@@ -609,6 +621,7 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
 
   private resetSelectionState = () => {
     this.selectedGroups = [];
+    this.lastSelectedGroupName = '';
     this.selectedGroup.emit(null);
     this.hasModeCapGroups = false;
     this.hasScoredCapGroups = false;
@@ -619,7 +632,10 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
     this.baselineProfile = '';
   };
 
-  private updateSelectionState = (selectedRows: Array<Group>) => {
+  private updateSelectionState = (
+    selectedRows: Array<Group>,
+    preferredGroupName: string = ''
+  ) => {
     const selectedNames = new Set(
       (selectedRows || [])
         .filter(Boolean)
@@ -633,9 +649,13 @@ export class GroupsComponent implements OnInit, OnChanges, OnDestroy {
       this.resetSelectionState();
       return;
     }
-    this.selectedGroup.emit(
-      this.selectedGroups.length > 0 ? this.selectedGroups[0] : null
-    );
+    const detailGroup =
+      this.selectedGroups.find(group => group.name === preferredGroupName) ||
+      selectedRows.find(group => group?.name === preferredGroupName) ||
+      selectedRows[selectedRows.length - 1] ||
+      this.selectedGroups[0];
+    this.lastSelectedGroupName = detailGroup?.name || '';
+    this.selectedGroup.emit(detailGroup || null);
     this.hasModeCapGroups = this.selectedGroups.some(
       group => group.cap_change_mode
     );

@@ -15,6 +15,10 @@
     >
     <input
       *ngIf="field.templateOptions?.type !== 'number'; else numberTmp"
+      [attr.autocomplete]="
+        field.templateOptions?.autocomplete ||
+        (field.templateOptions?.type === 'password' ? 'current-password' : null)
+      "
       [attr.disabled]="field.templateOptions?.disabled || false"
       [formControl]="formControl"
       [formlyAttributes]="field"

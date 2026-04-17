@@ -1,4 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { GlobalVariable } from '@common/variables/global.variable';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -18,7 +24,7 @@ import * as $ from 'jquery';
   templateUrl: './custom-check.component.html',
   styleUrls: ['./custom-check.component.scss'],
 })
-export class CustomCheckComponent implements OnInit {
+export class CustomCheckComponent implements OnInit, OnChanges {
   @Input() source: string;
   @Input() groupName: string = '';
   @Input() resizableHeight: number;
@@ -52,6 +58,18 @@ export class CustomCheckComponent implements OnInit {
     this.initializeVM();
     this.refresh();
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.groupName &&
+      !changes.groupName.firstChange &&
+      changes.groupName.previousValue !== changes.groupName.currentValue
+    ) {
+      this.switch2Add();
+      this.refresh();
+    }
+  }
+
   refresh = () => {
     this.isCustomCheckPromiseCompleted = false;
     this.hasConfigurationWarning = false;
@@ -168,7 +186,7 @@ export class CustomCheckComponent implements OnInit {
   };
 
   switch2Add = () => {
-    this.gridApi!.deselectAll();
+    this.gridApi?.deselectAll();
     this.customCheckForm.reset();
     setTimeout(() => {
       this.opType = GlobalConstant.MODAL_OP.ADD;

@@ -243,6 +243,8 @@ controller:
   image:
     repository: ${IMAGE_NAMESPACE}/controller
     imagePullPolicy: ${IMAGE_PULL_POLICY}
+  certupgrader:
+    imagePullPolicy: ${IMAGE_PULL_POLICY}
   apisvc:
     type: ${CONTROLLER_API_SERVICE_TYPE}
     ctrlServerPort: 10443

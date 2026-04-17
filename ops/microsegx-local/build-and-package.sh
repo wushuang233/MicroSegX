@@ -59,6 +59,7 @@ tar -C "${FULL_RELEASE_ARTIFACT_DIR}" -cf - . | tar -C "${MICROSEGX_ARTIFACT_DIR
 tar -C "${STACK_BUNDLE_DIR}" -cf - . | tar -C "${MICROSEGX_ARTIFACT_DIR}/port-audit-stack" -xf -
 
 cp "${SCRIPT_DIR}/deploy-local.sh" "${MICROSEGX_ARTIFACT_DIR}/deploy-local.sh"
+cp "${SCRIPT_DIR}/setup-k3s-offline-auto-import.sh" "${MICROSEGX_ARTIFACT_DIR}/setup-k3s-offline-auto-import.sh"
 cp "${SCRIPT_DIR}/manager-microsegx.overlay.yaml.example" "${MICROSEGX_ARTIFACT_DIR}/manager-microsegx.overlay.yaml.example"
 cp "${SCRIPT_DIR}/microsegx-local.env.example" "${MICROSEGX_ARTIFACT_DIR}/microsegx-local.env.example"
 cp "${ROOT_DIR}/MicroSegX-本地K8s一体化部署说明.zh-CN.md" "${MICROSEGX_ARTIFACT_DIR}/MicroSegX-本地K8s一体化部署说明.zh-CN.md"
@@ -79,6 +80,12 @@ cat >"${MICROSEGX_ARTIFACT_DIR}/README.md" <<EOF
 FULL_RELEASE_ENV=/abs/path/to/full-release.env bash ./deploy-local.sh
 \`\`\`
 
+部署完成后，如果目标机器是单机 k3s，本地离线模式建议再执行：
+
+\`\`\`bash
+bash ./setup-k3s-offline-auto-import.sh
+\`\`\`
+
 更详细说明：
 
 - \`MicroSegX-本地K8s一体化部署说明.zh-CN.md\`
@@ -89,6 +96,7 @@ FULL_RELEASE_ENV=/abs/path/to/full-release.env bash ./deploy-local.sh
 - Core helm charts：\`core/bundle/charts/\`
 - Port-audit stack 镜像：\`port-audit-stack/k8s-port-audit-stack-${STACK_VERSION}.tar\`
 - Port-audit installer：\`port-audit-stack/openziti-stack-installer-local.yaml\`
+- 开机自动导入脚本：\`setup-k3s-offline-auto-import.sh\`
 EOF
 
 echo

@@ -92,27 +92,28 @@
             [height]="height"
             [isShowingSystemGroups]="isShowingSystemGroups"
             [linkedGroup]="linkedGroup"
+            (selectedGroup)="onSelectedGroupChange($event)"
             (refreshing)="refreshing($event)"></app-groups>
         </mat-card>
       </ng-container>
       <ng-container *appContainerTwo="let height">
         <mat-card
           [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
-          *ngIf="groupsView && groupsView.selectedGroups.length > 0"
+          *ngIf="selectedGroup"
           class="groups-page__split-card groups-page__split-card--detail">
           <app-group-details
             class="clearfix groups-page__split-content"
             [resizableHeight]="height"
-            [selectedGroupName]="groupsView.selectedGroups[0].name"
-            [members]="groupsView.selectedGroups[0].members"
-            [cfgType]="groupsView.selectedGroups[0].cfg_type || ''"
-            [kind]="groupsView.selectedGroups[0].kind || ''"
-            [baselineProfile]="groupsView.selectedGroups[0].baseline_profile">
+            [selectedGroupName]="selectedGroup.name"
+            [members]="selectedGroup.members"
+            [cfgType]="selectedGroup.cfg_type || ''"
+            [kind]="selectedGroup.kind || ''"
+            [baselineProfile]="selectedGroup.baseline_profile">
           </app-group-details>
         </mat-card>
         <mat-card
           [ngStyle]="{ height: height + 'px', width: '100%', minWidth: '0' }"
-          *ngIf="groupsView && groupsView.selectedGroups.length === 0"
+          *ngIf="!selectedGroup"
           class="groups-page__split-card groups-page__split-card--detail">
           <mat-card-content class="groups-page__empty-state">
             <div class="hint-info">

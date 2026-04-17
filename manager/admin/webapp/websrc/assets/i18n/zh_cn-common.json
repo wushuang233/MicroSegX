@@ -2339,6 +2339,8 @@
       "PATTERN": "正则形式",
       "LOGIC_IS_NOT": "是/否",
       "CONTEXT": "语境",
+      "REGEX": "是",
+      "!REGEX": "否",
       "IS": "是",
       "NOT": "否"
     },
@@ -2421,6 +2423,8 @@
       "PATTERN": "正则形式",
       "LOGIC_IS_NOT": "是/否",
       "CONTEXT": "语境",
+      "REGEX": "是",
+      "!REGEX": "否",
       "IS": "是",
       "NOT": "否"
     },

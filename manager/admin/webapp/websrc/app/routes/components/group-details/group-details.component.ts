@@ -4,6 +4,8 @@ import {
   Input,
   AfterViewInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { GlobalVariable } from '@common/variables/global.variable';
@@ -31,7 +33,9 @@ export const groupDetailsTabs = [
   templateUrl: './group-details.component.html',
   styleUrls: ['./group-details.component.scss'],
 })
-export class GroupDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class GroupDetailsComponent
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy
+{
   @Input() resizableHeight!: number;
   @Input() selectedGroupName!: string;
   @Input() members: any;
@@ -132,6 +136,20 @@ export class GroupDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!TAB_VISIBLE_MATRIX[this.groupsService.activeTabIndex])
       this.groupsService.activeTabIndex = 0;
     this.triggerGridResize();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.selectedGroupName &&
+      !changes.selectedGroupName.firstChange &&
+      changes.selectedGroupName.previousValue !==
+        changes.selectedGroupName.currentValue
+    ) {
+      this.filter.setValue('', { emitEvent: true });
+      this.selectedFileAccessRules = null;
+      this.selectedProcessProfileRules = null;
+      this.triggerGridResize();
+    }
   }
 
   ngOnDestroy(): void {

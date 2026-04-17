@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="faviconTitle">
+  <title id="faviconTitle">AMS</title>
+  <defs>
+    <linearGradient id="amsGradient" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1677ff" />
+      <stop offset="1" stop-color="#6aaeff" />
+    </linearGradient>
+  </defs>
+  <rect x="9" y="9" width="46" height="46" rx="16" fill="url(#amsGradient)" />
+  <circle cx="47" cy="18" r="4" fill="#ffffff" fill-opacity="0.88" />
+  <text
+    x="32"
+    y="39"
+    fill="#ffffff"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="17"
+    font-weight="700"
+    letter-spacing="1.3"
+    text-anchor="middle">AMS</text>
+</svg>

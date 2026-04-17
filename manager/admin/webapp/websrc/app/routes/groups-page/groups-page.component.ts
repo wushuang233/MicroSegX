@@ -14,6 +14,7 @@ import { PathConstant } from '@common/constants/path.constant';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { Group } from '@common/types';
 
 @Component({
   standalone: false,
@@ -30,6 +31,8 @@ export class GroupsPageComponent implements OnInit, AfterViewInit {
   public netServicePolicyModeValue!: string;
   public netServicePolicyMode!: string;
   public linkedGroup: string = '';
+  public selectedGroup: Group | null = null;
+  public selectedGroupRenderKey: string = '';
   @ViewChild(GroupsComponent) groupsView!: GroupsComponent;
 
   constructor(
@@ -64,6 +67,33 @@ export class GroupsPageComponent implements OnInit, AfterViewInit {
   toggleSystemGroup = () => {
     this.isShowingSystemGroups = !this.isShowingSystemGroups;
   };
+
+  onSelectedGroupChange(group: Group | null) {
+    const nextGroup = group
+      ? ({
+          ...group,
+          members: Array.isArray(group.members)
+            ? [...group.members]
+            : group.members,
+        } as Group)
+      : null;
+
+    if (!nextGroup) {
+      this.selectedGroup = null;
+      this.selectedGroupRenderKey = '';
+      return;
+    }
+
+    if (this.selectedGroup?.name !== nextGroup.name) {
+      this.selectedGroup = null;
+      this.selectedGroupRenderKey = '';
+      this.cd.detectChanges();
+    }
+
+    this.selectedGroup = nextGroup;
+    this.selectedGroupRenderKey = nextGroup.name;
+    this.cd.detectChanges();
+  }
 
   openImportGroupsDialog = () => {
     const importDialogRef = this.dialog.open(ImportFileModalComponent, {

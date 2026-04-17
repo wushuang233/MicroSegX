@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { ResponseRulesService } from '@services/response-rules.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GridOptions, GridApi } from 'ag-grid-community';
@@ -29,7 +36,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   templateUrl: './response-rules.component.html',
   styleUrls: ['./response-rules.component.scss'],
 })
-export class ResponseRulesComponent implements OnInit, OnDestroy {
+export class ResponseRulesComponent implements OnInit, OnChanges, OnDestroy {
   @Input() source: string = '';
   @Input() groupName: string = '';
   @Input() resizableHeight: number = 0;
@@ -115,6 +122,16 @@ export class ResponseRulesComponent implements OnInit, OnDestroy {
       this.multiClusterService.onClusterSwitchedEvent$.subscribe(data => {
         this.refresh();
       });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.groupName &&
+      !changes.groupName.firstChange &&
+      changes.groupName.previousValue !== changes.groupName.currentValue
+    ) {
+      this.refresh();
+    }
   }
 
   ngOnDestroy(): void {

@@ -122,28 +122,30 @@ export class AdvancedFilterComponent implements OnInit {
   ngOnInit(): void {
     const filter = this.advFilter;
     const settings = this.settings;
-    this.domainChips = filter.domains;
-    this.groupChips = filter.groups;
+    this.domainChips = filter?.domains || [];
+    this.groupChips = filter?.groups || [];
     this.advFilterForm = new FormGroup({
-      domains: new FormControl(filter.domains),
-      selectedGroups: new FormControl(filter.groups),
-      vulnerabilityType: new FormControl(filter.cve),
+      domains: new FormControl(this.domainChips),
+      selectedGroups: new FormControl(this.groupChips),
+      vulnerabilityType: new FormControl(filter?.cve || 'all'),
       protocols: new FormGroup({
-        tcp: new FormControl(filter.protocol.tcp),
-        udp: new FormControl(filter.protocol.udp),
-        icmp: new FormControl(filter.protocol.icmp),
+        tcp: new FormControl(filter?.protocol?.tcp ?? true),
+        udp: new FormControl(filter?.protocol?.udp ?? true),
+        icmp: new FormControl(filter?.protocol?.icmp ?? true),
       }),
-      riskType: new FormControl(filter.risk),
+      riskType: new FormControl(filter?.risk || 'all'),
       settings: new FormGroup({
-        showSysNode: new FormControl(settings.showSysNode),
-        showSysApp: new FormControl(settings.showSysApp),
-        persistent: new FormControl(settings.persistent),
-        gpuEnabled: new FormControl(settings.gpuEnabled),
+        showSysNode: new FormControl(settings?.showSysNode ?? false),
+        showSysApp: new FormControl(settings?.showSysApp ?? false),
+        persistent: new FormControl(settings?.persistent ?? false),
+        gpuEnabled: new FormControl(settings?.gpuEnabled ?? false),
       }),
     });
   }
 
   reset() {
+    this.domainChips = [];
+    this.groupChips = [];
     this.advFilter = {
       domains: [],
       groups: [],
@@ -168,6 +170,23 @@ export class AdvancedFilterComponent implements OnInit {
       persistent: false,
       gpuEnabled: false,
     };
+    this.advFilterForm.patchValue({
+      domains: this.domainChips,
+      selectedGroups: this.groupChips,
+      vulnerabilityType: 'all',
+      protocols: {
+        tcp: true,
+        udp: true,
+        icmp: true,
+      },
+      riskType: 'all',
+      settings: {
+        showSysNode: false,
+        showSysApp: false,
+        persistent: false,
+        gpuEnabled: false,
+      },
+    });
     this.doReset.emit('reset');
   }
 
@@ -264,8 +283,19 @@ export class AdvancedFilterComponent implements OnInit {
       formValue === null
         ? matches
         : matches.filter(x => !formValue.find(y => y.name === x.name));
-    if (matchesNotYetSelected.length === 1)
-      selectedItems[type].value.push(matchesNotYetSelected[0]);
+    if (matchesNotYetSelected.length === 1) {
+      const nextValue = [...(formValue || []), matchesNotYetSelected[0]];
+
+      if (type === 'domain') {
+        this.domainChips = nextValue;
+        this.advFilterForm.controls.domains.setValue(nextValue);
+        this.advFilterForm.controls.domains.markAsTouched();
+      } else {
+        this.groupChips = nextValue;
+        this.advFilterForm.controls.selectedGroups.setValue(nextValue);
+        this.advFilterForm.controls.selectedGroups.markAsTouched();
+      }
+    }
 
     event.chipInput?.clear();
   }

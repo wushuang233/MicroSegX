@@ -1,4 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { ContainersService } from '@common/services/containers.service';
 
 @Component({
@@ -7,7 +13,7 @@ import { ContainersService } from '@common/services/containers.service';
   templateUrl: './members.component.html',
   styleUrls: ['./members.component.scss'],
 })
-export class MembersComponent implements OnInit {
+export class MembersComponent implements OnInit, OnChanges {
   @Input() source: string = '';
   @Input() groupName: string = '';
   @Input() resizableHeight: number = 0;
@@ -19,9 +25,20 @@ export class MembersComponent implements OnInit {
   constructor(private containersService: ContainersService) {}
 
   ngOnInit(): void {
+    this.syncMemberGridRowData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.members || changes.kind || changes.groupName) {
+      this.syncMemberGridRowData();
+    }
+  }
+
+  private syncMemberGridRowData() {
+    const members = this.members || [];
     this.memberGridRowData =
       this.kind === 'node'
-        ? this.members
-        : this.containersService.formatScannedWorkloads(this.members);
+        ? members
+        : this.containersService.formatScannedWorkloads(members);
   }
 }

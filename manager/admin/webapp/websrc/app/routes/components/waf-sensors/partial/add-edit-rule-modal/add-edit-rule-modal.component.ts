@@ -55,11 +55,11 @@ export class AddEditRuleModalComponent implements OnInit {
     this.operators = [
       {
         value: 'regex',
-        viewValue: this.translate.instant('waf.patternGrid.REGEX'),
+        viewValue: this.getPatternOperatorLabel('regex'),
       },
       {
         value: '!regex',
-        viewValue: this.translate.instant('waf.patternGrid.!REGEX'),
+        viewValue: this.getPatternOperatorLabel('!regex'),
       },
     ];
     this.contexts = ['packet', 'url', 'header', 'body'];
@@ -241,4 +241,15 @@ export class AddEditRuleModalComponent implements OnInit {
       }) > -1
     );
   };
+
+  private getPatternOperatorLabel(operator: 'regex' | '!regex') {
+    const key = `waf.patternGrid.${operator.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    if (translated !== key) {
+      return translated;
+    }
+    return operator === 'regex'
+      ? this.translate.instant('waf.patternGrid.IS')
+      : this.translate.instant('waf.patternGrid.NOT');
+  }
 }

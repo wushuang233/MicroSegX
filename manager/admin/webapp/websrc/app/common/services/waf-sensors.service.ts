@@ -138,9 +138,13 @@ export class WafSensorsService {
         field: 'op',
         cellRenderer: params => {
           if (params && params.value) {
-            return this.translate.instant(
-              `waf.patternGrid.${params.value.toUpperCase()}`
-            );
+            const key = `waf.patternGrid.${params.value.toUpperCase()}`;
+            const translated = this.translate.instant(key);
+            return translated === key
+              ? params.value === 'regex'
+                ? this.translate.instant('waf.patternGrid.IS')
+                : this.translate.instant('waf.patternGrid.NOT')
+              : translated;
           }
           return '';
         },

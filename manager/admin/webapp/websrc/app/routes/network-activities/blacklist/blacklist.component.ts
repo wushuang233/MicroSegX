@@ -128,21 +128,33 @@ export class BlacklistComponent implements OnInit {
 
   ngOnInit(): void {
     const list = this.blacklist;
-    this.domainChips = list.domains;
-    this.groupChips = list.groups;
-    this.nodeChips = list.endpoints;
+    this.domainChips = list?.domains || [];
+    this.groupChips = list?.groups || [];
+    this.nodeChips = list?.endpoints || [];
     this.form = new FormGroup({
-      hideUnmanaged: new FormControl(list.hideUnmanaged),
+      selectedDomains: new FormControl(this.domainChips),
+      selectedGroups: new FormControl(this.groupChips),
+      selectedNodes: new FormControl(this.nodeChips),
+      hideUnmanaged: new FormControl(list?.hideUnmanaged || false),
     });
   }
 
   reset() {
+    this.domainChips = [];
+    this.groupChips = [];
+    this.nodeChips = [];
     this.blacklist = {
       domains: [],
       groups: [],
       endpoints: [],
       hideUnmanaged: false,
     };
+    this.form.patchValue({
+      selectedDomains: this.domainChips,
+      selectedGroups: this.groupChips,
+      selectedNodes: this.nodeChips,
+      hideUnmanaged: false,
+    });
     this.doReset.emit('reset');
   }
 
@@ -263,8 +275,19 @@ export class BlacklistComponent implements OnInit {
       formValue === null
         ? matches
         : matches.filter(x => !formValue.find(y => y[key] === x[key]));
-    if (matchesNotYetSelected.length === 1)
-      selectedItems[type].value.push(matchesNotYetSelected[0]);
+    if (matchesNotYetSelected.length === 1) {
+      const nextValue = [...(formValue || []), matchesNotYetSelected[0]];
+      selectedItems[type].setValue(nextValue);
+      selectedItems[type].markAsTouched();
+
+      if (type === 'domain') {
+        this.domainChips = nextValue;
+      } else if (type === 'group') {
+        this.groupChips = nextValue;
+      } else {
+        this.nodeChips = nextValue;
+      }
+    }
 
     event.chipInput?.clear();
   }
