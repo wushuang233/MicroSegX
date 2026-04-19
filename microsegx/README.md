@@ -1,30 +1,67 @@
-# MicroSegX [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/microsegx/microsegx/badge)](https://scorecard.dev/viewer/?uri=github.com/microsegx/microsegx)
+# microsegx
 
-MicroSegX Full Lifecycle Container Security Platform delivers the only cloud-native security with uncompromising end-to-end protection from DevOps vulnerability protection to automated run-time security, and featuring a true Layer 7 container firewall.
+`microsegx` 目录保存核心控制面和节点执行面的源码，是 `controller`、`enforcer`、数据面和公共运行库的主要实现位置。
 
-A viewable version of docs can be seen at https://open-docs.microsegx.com.
+## 目录说明
 
-The images are on the MicroSegX Docker Hub registry. Use the appropriate version tag for the manager, controller, enforcer, and leave the version as 'latest' for scanner and updater. For example:
-+ microsegx/manager:5.0.0
-+ microsegx/controller:5.0.0
-+ microsegx/enforcer:5.0.0
-+ microsegx/scanner:latest
-+ microsegx/updater:latest
+- `controller`
+  控制面核心逻辑，包括缓存、策略、资源同步、REST/RPC、Kubernetes 资源处理等。
 
-Note: Deploying from the Rancher Manager 2.6.5+ MicroSegX chart pulls from the rancher-mirrored repo and deploys into the cattle-microsegx-system namespace.
+- `agent`
+  节点侧代理代码，对应 `enforcer` 运行时行为、策略执行和主机侧采集。
 
-# License
+- `dp`
+  数据面与包处理相关代码。
 
-Copyright © 2016-2025 [SUSE](https://www.suse.com/products/rancher/security/). All Rights Reserved
+- `share`
+  公共包、模型、集群通信和工具库。
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+- `monitor`
+  监控辅助进程代码。
 
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+- `upgrader`
+  升级相关组件代码。
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+- `scripts`
+  运行时脚本和系统配置脚本。
+
+- `templates`
+  控制面生成资源时用到的模板文件。
+
+- `package`
+  controller / enforcer 镜像 Dockerfile 和打包文件。
+
+## 常用流程
+
+构建核心二进制：
+
+```bash
+make fleet
+```
+
+构建 controller 镜像：
+
+```bash
+make build-controller-image TAG=<tag> REPO=<repo>
+```
+
+构建 enforcer 镜像：
+
+```bash
+make build-enforcer-image TAG=<tag> REPO=<repo>
+```
+
+兼容旧流程时，也可以继续使用：
+
+```bash
+make ctrl_image
+make enf_image
+```
+
+## 说明
+
+- `controller` 的持久化不是可选项，部署时需要同时保证 PVC、持久化目录和相关配置一致。
+- 该目录主要负责控制面与执行面源码，最终交付流程请以仓库根目录 `docs/` 下文档为准。
+- 自动策略系统的设计与执行手册在：
+  - `../docs/AUTO-NETWORK-POLICY-SYSTEM-DESIGN.zh-CN.md`
+  - `../docs/AUTO-NETWORK-POLICY-SYSTEM-AGENT-EXECUTION.zh-CN.md`

@@ -1,34 +1,58 @@
-﻿# Overview
-MicroSegX Security Center Admin Console for the SUSE MicroSegX Container Security Platform.
+# manager
 
-A viewable version of docs can be seen at https://open-docs.microsegx.com
+`manager` 目录保存管理端相关代码，包括后端接口、前端页面、打包脚本和镜像构建文件。
 
-The images are on the MicroSegX Docker Hub registry. Use the appropriate version tag for the manager, controller, enforcer, and leave the version as 'latest' for scanner and updater. For example:
-+ microsegx/manager:5.0.0
-+ microsegx/controller:5.0.0
-+ microsegx/enforcer:5.0.0
-+ microsegx/scanner:latest
-+ microsegx/updater:latest
+## 目录说明
 
-Note: Deploying from the Rancher Manager 2.6.5+ MicroSegX chart pulls from the rancher-mirrored repo and deploys into the cattle-microsegx-system namespace.
+- `admin`
+  Scala 后端工程，负责 API、静态资源装载和管理端服务启动。
 
-# Bugs & Issues
-Please submit bugs and issues to [microsegx/microsegx](//github.com/microsegx/microsegx/issues) with a title starting with `[UI] `.
+- `admin/webapp`
+  Angular 前端工程，页面样式、路由、组件和国际化资源主要都在这里。
 
-Or just [click here](//github.com/microsegx/microsegx/issues/new?title=%5BUI%5D%20) to create a new issue.
+- `common`
+  `manager` 侧公共模块。
 
-# License
+- `package`
+  `manager` 镜像构建目录，包含 Dockerfile、requirements 和入口脚本。
 
-Copyright © 2016-2026 [SUSE](https://www.suse.com/products/rancher/security/). All Rights Reserved
+- `scripts`
+  运维和支持脚本。
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+- `images`
+  界面定制相关示意资源。
 
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+## 常用流程
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+前端本地开发：
+
+```bash
+cd admin/webapp
+npm ci
+npm run start
+```
+
+前端生产构建：
+
+```bash
+cd admin/webapp
+npm run build
+```
+
+构建后端 assembly：
+
+```bash
+make jar
+```
+
+构建 `manager` 镜像：
+
+```bash
+make build-image TAG=<tag> REPO=<repo>
+```
+
+## 说明
+
+- 前端静态资源最终由 `admin/src/main/scala/com/microsegx/web/StaticResources.scala` 装入后端服务。
+- 前端页面修改、重打包和重部署流程请看 `../docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md`。
+- 整体打包与部署主流程请看 `../docs/DEPLOYMENT.md` 和 `../docs/PACKAGING.md`。

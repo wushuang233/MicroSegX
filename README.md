@@ -109,6 +109,12 @@
 - [docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md](./docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md)
   `manager` 前端页面修改与重部署流程。
 
+- [docs/AUTO-NETWORK-POLICY-SYSTEM-DESIGN.zh-CN.md](./docs/AUTO-NETWORK-POLICY-SYSTEM-DESIGN.zh-CN.md)
+  全自动网络策略系统设计文档。
+
+- [docs/AUTO-NETWORK-POLICY-SYSTEM-AGENT-EXECUTION.zh-CN.md](./docs/AUTO-NETWORK-POLICY-SYSTEM-AGENT-EXECUTION.zh-CN.md)
+  全自动网络策略系统执行手册。
+
 ## 推荐交付路径
 
 当前推荐的正式交付路径为：

@@ -1,39 +1,58 @@
-# MicroSegX
+# scanner
 
-MicroSegX vulnerability scanner for the SUSE MicroSegX Container Security Platform.
+`scanner` 目录保存漏洞扫描组件源码，负责漏洞库读取、镜像与运行时扫描、任务执行和扫描结果输出。
 
-The scanner has multiple working modes.
+## 目录说明
 
-The scanner runs with the MicroSegX controller to provide registry scan and runtime scan functions. Please see the [document](https://open-docs.microsegx.com) and the [helm chart](https://github.com/microsegx/microsegx-helm) of how to deploy scanners in this mode.
+- `scanner.go`
+  扫描器主入口。
 
-The scanner runs in standalone mode, print the scan results to the screen and save it to the file at the same time. Run the scanner in the standalone mode with the following command.
+- `server.go`
+  服务模式入口，供控制面调用。
 
+- `standalone.go`
+  独立运行模式入口。
+
+- `cvetools`
+  漏洞库、特征解析和包信息处理逻辑。
+
+- `detectors`
+  系统与软件包识别逻辑。
+
+- `task`
+  扫描任务执行逻辑。
+
+- `monitor`
+  辅助监控组件。
+
+- `data`
+  本地漏洞数据库和相关数据文件。
+
+- `package`
+  scanner 镜像打包文件。
+
+## 常用流程
+
+构建本地二进制：
+
+```bash
+make build
 ```
-docker run --rm  microsegx/scanner -i ubuntu:18.04
+
+运行单元测试：
+
+```bash
+make test
 ```
 
-The scanner can also be used in the CI/CD pipeline though various of plugins.
+构建镜像：
 
-Note: Deploying from the Rancher Manager 2.6.5+ MicroSegX chart pulls from the rancher-mirrored repo and deploys into the cattle-microsegx-system namespace.
+```bash
+make build-image TAG=<tag> REPO=<repo>
+```
 
-# Bugs & Issues
-Please submit bugs and issues to [microsegx/microsegx](//github.com/microsegx/microsegx/issues) with a title starting with `[SCAN] `.
+## 说明
 
-Or just [click here](//github.com/microsegx/microsegx/issues/new?title=%5BSCAN%5D%20) to create a new issue.
-
-# License
-
-Copyright © 2016-2025 [SUSE](https://www.suse.com/products/rancher/security/). All Rights Reserved
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+- `scanner` 既可以作为服务模式接入控制面，也可以独立运行做单次扫描。
+- 运行时实际部署通常还会配合漏洞库更新流程一起使用，镜像和交付以仓库根目录 `ops/`、`docs/` 下流程为准。
+- 当前工程里的 `scanner` 主要服务于 Kubernetes 集群内的安全评估，不再以公开产品 README 的用法说明为准。

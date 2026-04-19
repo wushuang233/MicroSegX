@@ -1,161 +1,49 @@
-# MicroSegX Helm charts
+# microsegx-helm
 
-A collection of Helm charts for deploying MicroSegX product in Kubernetes, Rancher and Openshift clusters.
+`microsegx-helm` 目录保存 `MicroSegX` 相关 Helm Chart 模板，供本仓库的离线打包和集群部署流程使用。
 
-## Installing charts
+## 目录说明
 
-### Helm Charts
+- `charts/core`
+  核心组件 chart，覆盖 `manager`、`controller`、`enforcer`、`scanner` 等主要工作负载。
 
-This repository contains three Helm charts.
-Chart | Description
------ | -----------
-core | Deploy MicroSegX container security core services. [chart](charts/core)
-crd | Deploy CRD services before installing MicroSegX container security platform. [chart](charts/crd)
-monitor | Deploy monitoring services, such as Prometheus exporter. [chart](charts/monitor)
+- `charts/crd`
+  先行安装的 CRD chart。
 
-**IMPORTANT** - Each chart has a set of configuration values, especially for the 'core' chart. Review the Helm chart configuration values [here](charts/core) and make any required changes to the `values.yaml` file for your deployment.
+- `charts/monitor`
+  监控相关 chart。
 
-### Adding chart repo
+- `values-local.yaml`
+  本地或特定环境覆盖值示例。
 
-```console
-helm repo add microsegx https://microsegx.github.io/microsegx-helm/
-helm search repo microsegx/core
+- `scripts`
+  版本和 chart 维护脚本。
+
+- `test`
+  chart 渲染与行为测试。
+
+## 常用流程
+
+渲染 core chart：
+
+```bash
+helm template microsegx charts/core -n microsegx -f values-local.yaml
 ```
 
-### Versioning
+安装或升级 core chart：
 
-Helm charts for officially released product are published from the release branch of the repository. The main branch is used for the charts of the product in the development. Typically, the charts in the main branch are published with the alpha, beta or rc tag. They can be discovered with --devel option.
-
-```console
-$ helm search repo microsegx/core -l
-NAME          	CHART VERSION	APP VERSION	DESCRIPTION
-microsegx/core	2.2.2       	5.0.2      	Helm chart for MicroSegX's core services
-microsegx/core	2.2.1        	5.0.1      	Helm chart for MicroSegX's core services
-microsegx/core	2.2.0        	5.0.0      	Helm chart for MicroSegX's core services
-microsegx/core	1.9.2        	4.4.4-s2   	Helm chart for MicroSegX's core services
-microsegx/core	1.9.1        	4.4.4      	Helm chart for MicroSegX's core services
-...
-...
-
-$ helm search repo microsegx/core --devel
-NAME            	CHART VERSION	APP VERSION	DESCRIPTION
-microsegx/core	2.2.0-b1     	5.0.0-b1   	Helm chart for MicroSegX's core services
-microsegx/core	1.9.2        	4.4.4-s2   	Helm chart for MicroSegX's core services
-microsegx/core	1.9.1        	4.4.4      	Helm chart for MicroSegX's core services
-microsegx/core	1.9.0        	4.4.4      	Helm chart for MicroSegX's core services
-microsegx/core	1.8.9        	4.4.3      	Helm chart for MicroSegX's core services
-...
-...
+```bash
+helm upgrade --install microsegx charts/core -n microsegx --create-namespace -f values-local.yaml
 ```
 
-### Deploy in Kubernetes
+单独安装 CRD：
 
-To install the chart with the release name `microsegx`:
-
-- Create the MicroSegX namespace. You can use namespace name other than "microsegx".
-```console
-kubectl create namespace microsegx
+```bash
+helm upgrade --install microsegx-crd charts/crd -n microsegx --create-namespace
 ```
 
-- Label the MicroSegX namespace with privileged profile for deploying on PSA enabled cluster.
-```console
-kubectl label  namespace microsegx "pod-security.kubernetes.io/enforce=privileged"
-```
+## 说明
 
-- To install the chart with the release name `microsegx`.
-```console
-helm install microsegx --namespace microsegx --create-namespace microsegx/core
-```
-
-You can find a list of all config options in the [README of the core chart](charts/core).
-
-### Deploy in Rancher by SUSE
-
-
-You can find instructions for deploying MicroSegX from Rancher charts here: https://open-docs.microsegx.com/deploying/rancher
-
-
-### Deploy in RedHat OpenShift
-
-- Create a new project.
-```console
-oc new-project microsegx
-```
-
-- Privileged SCC is added to Service Account specified in the values.yaml by Helm chart version 2.0.0 and above in new Helm install on OpenShift 4.x. In case of upgrading MicroSegX chart from previous version to 2.0.0, please delete Privileged SCC before upgrading.
-
-```console
-oc delete rolebinding -n microsegx system:openshift:scc:privileged
-```
-
-To install the chart with the release name `microsegx`:
-
-```console
-helm install microsegx --namespace microsegx microsegx/core --set openshift=true,crio.enabled=true
-```
-
-## Rolling upgrade
-
-```console
-helm upgrade microsegx --set tag=5.0.2 microsegx/core
-```
-
-## Uninstalling the Chart
-
-To uninstall/delete the `microsegx` deployment:
-
-```console
-helm delete microsegx
-```
-
-The command removes all the Kubernetes components associated with the chart and deletes the release.
-
-## Using private registry
-
-If you are using a private registry, you need pull MicroSegX images of the specified version to your own registry and add registry name when installing the chart.
-
-```console
-helm install microsegx --namespace microsegx microsegx/core --set registry=your-private-registry
-```
-
-If your registry needs authentication, create a secret with the authentication information:
-
-```console
-kubectl create secret docker-registry regsecret -n microsegx --docker-server=https://your-private-registry/ --docker-username=your-name --docker-password=your-password --docker-email=your-email
-```
-
-or for OpenShift:
-
-```console
-oc create secret docker-registry regsecret -n microsegx --docker-server=https://your-private-registry/ --docker-username=your-name --docker-password=your-password --docker-email=your-email
-```
-
-And install the helm chart with at least these values:
-
-```console
-helm install microsegx --namespace microsegx microsegx/core --set imagePullSecrets=regsecret,registry=your-private-registry
-```
-
-To keep the vulnerability database up-to-date, you want to create a script, run it as a cronjob to pull the updater and scanner images periodically to your own registry.
-
-```console
-$ docker login docker.io
-$ docker pull docker.io/microsegx/updater
-$ docker logout docker.io
-
-$ oc login -u <user_name>
-# this user_name is the one when you install microsegx
-
-$ docker login -u <user_name> -p `oc whoami -t` docker-registry.default.svc:5000
-$ docker tag docker.io/microsegx/updater docker-registry.default.svc:5000/microsegx/updater
-$ docker push docker-registry.default.svc:5000/microsegx/updater
-$ docker logout docker-registry.default.svc:5000
-```
-
-## Migration
-
-If you are using the previous way to install charts from the source directly, after adding the Helm repo, you can upgrade the current installation by given the same chart name. 
-
-```console
-helm upgrade my-release microsegx/core --namespace microsegx --set tag=4.1.0
-```
+- 这里的 chart 是当前仓库源码和离线交付流程的一部分，不再按上游公开 Helm 仓库说明维护。
+- 最终交付仍以仓库根目录 `ops/full-release` 脚本和 `../docs/` 文档为准。
+- 如果是普通 Kubernetes 集群离线 `ctr/containerd` 交付，请优先看 `../docs/K8S-CONTAINERD-DELIVERY-MANUAL.md`。
