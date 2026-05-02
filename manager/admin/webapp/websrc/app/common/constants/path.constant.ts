@@ -88,6 +88,11 @@ export class PathConstant {
   public static DASHBOARD_DETAILS_URL = 'dashboard/details'; //dashboard
   public static DASHBOARD_NOTIFICATIONS_URL = 'dashboard/notifications'; //dashboard
   public static MICROSEGX_OVERVIEW_URL = 'microsegx/overview'; //microsegx
+  public static AUTO_POLICY_STATUS_URL = 'policy/auto/status'; //policy
+  public static AUTO_POLICY_CONFIG_URL = 'policy/auto/config'; //policy
+  public static AUTO_POLICY_RULES_URL = 'policy/auto/rule'; //policy
+  public static AUTO_POLICY_FEATURES_URL = 'policy/auto/feature'; //policy
+  public static AUTO_POLICY_EVENTS_URL = 'policy/auto/event'; //policy
   public static SECURITY_EVENTS_URL_2 = 'security-events2'; //events
   public static ADMISSION_URL = 'admission/rules'; //policy
   public static ADMISSION_SINGLE_URL = 'admission/rule'; //policy

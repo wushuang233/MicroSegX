@@ -77,14 +77,63 @@
   [currentName]="currentNodeName"
   [conversations]="conversations"></app-active-session>
 
+<div
+  *ngIf="popupState.onEdge() && edgeDetailLoading"
+  class="infoBox topLeftSession"
+  cdkDrag>
+  <div
+    cdkDragHandle
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 class="mt-1">{{ 'general.LOADING' | translate }}</h4>
+    <button
+      (click)="popupState.leave()"
+      aria-label="Close icon button"
+      class="d-flex align-items-center justify-content-center"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+  <hr class="fancy mx-0 my-0" />
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+
+<div
+  *ngIf="popupState.onEdge() && !edgeDetailLoading && edgeDetailError"
+  class="infoBox topLeftSession"
+  cdkDrag>
+  <div
+    cdkDragHandle
+    class="d-flex align-items-center justify-content-between handle">
+    <h4 class="mt-1">{{ edgeDetailError | translate }}</h4>
+    <button
+      (click)="popupState.leave()"
+      aria-label="Close icon button"
+      class="d-flex align-items-center justify-content-center"
+      mat-icon-button>
+      <i class="eos-icons">close</i>
+    </button>
+  </div>
+</div>
+
 <app-edge-details
-  *ngIf="popupState.onEdge()"
+  *ngIf="
+    popupState.onEdge() &&
+    !edgeDetailLoading &&
+    !edgeDetailError &&
+    conversationDetail
+  "
   [popupState]="popupState"
   (doClearSession)="clearSessions($event)"
   [conversationDetail]="conversationDetail"
   [entriesGridHeight]="entriesGridHeight"
   [edgeDetails]="edgeDetails">
 </app-edge-details>
+
+<app-auto-policy-inspector
+  *ngIf="popupState.onEdge() && !edgeDetailLoading && conversationDetail"
+  [edgeDetails]="edgeDetails"
+  [conversationDetail]="conversationDetail">
+</app-auto-policy-inspector>
 
 <app-sniffer
   *ngIf="popupState.onSniffer()"

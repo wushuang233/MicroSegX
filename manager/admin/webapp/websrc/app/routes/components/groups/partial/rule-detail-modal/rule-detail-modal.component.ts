@@ -16,6 +16,15 @@ export class RuleDetailModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (!this.data) {
+      this.data = {};
+    }
+    if (!this.data.rule) {
+      this.data.rule = {};
+    }
+    if (!Array.isArray(this.data.rule.applications)) {
+      this.data.rule.applications = [];
+    }
     if (this.data.ruleType === 'response') {
       this.data.rule.conditions = this.destructConditions(
         this.data.rule.conditions

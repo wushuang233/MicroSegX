@@ -42,8 +42,15 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'port-exposure',
+            redirectTo: 'auto-policy',
             pathMatch: 'full',
+          },
+          {
+            path: 'auto-policy',
+            loadChildren: () =>
+              import('./microsegx-auto-policy/microsegx-auto-policy.module').then(
+                m => m.MicrosegxAutoPolicyModule
+              ),
           },
           {
             path: 'port-exposure',
@@ -55,8 +62,8 @@ export const routes: Routes = [
           {
             path: 'ziti',
             loadChildren: () =>
-              import('./microsegx-ziti/microsegx-ziti.module').then(
-                m => m.MicrosegxZitiModule
+              import('./microsegx-port-exposure/microsegx-port-exposure.module').then(
+                m => m.MicrosegxPortExposureModule
               ),
           },
         ],

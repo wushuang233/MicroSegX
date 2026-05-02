@@ -8,6 +8,54 @@ STACK_CONTAINERD_NAMESPACE="${STACK_CONTAINERD_NAMESPACE:-k8s.io}"
 K3S_IMPORT_HELPER_NAMESPACE="${K3S_IMPORT_HELPER_NAMESPACE:-default}"
 K3S_IMPORT_HELPER_NAME="${K3S_IMPORT_HELPER_NAME:-k3s-import-helper}"
 K3S_IMPORT_HELPER_IMAGE="${K3S_IMPORT_HELPER_IMAGE:-alpine:3.20}"
+PORT_AUDIT_NAMESPACE="${PORT_AUDIT_NAMESPACE:-port-audit}"
+PORT_AUDIT_SERVICE_NAME="${PORT_AUDIT_SERVICE_NAME:-k8s-port-audit}"
+
+wait_for_service_ip() {
+  local namespace="$1"
+  local service_name="$2"
+  local timeout_seconds="${3:-120}"
+  local elapsed=0
+  local ip=""
+
+  while (( elapsed < timeout_seconds )); do
+    ip=$(kubectl get svc -n "${namespace}" "${service_name}" -o jsonpath='{.spec.clusterIP}' 2>/dev/null || true)
+    if [[ -n "${ip}" && "${ip}" != "None" && "${ip}" != "<none>" ]]; then
+      printf '%s' "${ip}"
+      return 0
+    fi
+    sleep 2
+    elapsed=$((elapsed + 2))
+  done
+
+  return 1
+}
+
+resolve_first_node_internal_ip() {
+  kubectl get nodes -o jsonpath='{range .items[0].status.addresses[?(@.type=="InternalIP")]}{.address}{end}' 2>/dev/null || true
+}
+
+resolve_port_audit_host_port() {
+  local namespace="$1"
+  local deployment_name="$2"
+  kubectl get deployment -n "${namespace}" "${deployment_name}" \
+    -o jsonpath='{range .spec.template.spec.containers[0].ports[*]}{.hostPort}{"\n"}{end}' 2>/dev/null \
+    | awk 'NF { print; exit }'
+}
+
+patch_runtime_port_audit_address() {
+  local manager_namespace="$1"
+  local base_url="${MICROSEGX_PORT_AUDIT_BASE_URL:-}"
+
+  if [[ -z "${base_url}" ]]; then
+    echo "==> Skipping manager port-audit runtime patch: base URL is empty"
+    return 0
+  fi
+
+  echo "==> Patching manager port-audit runtime URL to ${base_url}"
+  kubectl set env -n "${manager_namespace}" deployment/microsegx-manager-pod MICROSEGX_PORT_AUDIT_BASE_URL="${base_url}" >/dev/null
+  kubectl rollout status -n "${manager_namespace}" deployment/microsegx-manager-pod --timeout=180s
+}
 
 if [[ -d "${SCRIPT_DIR}/core" && -d "${SCRIPT_DIR}/port-audit-stack" ]]; then
   DEPLOY_LAYOUT="artifact"
@@ -54,6 +102,41 @@ require_cmd() {
     echo "Required command not found: $1" >&2
     exit 1
   }
+}
+
+prepare_local_full_release_env() {
+  local target_env="$1"
+  cp "${FULL_RELEASE_ENV}" "${target_env}"
+
+  if ! grep -q '^AUTO_POLICY_MODE=' "${target_env}"; then
+    cat >>"${target_env}" <<'EOF'
+AUTO_POLICY_MODE=shadow
+AUTO_POLICY_WINDOW_SECONDS=5
+AUTO_POLICY_SLOT_MINUTES=1
+AUTO_POLICY_DISTINCT_DAY_DURATION=60s
+AUTO_POLICY_TTL_CHECK_SECONDS=60
+EOF
+    echo "==> Applying default local auto-policy shadow settings for single-node validation"
+  fi
+
+  if [[ "${STACK_LOCAL_RUNTIME}" != "k3s" ]]; then
+    return
+  fi
+
+  require_cmd kubectl
+
+  local node_count
+  node_count=$(kubectl get nodes --no-headers 2>/dev/null | sed '/^$/d' | wc -l | tr -d '[:space:]')
+  if [[ "${node_count}" != "1" ]]; then
+    return
+  fi
+
+  cat >>"${target_env}" <<'EOF'
+CONTROLLER_REPLICAS=1
+SCANNER_REPLICAS=1
+EOF
+
+  echo "==> Single-node k3s detected, overriding core/scanner replicas to 1 for local deployment"
 }
 
 ensure_k3s_import_helper() {
@@ -157,6 +240,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
+FULL_RELEASE_DEPLOY_ENV="${TMP_DIR}/full-release.local.env"
+prepare_local_full_release_env "${FULL_RELEASE_DEPLOY_ENV}"
+
 MANAGER_OVERLAY_FILE="${TMP_DIR}/manager-microsegx.overlay.yaml"
 cat >"${MANAGER_OVERLAY_FILE}" <<EOF
 manager:
@@ -167,21 +253,26 @@ manager:
 EOF
 
 echo "==> Importing local manager/core images"
-ARTIFACT_DIR="${FULL_RELEASE_ARTIFACT_DIR}" bash "${FULL_RELEASE_LOAD_SCRIPT}" "${FULL_RELEASE_ENV}"
+ARTIFACT_DIR="${FULL_RELEASE_ARTIFACT_DIR}" bash "${FULL_RELEASE_LOAD_SCRIPT}" "${FULL_RELEASE_DEPLOY_ENV}"
 
 echo "==> Deploying manager/core with MicroSegX overlay"
 EXTRA_VALUES_FILES="${MANAGER_OVERLAY_FILE}" \
   ARTIFACT_DIR="${FULL_RELEASE_ARTIFACT_DIR}" \
-  bash "${FULL_RELEASE_DEPLOY_SCRIPT}" "${FULL_RELEASE_ENV}"
+  bash "${FULL_RELEASE_DEPLOY_SCRIPT}" "${FULL_RELEASE_DEPLOY_ENV}"
 
 echo "==> Importing port-audit + OpenZiti stack image"
 import_stack_image
+
+echo "==> Resetting previous OpenZiti installer job if it exists"
+kubectl delete job -n openziti-installer openziti-stack-installer --ignore-not-found >/dev/null 2>&1 || true
 
 echo "==> Applying MicroSegX port-audit + OpenZiti installer"
 kubectl apply -f "${STACK_INSTALLER_MANIFEST}"
 
 echo "==> Waiting for installer job to finish"
 kubectl wait --for=condition=complete -n openziti-installer job/openziti-stack-installer --timeout="${STACK_INSTALLER_TIMEOUT:-30m}" || true
+
+patch_runtime_port_audit_address "${NAMESPACE:-microsegx}"
 
 echo
 echo "Manager/core pods:"

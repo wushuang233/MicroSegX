@@ -1,5 +1,5 @@
-<div class="ziti-page">
-  <section class="workspace-hero">
+<div class="ziti-page" [class.ziti-page--embedded]="embedded">
+  <section *ngIf="!embedded" class="workspace-hero">
     <div class="workspace-hero__content">
       <span class="workspace-kicker">
         {{ 'MICROSEGX.ZITI.HERO_EYEBROW' | translate }}
@@ -47,9 +47,56 @@
       </mat-form-field>
 
       <button
+        type="button"
         mat-flat-button
         color="primary"
         class="hero-action hero-action--primary"
+        (click)="refresh()"
+        [disabled]="loading">
+        <mat-icon>cached</mat-icon>
+        {{ 'general.REFRESH' | translate }}
+      </button>
+    </div>
+  </section>
+
+  <section *ngIf="embedded" class="workspace-inline-header">
+    <div class="workspace-inline-header__copy">
+      <span class="workspace-kicker">
+        {{ 'MICROSEGX.ZITI.HERO_EYEBROW' | translate }}
+      </span>
+      <div class="page-header__info">
+        <h2>{{ 'MICROSEGX.ZITI.TITLE' | translate }}</h2>
+        <p class="subtitle">{{ 'MICROSEGX.ZITI.SUBTITLE' | translate }}</p>
+      </div>
+      <div class="workspace-chips">
+        <span class="workspace-chip">
+          <mat-icon>hub</mat-icon>
+          {{ 'MICROSEGX.ZITI.CONTROLLER' | translate }}:
+          {{
+            session?.controller_url || session?.default_controller_url || '-'
+          }}
+        </span>
+        <span class="workspace-chip">
+          <mat-icon>badge</mat-icon>
+          {{ 'MICROSEGX.ZITI.IDENTITY' | translate }}:
+          {{ session?.identity_name || session?.username || '-' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="workspace-inline-header__actions">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'general.FILTER' | translate }}</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          [placeholder]="'MICROSEGX.ZITI.SEARCH_PLACEHOLDER' | translate" />
+      </mat-form-field>
+
+      <button
+        type="button"
+        mat-stroked-button
+        class="hero-action"
         (click)="refresh()"
         [disabled]="loading">
         <mat-icon>cached</mat-icon>
@@ -79,7 +126,7 @@
     </mat-card>
 
     <mat-card
-      *ngIf="isConfigured && !isLoggedIn"
+      *ngIf="isConfigured && !isLoggedIn && !hasOverviewData"
       class="feedback-card feedback-card--warning">
       <mat-icon>lock_clock</mat-icon>
       <div>
@@ -88,7 +135,17 @@
       </div>
     </mat-card>
 
-    <ng-container *ngIf="isConfigured && isLoggedIn">
+    <mat-card
+      *ngIf="isConfigured && isReadOnlySession && hasOverviewData"
+      class="feedback-card feedback-card--warning">
+      <mat-icon>visibility</mat-icon>
+      <div>
+        <h3>{{ 'MICROSEGX.ZITI.READ_ONLY_TITLE' | translate }}</h3>
+        <p>{{ 'MICROSEGX.ZITI.READ_ONLY_DESC' | translate }}</p>
+      </div>
+    </mat-card>
+
+    <ng-container *ngIf="isConfigured && (isLoggedIn || hasOverviewData)">
       <div class="session-grid">
         <mat-card class="session-card session-card--primary">
           <div class="session-card__head">
@@ -99,9 +156,32 @@
               <h2>{{ session?.identity_name || session?.username || '-' }}</h2>
               <p>{{ 'MICROSEGX.ZITI.SESSION_DESC' | translate }}</p>
             </div>
-            <span class="status-chip status-online">
-              <mat-icon>check_circle</mat-icon>
-              {{ 'MICROSEGX.ZITI.SESSION_ACTIVE' | translate }}
+            <span
+              class="status-chip"
+              [ngClass]="
+                isReadOnlySession
+                  ? 'status-offline'
+                  : isLoggedIn
+                    ? 'status-online'
+                    : 'status-offline'
+              ">
+              <mat-icon>
+                {{
+                  isReadOnlySession
+                    ? 'visibility'
+                    : isLoggedIn
+                      ? 'check_circle'
+                      : 'visibility'
+                }}
+              </mat-icon>
+              {{
+                (isReadOnlySession
+                  ? 'MICROSEGX.ZITI.READ_ONLY_BADGE'
+                  : isLoggedIn
+                    ? 'MICROSEGX.ZITI.SESSION_ACTIVE'
+                    : 'MICROSEGX.ZITI.READ_ONLY_BADGE'
+                ) | translate
+              }}
             </span>
           </div>
 
@@ -283,6 +363,8 @@
           </div>
 
           <button
+            type="button"
+            *ngIf="canMutate"
             mat-flat-button
             color="primary"
             class="tabs-card__create"
@@ -408,8 +490,9 @@
                     {{ 'general.ACTIONS' | translate }}
                   </th>
                   <td mat-cell *matCellDef="let router">
-                    <div class="row-actions">
+                    <div *ngIf="canMutate" class="row-actions">
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
@@ -418,6 +501,7 @@
                         {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [matTooltip]="
@@ -436,6 +520,7 @@
                         }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [disabled]="isEntityBusy('router-reenroll', router.id)"
@@ -447,6 +532,7 @@
                         {{ 'MICROSEGX.ZITI.Routers.RE_ENROLL' | translate }}
                       </button>
                       <button
+                        type="button"
                         *ngIf="getRouterWorkload(router)"
                         mat-stroked-button
                         class="action-chip"
@@ -459,6 +545,7 @@
                         {{ 'MICROSEGX.ZITI.Routers.DELETE_K8S' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
@@ -668,18 +755,13 @@
                     {{ 'general.ACTIONS' | translate }}
                   </th>
                   <td mat-cell *matCellDef="let service">
-                    <div class="row-actions">
+                    <div *ngIf="canMutate" class="row-actions">
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [disabled]="!canAttachServiceToRouter(service)"
-                        [matTooltip]="
-                          canAttachServiceToRouter(service)
-                            ? ('MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER'
-                              | translate)
-                            : ('MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_DISABLED'
-                              | translate)
-                        "
+                        [matTooltip]="getAttachRouterDisabledTooltip(service)"
                         (click)="openAttachServiceDialog(service)">
                         <mat-icon>router</mat-icon>
                         {{
@@ -687,6 +769,7 @@
                         }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
@@ -695,6 +778,7 @@
                         {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
@@ -786,11 +870,7 @@
                       <mat-option
                         *ngFor="let type of identityTypeOptions"
                         [value]="type">
-                        {{
-                          type === 'admin'
-                            ? ('MICROSEGX.ZITI.TYPE_ADMIN' | translate)
-                            : type
-                        }}
+                        {{ getIdentityTypeDisplay(type) }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -819,7 +899,9 @@
                   </th>
                   <td mat-cell *matCellDef="let identity">
                     <div class="entity-cell">
-                      <strong>{{ getIdentityTypeName(identity) }}</strong>
+                      <strong>{{
+                        getIdentityTypeDisplay(identity.type)
+                      }}</strong>
                       <small>{{ getIdentityTypeLabel(identity) }}</small>
                     </div>
                   </td>
@@ -873,8 +955,9 @@
                     {{ 'general.ACTIONS' | translate }}
                   </th>
                   <td mat-cell *matCellDef="let identity">
-                    <div class="row-actions">
+                    <div *ngIf="canMutate" class="row-actions">
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
@@ -883,6 +966,7 @@
                         {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [disabled]="isEntityBusy('identity-jwt', identity.id)"
@@ -896,6 +980,7 @@
                         }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [disabled]="
@@ -909,6 +994,7 @@
                         {{ 'MICROSEGX.ZITI.IDENTITIES.ROTATE_JWT' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
@@ -1025,8 +1111,9 @@
                     {{ 'general.ACTIONS' | translate }}
                   </th>
                   <td mat-cell *matCellDef="let config">
-                    <div class="row-actions">
+                    <div *ngIf="canMutate" class="row-actions">
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
@@ -1035,6 +1122,7 @@
                         {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
@@ -1087,8 +1175,12 @@
                       <mat-option value="all">{{
                         'general.ALL' | translate
                       }}</mat-option>
-                      <mat-option value="AnyOf">AnyOf</mat-option>
-                      <mat-option value="AllOf">AllOf</mat-option>
+                      <mat-option value="AnyOf">{{
+                        policySemanticLabel('AnyOf')
+                      }}</mat-option>
+                      <mat-option value="AllOf">{{
+                        policySemanticLabel('AllOf')
+                      }}</mat-option>
                     </mat-select>
                   </mat-form-field>
 
@@ -1104,10 +1196,10 @@
                         'general.ALL' | translate
                       }}</mat-option>
                       <mat-option value="Dial">{{
-                        'MICROSEGX.ZITI.POLICIES.TYPE_DIAL' | translate
+                        policyTypeLabel('Dial')
                       }}</mat-option>
                       <mat-option value="Bind">{{
-                        'MICROSEGX.ZITI.POLICIES.TYPE_BIND' | translate
+                        policyTypeLabel('Bind')
                       }}</mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -1170,11 +1262,13 @@
                     {{ 'general.ACTIONS' | translate }}
                   </th>
                   <td mat-cell *matCellDef="let policy">
-                    <div class="row-actions">
+                    <div *ngIf="canMutate" class="row-actions">
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
-                        [matTooltip]="'MICROSEGX.ZITI.EDIT_ENTITY' | translate"
+                        [disabled]="isSystemManagedEntity(policy)"
+                        [matTooltip]="getEditTooltip(policy)"
                         (click)="
                           openEditPolicyDialog(policy, selectedPolicyType)
                         ">
@@ -1182,6 +1276,7 @@
                         {{ 'MICROSEGX.ZITI.EDIT_ENTITY' | translate }}
                       </button>
                       <button
+                        type="button"
                         mat-stroked-button
                         class="action-chip"
                         color="warn"
@@ -1224,7 +1319,7 @@
 <div
   *ngIf="showServiceAttachDialog"
   class="dialog-overlay"
-  (click)="closeServiceAttachDialog()">
+  (click)="!dialogLoading && closeServiceAttachDialog()">
   <mat-card class="dialog-card" (click)="$event.stopPropagation()">
     <mat-card-header>
       <mat-card-title>
@@ -1297,14 +1392,21 @@
     </mat-card-content>
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="primary"
         (click)="attachServiceToRouter()"
-        [disabled]="dialogLoading">
+        [disabled]="
+          dialogLoading || !serviceAttachForm.routerId || !selectedAttachRouter
+        ">
         <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.SAVE' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeServiceAttachDialog()">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeServiceAttachDialog()"
+        [disabled]="dialogLoading">
         {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
       </button>
     </mat-card-actions>
@@ -1314,7 +1416,7 @@
 <div
   *ngIf="showRouterDeployDialog"
   class="dialog-overlay"
-  (click)="closeRouterDeployDialog()">
+  (click)="!dialogLoading && closeRouterDeployDialog()">
   <mat-card class="dialog-card" (click)="$event.stopPropagation()">
     <mat-card-header>
       <mat-card-title>
@@ -1362,6 +1464,7 @@
     </mat-card-content>
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="primary"
         (click)="deployRouter()"
@@ -1369,7 +1472,11 @@
         <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.SAVE' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeRouterDeployDialog()">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeRouterDeployDialog()"
+        [disabled]="dialogLoading">
         {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
       </button>
     </mat-card-actions>
@@ -1379,7 +1486,10 @@
 <div
   *ngIf="showCreateDialog || showEditDialog"
   class="dialog-overlay"
-  (click)="showCreateDialog ? closeCreateDialog() : closeEditDialog()">
+  (click)="
+    !dialogLoading &&
+      (showCreateDialog ? closeCreateDialog() : closeEditDialog())
+  ">
   <mat-card
     class="dialog-card dialog-card--wide"
     (click)="$event.stopPropagation()">
@@ -1476,10 +1586,18 @@
                 'MICROSEGX.ZITI.IDENTITIES.TYPE' | translate
               }}</mat-label>
               <mat-select [(ngModel)]="entityForm.type">
-                <mat-option value="Default">Default</mat-option>
-                <mat-option value="Device">Device</mat-option>
-                <mat-option value="User">User</mat-option>
-                <mat-option value="Service">Service</mat-option>
+                <mat-option value="Default">{{
+                  'MICROSEGX.ZITI.TYPE_DEFAULT' | translate
+                }}</mat-option>
+                <mat-option value="Device">{{
+                  'MICROSEGX.ZITI.TYPE_DEVICE' | translate
+                }}</mat-option>
+                <mat-option value="User">{{
+                  'MICROSEGX.ZITI.TYPE_USER' | translate
+                }}</mat-option>
+                <mat-option value="Service">{{
+                  'MICROSEGX.ZITI.TYPE_SERVICE' | translate
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -1727,8 +1845,12 @@
                 'MICROSEGX.ZITI.POLICIES.TYPE' | translate
               }}</mat-label>
               <mat-select [(ngModel)]="entityForm.type">
-                <mat-option value="Dial">Dial</mat-option>
-                <mat-option value="Bind">Bind</mat-option>
+                <mat-option value="Dial">{{
+                  policyTypeLabel('Dial')
+                }}</mat-option>
+                <mat-option value="Bind">{{
+                  policyTypeLabel('Bind')
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -1737,8 +1859,12 @@
                 'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
               }}</mat-label>
               <mat-select [(ngModel)]="entityForm.semantic">
-                <mat-option value="AnyOf">AnyOf</mat-option>
-                <mat-option value="AllOf">AllOf</mat-option>
+                <mat-option value="AnyOf">{{
+                  policySemanticLabel('AnyOf')
+                }}</mat-option>
+                <mat-option value="AllOf">{{
+                  policySemanticLabel('AllOf')
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -1843,8 +1969,12 @@
                 'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
               }}</mat-label>
               <mat-select [(ngModel)]="entityForm.semantic">
-                <mat-option value="AnyOf">AnyOf</mat-option>
-                <mat-option value="AllOf">AllOf</mat-option>
+                <mat-option value="AnyOf">{{
+                  policySemanticLabel('AnyOf')
+                }}</mat-option>
+                <mat-option value="AllOf">{{
+                  policySemanticLabel('AllOf')
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -1940,8 +2070,12 @@
                 'MICROSEGX.ZITI.POLICIES.SEMANTIC' | translate
               }}</mat-label>
               <mat-select [(ngModel)]="entityForm.semantic">
-                <mat-option value="AnyOf">AnyOf</mat-option>
-                <mat-option value="AllOf">AllOf</mat-option>
+                <mat-option value="AnyOf">{{
+                  policySemanticLabel('AnyOf')
+                }}</mat-option>
+                <mat-option value="AllOf">{{
+                  policySemanticLabel('AllOf')
+                }}</mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -1984,6 +2118,7 @@
 
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="primary"
         (click)="showCreateDialog ? createEntity() : updateEntity()"
@@ -1992,8 +2127,10 @@
         {{ 'MICROSEGX.ZITI.SAVE' | translate }}
       </button>
       <button
+        type="button"
         mat-stroked-button
-        (click)="showCreateDialog ? closeCreateDialog() : closeEditDialog()">
+        (click)="showCreateDialog ? closeCreateDialog() : closeEditDialog()"
+        [disabled]="dialogLoading">
         {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
       </button>
     </mat-card-actions>
@@ -2003,7 +2140,7 @@
 <div
   *ngIf="showDeleteConfirm"
   class="dialog-overlay"
-  (click)="closeDeleteConfirm()">
+  (click)="!dialogLoading && closeDeleteConfirm()">
   <mat-card
     class="dialog-card dialog-card--small"
     (click)="$event.stopPropagation()">
@@ -2032,6 +2169,7 @@
 
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="warn"
         (click)="deleteEntity()"
@@ -2039,7 +2177,11 @@
         <mat-spinner *ngIf="dialogLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.ZITI.DELETE_ENTITY' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeDeleteConfirm()">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeDeleteConfirm()"
+        [disabled]="dialogLoading">
         {{ 'MICROSEGX.ZITI.CANCEL' | translate }}
       </button>
     </mat-card-actions>

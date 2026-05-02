@@ -14,8 +14,11 @@ func checkControllerServiceDefault(t *testing.T, svc corev1.Service) {
 	if svc.Spec.Type != "" || svc.Spec.ClusterIP != "None" {
 		t.Errorf("Service type is wrong. type=%v clusterIP=%v\n", svc.Spec.Type, svc.Spec.ClusterIP)
 	}
-	if len(svc.Spec.Ports) != 3 {
+	if len(svc.Spec.Ports) != 4 {
 		t.Errorf("Service port is wrong. ports=%+v\n", svc.Spec.Ports)
+	}
+	if svc.Spec.Ports[3].Port != 18400 {
+		t.Errorf("Controller gRPC service port is missing. ports=%+v\n", svc.Spec.Ports)
 	}
 	if app, ok := svc.Spec.Selector["app"]; !ok || app != "microsegx-controller-pod" {
 		t.Errorf("Service selector is invalid. selector=%+v\n", svc.Spec.Selector)
@@ -31,6 +34,24 @@ func checkControllerServiceAPI(t *testing.T, svc corev1.Service, svcType string)
 	}
 	if len(svc.Spec.Ports) != 1 || svc.Spec.Ports[0].Port != 10443 {
 		t.Errorf("Service port is wrong. ports=%+v\n", svc.Spec.Ports)
+	}
+	if app, ok := svc.Spec.Selector["app"]; !ok || app != "microsegx-controller-pod" {
+		t.Errorf("Service selector is invalid. selector=%+v\n", svc.Spec.Selector)
+	}
+}
+
+func checkControllerServiceCluster(t *testing.T, svc corev1.Service) {
+	if svc.Name != "microsegx-svc-controller-cluster" {
+		t.Errorf("Service name is wrong. name=%v\n", svc.Name)
+	}
+	if svc.Spec.Type != corev1.ServiceTypeClusterIP || svc.Spec.ClusterIP == "" || svc.Spec.ClusterIP == "None" {
+		t.Errorf("Service type is wrong. type=%v clusterIP=%v\n", svc.Spec.Type, svc.Spec.ClusterIP)
+	}
+	if len(svc.Spec.Ports) != 4 {
+		t.Errorf("Service port is wrong. ports=%+v\n", svc.Spec.Ports)
+	}
+	if svc.Spec.Ports[3].Port != 18400 {
+		t.Errorf("Controller gRPC service port is missing. ports=%+v\n", svc.Spec.Ports)
 	}
 	if app, ok := svc.Spec.Selector["app"]; !ok || app != "microsegx-controller-pod" {
 		t.Errorf("Service selector is invalid. selector=%+v\n", svc.Spec.Selector)
@@ -78,7 +99,7 @@ func TestControllerService(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 2 {
+	if len(outs) != 3 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
@@ -90,6 +111,8 @@ func TestControllerService(t *testing.T) {
 		case 0:
 			checkControllerServiceDefault(t, svc)
 		case 1:
+			checkControllerServiceCluster(t, svc)
+		case 2:
 			checkControllerServiceAPI(t, svc, "ClusterIP")
 		}
 	}
@@ -108,7 +131,7 @@ func TestControllerServiceAPI(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 2 {
+	if len(outs) != 3 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
@@ -120,6 +143,8 @@ func TestControllerServiceAPI(t *testing.T) {
 		case 0:
 			checkControllerServiceDefault(t, svc)
 		case 1:
+			checkControllerServiceCluster(t, svc)
+		case 2:
 			checkControllerServiceAPI(t, svc, "NodePort")
 		}
 	}
@@ -138,7 +163,7 @@ func TestControllerFedMaster(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 2 {
+	if len(outs) != 4 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
@@ -149,7 +174,11 @@ func TestControllerFedMaster(t *testing.T) {
 		switch i {
 		case 0:
 			checkControllerServiceDefault(t, svc)
+		case 1:
+			checkControllerServiceCluster(t, svc)
 		case 2:
+			checkControllerServiceAPI(t, svc, "ClusterIP")
+		case 3:
 			checkControllerServiceFedMaster(t, svc, "NodePort")
 		}
 	}
@@ -169,7 +198,7 @@ func TestControllerServiceAPIandFedMaster(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 3 {
+	if len(outs) != 4 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
@@ -181,8 +210,10 @@ func TestControllerServiceAPIandFedMaster(t *testing.T) {
 		case 0:
 			checkControllerServiceDefault(t, svc)
 		case 1:
-			checkControllerServiceAPI(t, svc, "NodePort")
+			checkControllerServiceCluster(t, svc)
 		case 2:
+			checkControllerServiceAPI(t, svc, "NodePort")
+		case 3:
 			checkControllerServiceFedMaster(t, svc, "NodePort")
 		}
 	}
@@ -202,7 +233,7 @@ func TestControllerServiceAPIandFedManaged(t *testing.T) {
 	out := helm.RenderTemplate(t, options, helmChartPath, nvRel, []string{"templates/controller-service.yaml"})
 	outs := splitYaml(out)
 
-	if len(outs) != 3 {
+	if len(outs) != 4 {
 		t.Errorf("Resource count is wrong. count=%v\n", len(outs))
 	}
 
@@ -214,8 +245,10 @@ func TestControllerServiceAPIandFedManaged(t *testing.T) {
 		case 0:
 			checkControllerServiceDefault(t, svc)
 		case 1:
-			checkControllerServiceAPI(t, svc, "NodePort")
+			checkControllerServiceCluster(t, svc)
 		case 2:
+			checkControllerServiceAPI(t, svc, "NodePort")
+		case 3:
 			checkControllerServiceFedManaged(t, svc, "NodePort")
 		}
 	}

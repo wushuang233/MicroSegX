@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="${1:-${SCRIPT_DIR}/full-release.env}"
+ARTIFACT_DIR_OVERRIDE="${ARTIFACT_DIR:-}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing env file: ${ENV_FILE}" >&2
@@ -12,11 +13,16 @@ fi
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
 
+if [[ -n "${ARTIFACT_DIR_OVERRIDE}" ]]; then
+  ARTIFACT_DIR="${ARTIFACT_DIR_OVERRIDE}"
+fi
+
 : "${REGISTRY:?REGISTRY is required}"
 
 ARTIFACT_DIR=${ARTIFACT_DIR:-"${SCRIPT_DIR}"}
 IMAGE_ARCHIVE=$(find "${ARTIFACT_DIR}" -maxdepth 1 -type f -name 'images-*.tar.gz' | head -n 1)
 IMAGES_FILE="${ARTIFACT_DIR}/bundle/image-list.txt"
+METADATA_FILE="${ARTIFACT_DIR}/bundle/build-metadata.txt"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -26,6 +32,40 @@ require_cmd() {
 }
 
 require_cmd docker
+
+retag_and_push_from_metadata() {
+  local source_image source_repo source_suffix target_repo target_image image_name
+
+  : "${IMAGE_NAMESPACE:?IMAGE_NAMESPACE is required when build-metadata.txt is present}"
+
+  while IFS= read -r line; do
+    [[ -z "${line}" ]] && continue
+    [[ "${line}" == *.image=* ]] || continue
+
+    source_image="${line#*=}"
+    [[ -n "${source_image}" ]] || continue
+
+    if [[ "${source_image}" == *@* ]]; then
+      source_repo="${source_image%@*}"
+      source_suffix="@${source_image#*@}"
+    else
+      source_repo="${source_image%:*}"
+      source_suffix=":${source_image##*:}"
+    fi
+
+    image_name="${source_repo##*/}"
+    target_repo="${REGISTRY}/${IMAGE_NAMESPACE}/${image_name}"
+    target_image="${target_repo}${source_suffix}"
+
+    if [[ "${target_image}" != "${source_image}" ]]; then
+      echo "==> Retagging ${source_image} -> ${target_image}"
+      docker tag "${source_image}" "${target_image}"
+    fi
+
+    echo "==> Pushing ${target_image}"
+    docker push "${target_image}"
+  done <"${METADATA_FILE}"
+}
 
 if [[ -n "${REGISTRY_USERNAME:-}" && -n "${REGISTRY_PASSWORD:-}" ]]; then
   echo "==> Logging in to ${REGISTRY}"
@@ -45,11 +85,15 @@ fi
 echo "==> Loading ${IMAGE_ARCHIVE}"
 docker load -i "${IMAGE_ARCHIVE}"
 
-while IFS= read -r image; do
-  [[ -z "${image}" ]] && continue
-  echo "==> Pushing ${image}"
-  docker push "${image}"
-done <"${IMAGES_FILE}"
+if [[ -f "${METADATA_FILE}" ]]; then
+  retag_and_push_from_metadata
+else
+  while IFS= read -r image; do
+    [[ -z "${image}" ]] && continue
+    echo "==> Pushing ${image}"
+    docker push "${image}"
+  done <"${IMAGES_FILE}"
+fi
 
 echo
 echo "Image push complete."

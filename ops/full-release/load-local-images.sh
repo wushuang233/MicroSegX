@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="${1:-${SCRIPT_DIR}/full-release.env}"
+ARTIFACT_DIR_OVERRIDE="${ARTIFACT_DIR:-}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing env file: ${ENV_FILE}" >&2
@@ -11,6 +12,10 @@ fi
 
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
+
+if [[ -n "${ARTIFACT_DIR_OVERRIDE}" ]]; then
+  ARTIFACT_DIR="${ARTIFACT_DIR_OVERRIDE}"
+fi
 
 DEPLOY_MODE=${DEPLOY_MODE:-local}
 LOCAL_RUNTIME=${LOCAL_RUNTIME:-containerd}
@@ -65,6 +70,17 @@ detect_k3s_helper_node() {
   nodes=$(kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.addresses[*]}{.type}={.address}{";"}{end}{"\n"}{end}')
   K3S_IMPORT_HELPER_NODE_NAME=$(printf '%s\n' "${nodes}" | awk -F '\t' -v ip="${host_ip}" 'index($2, "InternalIP=" ip ";") {print $1; exit}')
   if [[ -z "${K3S_IMPORT_HELPER_NODE_NAME}" ]]; then
+    local node_count fallback_node
+    node_count=$(printf '%s\n' "${nodes}" | sed '/^$/d' | wc -l | tr -d '[:space:]')
+    if [[ "${node_count}" == "1" ]]; then
+      fallback_node=$(printf '%s\n' "${nodes}" | awk -F '\t' 'NF {print $1; exit}')
+      if [[ -n "${fallback_node}" ]]; then
+        echo "==> Falling back to the only Kubernetes node for k3s image import helper: ${fallback_node}" >&2
+        K3S_IMPORT_HELPER_NODE_NAME="${fallback_node}"
+        return
+      fi
+    fi
+
     echo "Unable to match local host IP ${host_ip} to a Kubernetes node." >&2
     echo "Set K3S_IMPORT_HELPER_NODE_NAME explicitly in the env file and retry." >&2
     exit 1

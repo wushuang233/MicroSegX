@@ -1383,6 +1383,236 @@ type RESTPolicyRuleConfigData struct {
 	Replicate bool                  `json:"replicate,omitempty"`
 }
 
+type RESTAutoPolicyStatus struct {
+	Mode                    string                     `json:"mode"`
+	WindowSeconds           int64                      `json:"window_seconds"`
+	SlotMinutes             int64                      `json:"slot_minutes"`
+	DistinctDaySeconds      int64                      `json:"distinct_day_seconds"`
+	TTLCheckSeconds         int64                      `json:"ttl_check_seconds"`
+	FeatureRetentionSeconds int64                      `json:"feature_retention_seconds"`
+	ObservedEventCount      int                        `json:"observed_event_count"`
+	FeatureCount            int                        `json:"feature_count"`
+	DirectFeatureCount      int                        `json:"direct_feature_count"`
+	IngressFeatureCount     int                        `json:"ingress_feature_count"`
+	ZeroTrustFeatureCount   int                        `json:"zero_trust_feature_count"`
+	SystemFeatureCount      int                        `json:"system_feature_count"`
+	SystemGuardRuleCount    int                        `json:"system_guard_rule_count"`
+	BaselineRuleCount       int                        `json:"baseline_rule_count"`
+	PeriodicRuleCount       int                        `json:"periodic_rule_count"`
+	AnomalyRuleCount        int                        `json:"anomaly_rule_count"`
+	DirectRuleCount         int                        `json:"direct_rule_count"`
+	IngressRuleCount        int                        `json:"ingress_rule_count"`
+	ZeroTrustRuleCount      int                        `json:"zero_trust_rule_count"`
+	SystemRuleCount         int                        `json:"system_rule_count"`
+	CandidateBaseline       int                        `json:"candidate_baseline"`
+	CandidatePeriodic       int                        `json:"candidate_periodic"`
+	CandidateAnomaly        int                        `json:"candidate_anomaly"`
+	PendingPromotionCount   int                        `json:"pending_promotion_count"`
+	LastWindowProcessedTS   int64                      `json:"last_window_processed_timestamp"`
+	LastWindowEventCount    int                        `json:"last_window_event_count"`
+	PromotionCount          uint64                     `json:"promotion_count"`
+	DeleteCount             uint64                     `json:"delete_count"`
+	LastPromotionTS         int64                      `json:"last_promotion_timestamp,omitempty"`
+	LastDeleteTS            int64                      `json:"last_delete_timestamp,omitempty"`
+	Candidates              []*RESTAutoPolicyCandidate `json:"candidates,omitempty"`
+}
+
+type RESTAutoPolicyStatusData struct {
+	Status *RESTAutoPolicyStatus `json:"status"`
+}
+
+type RESTAutoPolicyConfig struct {
+	Mode string `json:"mode"`
+}
+
+type RESTAutoPolicyConfigData struct {
+	Config *RESTAutoPolicyConfig `json:"config"`
+}
+
+type RESTAutoPolicyCandidate struct {
+	From                     string   `json:"from"`
+	To                       string   `json:"to"`
+	DisplayKey               string   `json:"display_key,omitempty"`
+	FromNamespace            string   `json:"from_namespace,omitempty"`
+	ToNamespace              string   `json:"to_namespace,omitempty"`
+	Namespace                string   `json:"namespace,omitempty"`
+	FromBusiness             string   `json:"from_business,omitempty"`
+	ToBusiness               string   `json:"to_business,omitempty"`
+	Business                 string   `json:"business,omitempty"`
+	TrafficSource            string   `json:"traffic_source,omitempty"`
+	ZeroTrust                bool     `json:"zero_trust,omitempty"`
+	IsApp                    bool     `json:"is_app"`
+	IPProto                  uint8    `json:"ip_proto"`
+	Application              uint32   `json:"application,omitempty"`
+	Ports                    []string `json:"ports,omitempty"`
+	FQDNs                    []string `json:"fqdns,omitempty"`
+	Class                    string   `json:"class,omitempty"`
+	Confidence               float64  `json:"confidence,omitempty"`
+	ReasonCodes              []string `json:"reason_codes,omitempty"`
+	DistinctDays             uint32   `json:"distinct_days"`
+	ConsecutiveWindows       uint32   `json:"consecutive_windows"`
+	TotalWindows             uint32   `json:"total_windows"`
+	SourceWorkloadCount      int      `json:"source_workload_count,omitempty"`
+	SourceGroupSize          int      `json:"source_group_size,omitempty"`
+	SourceGroupSizeEstimated bool     `json:"source_group_size_estimated,omitempty"`
+	LastObservedTS           int64    `json:"last_observed_timestamp,omitempty"`
+	BaselineScore            float64  `json:"baseline_score,omitempty"`
+	PeriodicScore            float64  `json:"periodic_score,omitempty"`
+	AnomalyScore             float64  `json:"anomaly_score,omitempty"`
+}
+
+type RESTAutoPolicyFeature struct {
+	FeatureKey               string   `json:"feature_key"`
+	DisplayKey               string   `json:"display_key,omitempty"`
+	From                     string   `json:"from"`
+	To                       string   `json:"to"`
+	FromNamespace            string   `json:"from_namespace,omitempty"`
+	ToNamespace              string   `json:"to_namespace,omitempty"`
+	Namespace                string   `json:"namespace,omitempty"`
+	FromBusiness             string   `json:"from_business,omitempty"`
+	ToBusiness               string   `json:"to_business,omitempty"`
+	Business                 string   `json:"business,omitempty"`
+	TrafficSource            string   `json:"traffic_source,omitempty"`
+	ZeroTrust                bool     `json:"zero_trust,omitempty"`
+	IsApp                    bool     `json:"is_app"`
+	IPProto                  uint8    `json:"ip_proto"`
+	Application              uint32   `json:"application,omitempty"`
+	Ports                    []string `json:"ports,omitempty"`
+	FQDNs                    []string `json:"fqdns,omitempty"`
+	ActionHint               string   `json:"action_hint,omitempty"`
+	ClassHint                string   `json:"class_hint,omitempty"`
+	Stage                    string   `json:"stage"`
+	BaselineScore            float64  `json:"baseline_score,omitempty"`
+	PeriodicScore            float64  `json:"periodic_score,omitempty"`
+	AnomalyScore             float64  `json:"anomaly_score,omitempty"`
+	ConsecutiveWindows       uint32   `json:"consecutive_windows"`
+	HistoricalWindows        uint32   `json:"historical_windows"`
+	DistinctDays             uint32   `json:"distinct_days"`
+	WorkloadCoverage         float64  `json:"workload_coverage,omitempty"`
+	SourceWorkloadCount      int      `json:"source_workload_count,omitempty"`
+	SourceGroupSize          int      `json:"source_group_size,omitempty"`
+	SourceGroupSizeEstimated bool     `json:"source_group_size_estimated,omitempty"`
+	ActiveSlotCount          int      `json:"active_slot_count,omitempty"`
+	ActiveSlots              []uint16 `json:"active_slots,omitempty"`
+	LastSeenTS               int64    `json:"last_seen_timestamp,omitempty"`
+	RelatedRuleID            uint32   `json:"related_rule_id,omitempty"`
+	ReasonCodes              []string `json:"reason_codes,omitempty"`
+}
+
+type RESTAutoPolicyFeaturesData struct {
+	Features []*RESTAutoPolicyFeature `json:"features"`
+}
+
+type RESTAutoPolicyRule struct {
+	ID                  uint32          `json:"id"`
+	Class               string          `json:"class"`
+	DisplayKey          string          `json:"display_key,omitempty"`
+	FromNamespace       string          `json:"from_namespace,omitempty"`
+	ToNamespace         string          `json:"to_namespace,omitempty"`
+	Namespace           string          `json:"namespace,omitempty"`
+	FromBusiness        string          `json:"from_business,omitempty"`
+	ToBusiness          string          `json:"to_business,omitempty"`
+	Business            string          `json:"business,omitempty"`
+	TrafficSource       string          `json:"traffic_source,omitempty"`
+	ZeroTrust           bool            `json:"zero_trust,omitempty"`
+	Confidence          float64         `json:"confidence"`
+	Active              bool            `json:"active"`
+	ActiveNow           bool            `json:"active_now"`
+	Stale               bool            `json:"stale"`
+	FromLive            bool            `json:"from_live"`
+	ToLive              bool            `json:"to_live"`
+	FromEndpointCount   int             `json:"from_endpoint_count"`
+	ToEndpointCount     int             `json:"to_endpoint_count"`
+	FromServiceCount    int             `json:"from_service_count"`
+	ToServiceCount      int             `json:"to_service_count"`
+	Stage               string          `json:"stage,omitempty"`
+	CompileState        string          `json:"compile_state,omitempty"`
+	LastObservedTS      int64           `json:"last_observed_timestamp,omitempty"`
+	ExpiresTS           int64           `json:"expires_timestamp,omitempty"`
+	TTLRemainingSeconds int64           `json:"ttl_remaining_seconds,omitempty"`
+	PeriodicSlots       []uint16        `json:"periodic_slots,omitempty"`
+	PeriodicSlotSummary string          `json:"periodic_slot_summary,omitempty"`
+	ReasonCodes         []string        `json:"reason_codes,omitempty"`
+	PromotionReason     string          `json:"promotion_reason,omitempty"`
+	PendingReason       string          `json:"pending_reason,omitempty"`
+	SourceFeatureKey    string          `json:"source_feature_key,omitempty"`
+	BaselineScore       float64         `json:"baseline_score,omitempty"`
+	PeriodicScore       float64         `json:"periodic_score,omitempty"`
+	AnomalyScore        float64         `json:"anomaly_score,omitempty"`
+	Rule                *RESTPolicyRule `json:"rule"`
+}
+
+type RESTAutoPolicyRuleData struct {
+	Rule *RESTAutoPolicyRule `json:"rule"`
+}
+
+type RESTAutoPolicyRuleCreate struct {
+	From          string   `json:"from"`
+	To            string   `json:"to"`
+	Class         string   `json:"class"`
+	Ports         string   `json:"ports,omitempty"`
+	Applications  []uint32 `json:"applications,omitempty"`
+	Confidence    *float64 `json:"confidence,omitempty"`
+	PeriodicSlots []uint16 `json:"periodic_slots,omitempty"`
+	TTLSeconds    *int64   `json:"ttl_seconds,omitempty"`
+	ReasonCodes   []string `json:"reason_codes,omitempty"`
+}
+
+type RESTAutoPolicyRuleCreateData struct {
+	Config *RESTAutoPolicyRuleCreate `json:"config"`
+}
+
+type RESTAutoPolicyRuleUpdate struct {
+	Class         string   `json:"class"`
+	Confidence    *float64 `json:"confidence,omitempty"`
+	PeriodicSlots []uint16 `json:"periodic_slots,omitempty"`
+	TTLSeconds    *int64   `json:"ttl_seconds,omitempty"`
+	ReasonCodes   []string `json:"reason_codes,omitempty"`
+}
+
+type RESTAutoPolicyRuleUpdateData struct {
+	Config *RESTAutoPolicyRuleUpdate `json:"config"`
+}
+
+type RESTAutoPolicyRulesData struct {
+	Rules []*RESTAutoPolicyRule `json:"rules"`
+}
+
+type RESTAutoPolicyRuleDeleteRequest struct {
+	IDs []uint32 `json:"ids"`
+}
+
+type RESTAutoPolicyRuleDeleteResult struct {
+	Deleted    []uint32 `json:"deleted,omitempty"`
+	Suppressed []uint32 `json:"suppressed,omitempty"`
+	Skipped    []uint32 `json:"skipped,omitempty"`
+}
+
+type RESTAutoPolicyRuleDeleteData struct {
+	Result *RESTAutoPolicyRuleDeleteResult `json:"result"`
+}
+
+type RESTAutoPolicyEvent struct {
+	ID            uint64            `json:"id"`
+	EventType     string            `json:"event_type"`
+	EventClass    string            `json:"event_class,omitempty"`
+	DisplayKey    string            `json:"display_key,omitempty"`
+	Namespace     string            `json:"namespace,omitempty"`
+	Business      string            `json:"business,omitempty"`
+	TrafficSource string            `json:"traffic_source,omitempty"`
+	ZeroTrust     bool              `json:"zero_trust,omitempty"`
+	TargetType    string            `json:"target_type,omitempty"`
+	TargetID      uint32            `json:"target_id,omitempty"`
+	TargetKey     string            `json:"target_key,omitempty"`
+	Summary       string            `json:"summary"`
+	CreatedTS     int64             `json:"created_timestamp"`
+	Extra         map[string]string `json:"extra,omitempty"`
+}
+
+type RESTAutoPolicyEventsData struct {
+	Events []*RESTAutoPolicyEvent `json:"events"`
+}
+
 const (
 	WireInline  string = share.WireInline
 	WireDefault string = share.WireDefault

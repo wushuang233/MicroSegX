@@ -79,6 +79,7 @@
 
         <div class="quick-actions-card__buttons">
           <button
+            type="button"
             mat-flat-button
             color="primary"
             class="hero-action hero-action--primary"
@@ -94,6 +95,7 @@
           </button>
 
           <button
+            type="button"
             mat-stroked-button
             class="hero-action"
             (click)="refresh(false)"
@@ -288,7 +290,7 @@
           <mat-select [(ngModel)]="typeFilter">
             <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
             <mat-option *ngFor="let type of exposureTypes" [value]="type">
-              {{ type }}
+              {{ getExposureTypeLabel(type) }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -366,7 +368,7 @@
           <mat-select [(ngModel)]="servicePublishTypeFilter">
             <mat-option value="all">{{ 'general.ALL' | translate }}</mat-option>
             <mat-option *ngFor="let type of servicePublishTypes" [value]="type">
-              {{ type }}
+              {{ getServiceTypeLabel(type) }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -416,6 +418,7 @@
               }}
             </span>
             <button
+              type="button"
               mat-flat-button
               color="primary"
               class="service-governance-card__create"
@@ -497,7 +500,8 @@
               <div class="entity-cell">
                 <strong>{{ item.service_name }}</strong>
                 <small>
-                  {{ item.service_type }} · {{ item.public_service_type }} ·
+                  {{ getServiceTypeLabel(item.service_type) }} ·
+                  {{ getServiceTypeLabel(item.public_service_type) }} ·
                   {{ getServiceScopeLabelKey(item) | translate }}
                 </small>
                 <div
@@ -599,6 +603,7 @@
                     </div>
                   </div>
                   <button
+                    type="button"
                     mat-icon-button
                     class="port-card__action"
                     [color]="port.public ? 'warn' : 'primary'"
@@ -627,6 +632,7 @@
             <td mat-cell *matCellDef="let item">
               <div class="row-actions">
                 <button
+                  type="button"
                   mat-stroked-button
                   color="primary"
                   (click)="toggleAllPorts(item, true)"
@@ -638,6 +644,7 @@
                   {{ 'MICROSEGX.PORT_EXPOSURE.OPEN_ALL' | translate }}
                 </button>
                 <button
+                  type="button"
                   mat-stroked-button
                   color="warn"
                   (click)="toggleAllPorts(item, false)"
@@ -646,6 +653,7 @@
                   {{ 'MICROSEGX.PORT_EXPOSURE.CLOSE_ALL' | translate }}
                 </button>
                 <button
+                  type="button"
                   mat-stroked-button
                   color="warn"
                   (click)="requestDeleteService(item)"
@@ -728,11 +736,7 @@
                   <div class="node-overview-address__label">
                     <span class="mono-text">{{ address.address }}</span>
                     <span class="table-pill table-pill--soft">
-                      {{
-                        address.addressType ||
-                          ('MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_ADDRESS'
-                            | translate)
-                      }}
+                      {{ getAddressTypeLabel(address.addressType) }}
                     </span>
                   </div>
 
@@ -822,7 +826,7 @@
               <div class="entity-cell">
                 <strong>{{ item.resource_name }}</strong>
                 <small
-                  >{{ item.resource_kind }} ·
+                  >{{ getResourceKindLabel(item.resource_kind) }} ·
                   {{ getExposureScopeLabelKey(item) | translate }}</small
                 >
               </div>
@@ -835,7 +839,7 @@
             </th>
             <td mat-cell *matCellDef="let item">
               <span class="table-pill table-pill--soft">
-                {{ item.exposure_type || '-' }}
+                {{ getExposureTypeLabel(item.exposure_type) }}
               </span>
             </td>
           </ng-container>
@@ -916,10 +920,18 @@
       <mat-card class="auxiliary-workspace__card">
         <div class="auxiliary-workspace__header">
           <div>
-            <span class="auxiliary-workspace__eyebrow">Workspace</span>
-            <h2>附加工作区</h2>
+            <span class="auxiliary-workspace__eyebrow">{{
+              'MICROSEGX.PORT_EXPOSURE.AUXILIARY_WORKSPACE_EYEBROW' | translate
+            }}</span>
+            <h2>
+              {{
+                'MICROSEGX.PORT_EXPOSURE.AUXILIARY_WORKSPACE_TITLE' | translate
+              }}
+            </h2>
             <p>
-              主视图固定用于端口暴露与服务治理，零信任放在这里作为补充能力，不再覆盖扫描页面。
+              {{
+                'MICROSEGX.PORT_EXPOSURE.AUXILIARY_WORKSPACE_DESC' | translate
+              }}
             </p>
           </div>
 
@@ -930,7 +942,9 @@
               [class.is-active]="auxiliaryWorkspaceTab === 'summary'"
               (click)="setAuxiliaryWorkspaceTab('summary')">
               <mat-icon>radar</mat-icon>
-              <span>扫描摘要</span>
+              <span>{{
+                'MICROSEGX.PORT_EXPOSURE.AUXILIARY_SUMMARY_TAB' | translate
+              }}</span>
             </button>
 
             <button
@@ -981,7 +995,13 @@
                 class="auxiliary-summary__node">
                 <div>
                   <h3>{{ node.name }}</h3>
-                  <p>开放端口 {{ node.totalOpenCount }}</p>
+                  <p>
+                    {{
+                      'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_OPEN_PORTS'
+                        | translate
+                    }}
+                    {{ node.totalOpenCount }}
+                  </p>
                 </div>
 
                 <div class="auxiliary-summary__node-tags">
@@ -1005,7 +1025,28 @@
 
         <ng-container *ngIf="auxiliaryWorkspaceTab === 'ziti'">
           <div class="auxiliary-ziti">
-            <app-microsegx-ziti></app-microsegx-ziti>
+            <div class="auxiliary-ziti__notice">
+              <mat-icon>info</mat-icon>
+              <div>
+                <strong>{{
+                  'MICROSEGX.PORT_EXPOSURE.ZITI_DIRECT_EXPOSURE_NOTICE_TITLE'
+                    | translate
+                }}</strong>
+                <p>
+                  {{
+                    'MICROSEGX.PORT_EXPOSURE.ZITI_DIRECT_EXPOSURE_NOTICE_DESC'
+                      | translate
+                        : {
+                            open:
+                              manageableOpenPortCount +
+                              infrastructureExposurePortCount +
+                              nodeListenerPortCount,
+                          }
+                  }}
+                </p>
+              </div>
+            </div>
+            <app-microsegx-ziti [embedded]="true"></app-microsegx-ziti>
           </div>
         </ng-container>
       </mat-card>
@@ -1071,6 +1112,7 @@
           }}</span>
           <div class="suggested-ports__list">
             <button
+              type="button"
               *ngFor="
                 let port of [
                   suggestNodePort(),
@@ -1095,6 +1137,7 @@
 
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="primary"
         (click)="executePortToggle()"
@@ -1111,7 +1154,7 @@
             : ('MICROSEGX.PORT_EXPOSURE.CLOSE' | translate)
         }}
       </button>
-      <button mat-stroked-button (click)="closePortDialog()">
+      <button type="button" mat-stroked-button (click)="closePortDialog()">
         {{ 'general.CANCEL' | translate }}
       </button>
     </mat-card-actions>
@@ -1192,7 +1235,10 @@
               }}
             </p>
           </div>
-          <button mat-stroked-button (click)="addServiceCreatePort()">
+          <button
+            type="button"
+            mat-stroked-button
+            (click)="addServiceCreatePort()">
             <mat-icon>add</mat-icon>
             {{ 'MICROSEGX.PORT_EXPOSURE.ADD_PORT' | translate }}
           </button>
@@ -1247,6 +1293,7 @@
             </mat-form-field>
 
             <button
+              type="button"
               mat-icon-button
               class="service-port-row__delete"
               [disabled]="serviceCreateForm.ports.length === 1"
@@ -1265,6 +1312,7 @@
 
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="primary"
         (click)="submitServiceCreate()"
@@ -1272,7 +1320,10 @@
         <mat-spinner *ngIf="serviceCreateLoading" diameter="18"></mat-spinner>
         {{ 'general.SUBMIT' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeServiceCreateDialog()">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeServiceCreateDialog()">
         {{ 'general.CANCEL' | translate }}
       </button>
     </mat-card-actions>
@@ -1324,6 +1375,7 @@
 
     <mat-card-actions>
       <button
+        type="button"
         mat-flat-button
         color="warn"
         (click)="confirmDeleteService()"
@@ -1331,7 +1383,10 @@
         <mat-spinner *ngIf="serviceDeleteLoading" diameter="18"></mat-spinner>
         {{ 'MICROSEGX.PORT_EXPOSURE.DELETE_SERVICE' | translate }}
       </button>
-      <button mat-stroked-button (click)="closeServiceDeleteDialog()">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="closeServiceDeleteDialog()">
         {{ 'general.CANCEL' | translate }}
       </button>
     </mat-card-actions>

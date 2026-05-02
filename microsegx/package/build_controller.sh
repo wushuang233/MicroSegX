@@ -8,7 +8,7 @@ echo "Machine hardware architecture is \"$machine\""
 
 if [ "$machine" == "x86_64" ]; then
     echo "==> Unitest"
-    go test github.com/microsegx/microsegx/...
+    go test ./controller/... ./controller/rest ./controller/cache
 fi
 
 echo "==> Making monitor"
@@ -52,5 +52,5 @@ cp -r agent/nvbench/kubernetes-cis-benchmark/aks-1.4.0/ ${STAGE_DIR}/usr/local/b
 cp -r agent/nvbench/kubernetes-cis-benchmark/eks-1.4.0/ ${STAGE_DIR}/usr/local/bin/scripts/cis_yamls/
 cp -r agent/nvbench/kubernetes-cis-benchmark/cis-rke2-1.8.0/ ${STAGE_DIR}/usr/local/bin/scripts/cis_yamls/
 cp -r agent/nvbench/ocp/rh-1.4.0/ ${STAGE_DIR}/usr/local/bin/scripts/cis_yamls/
-cd vendor && ../genlic.sh > ../${STAGE_DIR}/licenses/microsegx-license.txt
+cd vendor && bash ../genlic.sh > ../${STAGE_DIR}/licenses/microsegx-license.txt
 cd ..

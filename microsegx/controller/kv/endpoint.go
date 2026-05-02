@@ -120,6 +120,8 @@ var cfgEndpoints []*cfgEndpoint = []*cfgEndpoint{
 	groupCfgEndpoint,
 	{name: share.CFGEndpointPolicy, key: share.CLUSConfigPolicyStore, isStore: true,
 		section: api.ConfSectionPolicy, lock: share.CLUSLockPolicyKey},
+	{name: share.CFGEndpointAutoPolicy, key: share.CLUSConfigAutoPolicyStore, isStore: true,
+		section: api.ConfSectionPolicy, lock: share.CLUSLockPolicyKey},
 	pprofileCfgEndpoint,
 	fmonitorCfgEndpoint,
 	faccessCfgEndpoint,

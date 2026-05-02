@@ -86,7 +86,11 @@ export class NetworkRulesService {
     };
 
     const lastModifiedTimestampRenderFunc = params => {
-      if (params.value && params.data && params.data.id > -1) {
+      if (
+        params.value &&
+        params.data &&
+        (params.data.id > -1 || params.data.legacy_preview)
+      ) {
         const date = new Date(params.value * 1000);
         return this.sanitizer.sanitize(
           SecurityContext.HTML,
@@ -97,7 +101,11 @@ export class NetworkRulesService {
     };
 
     const appRenderFunc = params => {
-      if (params.value && params.data && params.data.id > -1) {
+      if (
+        params.value &&
+        params.data &&
+        (params.data.id > -1 || params.data.legacy_preview)
+      ) {
         let app =
           Array.isArray(params.value) &&
           params.value.length > 0 &&
@@ -113,7 +121,11 @@ export class NetworkRulesService {
 
     const portsRenderFunc = params => {
       let ports = '';
-      if (params.value && params.data && params.data.id > -1) {
+      if (
+        params.value &&
+        params.data &&
+        (params.data.id > -1 || params.data.legacy_preview)
+      ) {
         ports =
           params.value === 'any'
             ? this.translate.instant('enum.ANY')
@@ -136,8 +148,78 @@ export class NetworkRulesService {
       return '';
     };
 
+    const autoPolicyClassLabel = (value?: string): string => {
+      switch (
+        String(value || '')
+          .trim()
+          .toLowerCase()
+      ) {
+        case 'baseline':
+          return this.translate.instant('MICROSEGX.AUTO_POLICY.CLASS_BASELINE');
+        case 'periodic':
+          return this.translate.instant('MICROSEGX.AUTO_POLICY.CLASS_PERIODIC');
+        case 'anomaly':
+          return this.translate.instant('MICROSEGX.AUTO_POLICY.CLASS_ANOMALY');
+        default:
+          return '';
+      }
+    };
+
+    const ruleSourceLabel = (value?: string): string => {
+      switch (
+        String(value || '')
+          .trim()
+          .toLowerCase()
+      ) {
+        case 'auto':
+          return this.translate.instant(
+            'MICROSEGX.AUTO_POLICY.RULE_SOURCE_AUTO'
+          );
+        case 'legacy':
+          return this.translate.instant(
+            'MICROSEGX.AUTO_POLICY.RULE_SOURCE_LEGACY'
+          );
+        case 'legacy_preview':
+          return this.translate.instant(
+            'MICROSEGX.AUTO_POLICY.RULE_SOURCE_LEGACY_PREVIEW'
+          );
+        default:
+          return this.translate.instant(
+            'MICROSEGX.AUTO_POLICY.RULE_SOURCE_USER'
+          );
+      }
+    };
+
+    const ruleSourceRenderFunc = params => {
+      if (!params.data || params.data.id === -1) {
+        return '';
+      }
+      const source = params.value || 'user';
+      const sourceLabel = ruleSourceLabel(source);
+      const classLabel =
+        source === 'auto'
+          ? autoPolicyClassLabel(params.data.auto_policy_class)
+          : source === 'legacy_preview'
+            ? this.translate.instant(
+                'MICROSEGX.AUTO_POLICY.LEGACY_PREVIEW_READONLY'
+              )
+            : '';
+      const safeSource = this.sanitizer.sanitize(
+        SecurityContext.HTML,
+        sourceLabel
+      );
+      const safeClass = this.sanitizer.sanitize(
+        SecurityContext.HTML,
+        classLabel
+      );
+      return `<div class="rule-source-cell">
+        <span class="type-label px-1">${safeSource}</span>
+        ${safeClass ? `<small>${safeClass}</small>` : ''}
+      </div>`;
+    };
+
     const actionRenderFunc = params => {
-      if (params.data && params.data && params.data.id > -1) {
+      if (params.data && (params.data.id > -1 || params.data.legacy_preview)) {
         return `<span class="action-label px-1 ${
           params.data.disable
             ? MapConstant.colourMap['disabled_background']
@@ -155,7 +237,15 @@ export class NetworkRulesService {
     };
 
     const typeRenderFunc = params => {
-      if (params.data && params.data && params.data.id > -1) {
+      if (params.data && (params.data.id > -1 || params.data.legacy_preview)) {
+        if (params.data.legacy_preview) {
+          return `<div class="type-label px-1 readonly-rule">${this.sanitizer.sanitize(
+            SecurityContext.HTML,
+            this.translate.instant(
+              'MICROSEGX.AUTO_POLICY.LEGACY_PREVIEW_READONLY'
+            )
+          )}</div>`;
+        }
         if (
           params.data.remove &&
           params.data.state !== GlobalConstant.NETWORK_RULES_STATE.READONLY
@@ -209,7 +299,7 @@ export class NetworkRulesService {
     };
 
     const idSelectionFunc = params => {
-      if (params.data) {
+      if (params.data && params.data.id > -1 && !params.data.legacy_preview) {
         return (
           isWriteNetworkRuleAuthorized &&
           params.data.category !== GlobalConstant.GLOBAL
@@ -240,7 +330,7 @@ export class NetworkRulesService {
         cellRenderer: FromToCellComponent,
         colSpan: function (params) {
           if (params.data && params.data.id === -1) {
-            return isWriteNetworkRuleAuthorized ? 8 : 7;
+            return isWriteNetworkRuleAuthorized ? 11 : 10;
           }
           return 1;
         },
@@ -282,6 +372,13 @@ export class NetworkRulesService {
         minWidth: 110,
         maxWidth: 110,
         hide: isScoreImprovement,
+      },
+      {
+        headerName: this.translate.instant('MICROSEGX.AUTO_POLICY.RULE_SOURCE'),
+        field: 'rule_source',
+        cellRenderer: ruleSourceRenderFunc,
+        width: 150,
+        minWidth: 150,
       },
       {
         headerName: this.translate.instant('policy.gridHeader.UPDATE_AT'),
@@ -326,11 +423,23 @@ export class NetworkRulesService {
       defaultColDef: {
         resizable: true,
         sortable: source === GlobalConstant.NAV_SOURCE.GROUP,
+        wrapHeaderText: true,
+        autoHeaderHeight: true,
+        tooltipValueGetter: params => {
+          const value = params.valueFormatted ?? params.value;
+          if (value === null || value === undefined) {
+            return '';
+          }
+          return Array.isArray(value) ? value.join(', ') : String(value);
+        },
       },
-      headerHeight: 30,
-      rowHeight: 30,
+      headerHeight: 44,
+      rowHeight: 34,
       animateRows: true,
       suppressDragLeaveHidesColumns: true,
+      pagination: source !== GlobalConstant.NAV_SOURCE.GROUP,
+      paginationPageSize: 50,
+      paginationPageSizeSelector: [25, 50, 100, 200],
       columnDefs: columnDefs,
       rowSelection: 'multiple' as 'single' | 'multiple' | undefined,
       isRowSelectable: idSelectionFunc,
@@ -342,6 +451,9 @@ export class NetworkRulesService {
         'critical-row': function (params) {
           if (!params.data) return;
           return params.data.id === -1 && params.data.critical;
+        },
+        'legacy-preview-row': function (params) {
+          return !!params.data?.legacy_preview;
         },
       },
       onGridReady: onGridReadyFunc,
@@ -381,13 +493,15 @@ export class NetworkRulesService {
   submitNetworkRule = (networkRules: Array<NetworkRule>, source: string) => {
     let networkRulesCopy = JSON.parse(JSON.stringify(networkRules));
     let payload = {};
-    let onlyRemove = true;
+    let hasNonDeleteChanges = false;
     let deletedRules = networkRulesCopy
       .map(function (rule) {
-        if (rule.remove) {
+        if (
+          rule.remove &&
+          rule.id > 0 &&
+          rule.id < GlobalConstant.NEW_ID_SEED.NETWORK_RULE
+        ) {
           return rule.id;
-        } else {
-          onlyRemove = false;
         }
       })
       .filter(x => !!x);
@@ -403,12 +517,15 @@ export class NetworkRulesService {
         } else {
           if (rule.state === GlobalConstant.NETWORK_RULES_STATE.NEW)
             rule.id = 0;
-          if (!rule.remove) return rule;
+          if (!rule.remove) {
+            hasNonDeleteChanges = true;
+            return rule;
+          }
         }
       })
       .filter(x => !!x && x.id !== -1);
 
-    if (onlyRemove && deletedRules.length > 0) {
+    if (!hasNonDeleteChanges && deletedRules.length > 0) {
       payload = { delete: deletedRules };
     } else {
       payload = { rules: networkRulesCopy, delete: deletedRules };

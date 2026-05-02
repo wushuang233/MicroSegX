@@ -37,6 +37,25 @@ func compareRESTRules(r1, r2 *api.RESTPolicyRule) bool {
 	return reflect.DeepEqual(e, r)
 }
 
+func isRESTPolicyRuleIDOnly(rule *api.RESTPolicyRule) bool {
+	return rule != nil &&
+		rule.ID != 0 &&
+		rule.Comment == "" &&
+		rule.From == "" &&
+		rule.To == "" &&
+		rule.Ports == "" &&
+		rule.Action == "" &&
+		rule.Applications == nil &&
+		!rule.Learned &&
+		!rule.Disable &&
+		rule.CreatedTS == 0 &&
+		rule.LastModTS == 0 &&
+		rule.CfgType == "" &&
+		rule.Priority == 0 &&
+		rule.MatchCntr == 0 &&
+		rule.LastMatchTS == 0
+}
+
 func compareCLUSRules(r1, r2 *share.CLUSPolicyRule) bool {
 	e := *r1
 	r := *r2
@@ -58,6 +77,69 @@ func isSecurityPolicyID(id uint32) bool {
 
 func isFedPolicyID(id uint32) bool {
 	return id >= api.PolicyFedRuleIDBase && id < api.PolicyFedRuleIDMax
+}
+
+func restAutoPolicyRuleReadOnlyError(w http.ResponseWriter, id uint32) {
+	e := fmt.Sprintf("Auto policy rule %d is read-only in generic policy endpoints", id)
+	log.WithFields(log.Fields{"id": id}).Error(e)
+	restRespErrorMessage(w, http.StatusBadRequest, api.RESTErrOpNotAllowed, e)
+}
+
+func rejectAutoPolicyRuleID(w http.ResponseWriter, id uint32) bool {
+	if cacher.IsAutoPolicyRule(id) {
+		restAutoPolicyRuleReadOnlyError(w, id)
+		return true
+	}
+	return false
+}
+
+func validateAutoPolicyReplacePayload(scope string, rules []*api.RESTPolicyRule, delRuleIDs utils.Set, acc *access.AccessControl) error {
+	if scope != share.ScopeLocal {
+		return nil
+	}
+
+	if delRuleIDs != nil {
+		for id := range delRuleIDs.Iter() {
+			ruleID := id.(uint32)
+			if cacher.IsAutoPolicyRule(ruleID) {
+				return fmt.Errorf("auto policy rule %d cannot be deleted through replace payload", ruleID)
+			}
+		}
+	}
+
+	expected := make(map[uint32]*api.RESTPolicyRule)
+	for _, autoRule := range cacher.GetAllAutoPolicyRules(acc) {
+		if autoRule == nil || autoRule.Rule == nil {
+			continue
+		}
+		expected[autoRule.ID] = autoRule.Rule
+	}
+	if len(expected) == 0 {
+		return nil
+	}
+
+	payload := make(map[uint32]*api.RESTPolicyRule, len(rules))
+	for _, rule := range rules {
+		if rule == nil {
+			continue
+		}
+		payload[rule.ID] = rule
+	}
+
+	for id, current := range expected {
+		rule, ok := payload[id]
+		if !ok {
+			return fmt.Errorf("auto policy rule %d must remain unchanged in replace payload", id)
+		}
+		if isRESTPolicyRuleIDOnly(rule) {
+			continue
+		}
+		if !compareRESTRules(rule, current) {
+			return fmt.Errorf("auto policy rule %d is read-only in replace payload", id)
+		}
+	}
+
+	return nil
 }
 
 func handlerPolicyRuleList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -1494,6 +1576,9 @@ func handlerPolicyRuleAction(w http.ResponseWriter, r *http.Request, ps httprout
 
 	dataChanged := false
 	if rconf.Move != nil {
+		if rejectAutoPolicyRuleID(w, rconf.Move.ID) {
+			return
+		}
 		isFedPolicy := isFedPolicyID(rconf.Move.ID)
 		if (scope == share.ScopeFed && !isFedPolicy) || (scope == share.ScopeLocal && isFedPolicy) ||
 			(isFedPolicy && fedRole != api.FedRoleMaster) {
@@ -1528,8 +1613,15 @@ func handlerPolicyRuleAction(w http.ResponseWriter, r *http.Request, ps httprout
 		// 2. [...] means the ids of learned rules to delete
 		if rconf.Delete != nil {
 			for _, id := range *rconf.Delete {
+				if rejectAutoPolicyRuleID(w, id) {
+					return
+				}
 				delRuleIDs.Add(id)
 			}
+		}
+		if err := validateAutoPolicyReplacePayload(scope, *rconf.Rules, delRuleIDs, acc); err != nil {
+			restRespErrorMessage(w, http.StatusBadRequest, api.RESTErrOpNotAllowed, err.Error())
+			return
 		}
 		err = replacePolicyRule(scope, w, r, *rconf.Rules, delRuleIDs, acc)
 		if err == nil {
@@ -1537,6 +1629,11 @@ func handlerPolicyRuleAction(w http.ResponseWriter, r *http.Request, ps httprout
 			restRespSuccess(w, r, nil, acc, login, &rconf, "Replace policy rules")
 		}
 	} else if rconf.Delete != nil && len(*rconf.Delete) > 0 {
+		for _, id := range *rconf.Delete {
+			if rejectAutoPolicyRuleID(w, id) {
+				return
+			}
+		}
 		deleted, err := deletePolicyRule(scope, w, r, *rconf.Delete, acc)
 		if err == nil {
 			dataChanged = (deleted > 0)
@@ -1587,6 +1684,9 @@ func handlerPolicyRuleConfig(w http.ResponseWriter, r *http.Request, ps httprout
 
 	if _, err := cacher.GetPolicyRuleCache(rconf.Config.ID, acc); err != nil {
 		restRespNotFoundLogAccessDenied(w, login, err)
+		return
+	}
+	if rejectAutoPolicyRuleID(w, rconf.Config.ID) {
 		return
 	}
 
@@ -1823,6 +1923,9 @@ func handlerPolicyRuleDelete(w http.ResponseWriter, r *http.Request, ps httprout
 		restRespNotFoundLogAccessDenied(w, login, err)
 		return
 	} else {
+		if rejectAutoPolicyRuleID(w, crule.ID) {
+			return
+		}
 		if crule.CfgType == share.FederalCfg {
 			scope = share.ScopeFed
 		}
@@ -1868,6 +1971,12 @@ func handlerPolicyRuleDeleteAll(w http.ResponseWriter, r *http.Request, ps httpr
 	if allowed.Cardinality() == 0 {
 		restRespSuccess(w, r, nil, acc, login, nil, "Delete all policy rules")
 		return
+	}
+	for id := range allowed.Iter() {
+		if cacher.IsAutoPolicyRule(id.(uint32)) {
+			restAutoPolicyRuleReadOnlyError(w, id.(uint32))
+			return
+		}
 	}
 
 	// No need to authorize again as it's done in the GetAllPolicyRulesCache()

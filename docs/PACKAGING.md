@@ -1,71 +1,70 @@
-# MicroSegX 打包文档
+# MicroSegX 打包主手册
 
-这份文档只负责一件事：从当前源码树产出可交付的离线包或部署 bundle。
+这份文档只做一件事：
 
-## 1. 先选你要的产物
+**把当前源码树正确地打成可交付产物。**
 
-### 1.1 普通 Kubernetes 集群离线交付总包
+覆盖三块内容：
 
-这是当前最推荐的产物，覆盖：
-
-- `MicroSegX`
+- `MicroSegX core`
 - `OpenZiti`
 - `Port-Audit`
-- 不使用私有仓库
-- 在目标集群节点上用 `ctr/containerd` 导入镜像
 
-脚本：
+如果你是未来要继续写代码、改代码、重新出包的本地 agent，请同时看：
+
+- [PACKAGING-AGENT-EXECUTION.zh-CN.md](./PACKAGING-AGENT-EXECUTION.zh-CN.md)
+
+## 1. 先说结论
+
+当前仓库最推荐、也最适合你后续 `1 master + 2 worker` 普通 Kubernetes 集群交付的路径只有一条：
 
 ```bash
 bash ops/full-release/build-k8s-containerd-suite.sh ops/full-release/full-release.k8s-delivery.env
 ```
 
-产物：
+这条链会自动串起来：
+
+1. 构建 `MicroSegX core` release
+2. 构建 `Port-Audit` containerd bundle
+3. 构建 `OpenZiti` offline bundle
+4. 把三者收成一个总交付包
+
+最终产物：
 
 ```text
 artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz
 ```
 
-### 1.2 只打 `MicroSegX core` release
+如果你的最终目标是三节点 Kubernetes 集群，**默认就走这条主线，不要优先走本地 k3s 一体化路径。**
 
-适用场景：
+## 2. 支持的打包产物矩阵
 
-- 只交付 `manager/controller/enforcer/scanner/updater`
-- 或者你想先单独验证 core bundle
+| 产物 | 推荐脚本 | 适用场景 | 主要产物 |
+|------|----------|----------|----------|
+| `MicroSegX core` | `ops/full-release/build-and-package.sh` | 只验证 `manager/controller/enforcer/scanner/updater` | `artifacts/full-release/${CORE_TAG}` |
+| `Port-Audit` containerd bundle | `k8s-node-surface/scripts/build-containerd-bundle.sh` | 只验证端口审计组件 | `k8s-node-surface/dist/k8s-port-audit-containerd-${VERSION}.tar.gz` |
+| `OpenZiti` offline bundle | `openziti/build-openziti-offline-bundle.sh` | 只验证 OpenZiti 离线交付 | `openziti/dist/openziti-k8s-offline-${TAG}.tar.gz` |
+| 普通 Kubernetes 集群总包 | `ops/full-release/build-k8s-containerd-suite.sh` | 最终对外交付主线 | `artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz` |
+| 本机 `k3s` 一体化目录 | `ops/microsegx-local/build-and-package.sh` | 单机联调、演示、排障 | `artifacts/microsegx-local/${CORE_TAG}` |
 
-脚本：
+## 3. 当前已经核过的真实情况
 
-```bash
-bash ops/full-release/build-and-package.sh ops/full-release/full-release.env
-```
+我这次不是只读文档，也核了脚本和实际环境。当前结论是：
 
-产物目录：
+- 当前机器具备打包前置命令：`docker`、`helm`、`go`、`make`、`node`、`npm`、`java`、`sbt`、`kubectl`、`ctr`
+- `docker info` 可用
+- `k8s-node-surface/scripts/verify-project.sh` 通过
+- 关键打包脚本都通过了 `bash -n`
+- `Port-Audit` containerd bundle 已实际构建成功
+- `OpenZiti` offline bundle 已实际构建成功
+- `MicroSegX core` 完整重打链已实际启动并连续走过 `controller → enforcer → manager` 镜像构建阶段；这条链构建时间明显更长，属于重任务
 
-```text
-artifacts/full-release/${CORE_TAG}
-```
+另外还发现并修正了两个真实阻塞点：
 
-### 1.3 本机 `k3s` 一体化本地离线交付包
+- `openziti/install-openziti-k8s.sh` 原本只是 `source env`，但没有导出变量，执行 `deploy-openziti-k8s.sh` 时可能带不进去；现在已修正
+- `ops/microsegx-local/build-and-package.sh` 原本引用了一个仓库里不存在的说明文件；现在已修正为复制现有部署文档
 
-适用场景：
-
-- 单机 `k3s`
-- 用本地镜像导入
-- 一次性把 `MicroSegX + OpenZiti + Port-Audit` 打成可拷贝目录
-
-脚本：
-
-```bash
-bash ops/microsegx-local/build-and-package.sh ops/full-release/full-release.env
-```
-
-产物目录：
-
-```text
-artifacts/microsegx-local/${CORE_TAG}
-```
-
-## 2. 打包机前置条件
+## 4. 打包机前置条件
 
 至少准备：
 
@@ -76,116 +75,68 @@ artifacts/microsegx-local/${CORE_TAG}
 - `curl`
 - `tar`
 - `gzip`
+- `sha256sum`
 - `node`
 - `npm`
 - `sbt`
 - `java 17`
+- `helm`
+- `kubectl`
 
-说明：
-
-- `manager/make_jar.sh` 会跑 `npm install`、`npm run build` 和 `sbt admin/assembly`
-- `scanner` 构建会自动准备 CVE DB
-- 打包机最好联网，目标集群可以离线
-
-## 3. 先准备环境文件
-
-### 3.1 通用 core 环境文件
-
-复制模板：
+建议先跑一轮预检：
 
 ```bash
-cp ops/full-release/full-release.env.example ops/full-release/full-release.env
+for c in docker helm go make node npm java sbt python3 tar gzip sha256sum ctr kubectl; do
+  printf '%-10s' "$c"
+  command -v "$c" || true
+done
 ```
 
-最关键的变量：
+```bash
+docker info >/dev/null
+```
 
-- `DEPLOY_MODE`
-- `REGISTRY`
-- `IMAGE_NAMESPACE`
-- `LOCAL_IMAGE_REGISTRY`
-- `LOCAL_RUNTIME`
+```bash
+./k8s-node-surface/scripts/verify-project.sh
+```
+
+## 5. 最终推荐主线：普通 Kubernetes 集群总交付包
+
+### 5.1 先确认环境文件
+
+默认主线环境文件：
+
+```text
+ops/full-release/full-release.k8s-delivery.env
+```
+
+至少确认这些值：
+
+- `DEPLOY_MODE=local`
+- `LOCAL_RUNTIME=containerd`
+- `LOCAL_IMAGE_REGISTRY=local.microsegx`
 - `CORE_TAG`
 - `SCANNER_TAG`
 - `UPDATER_TAG`
 - `BOOTSTRAP_PASSWORD`
 - `CONTROLLER_PVC_STORAGE_CLASS`
+- `OPENZITI_BUNDLE_TAG`
 
-必须注意：
-
-- `BOOTSTRAP_PASSWORD` 不能留空
-- 如果目标是 Kubernetes 集群，`controller` 持久化相关参数必须明确
-
-### 3.2 普通 Kubernetes 集群离线总包环境文件
-
-默认文件：
-
-```bash
-ops/full-release/full-release.k8s-delivery.env
-```
-
-这份文件的目标就是：
-
-- `DEPLOY_MODE=local`
-- `LOCAL_RUNTIME=containerd`
-- `LOCAL_IMAGE_REGISTRY=local.microsegx`
-
-它是“普通 Kubernetes 集群 + `ctr` 离线导入”主线的默认入口。
-
-### 3.3 推荐的核心参数基线
-
-无论最终是 `k3s` 还是普通 Kubernetes，下面这组安全基线都建议保留：
-
-```text
-CONTROLLER_HOST_NETWORK=false
-ENFORCER_HOST_NETWORK=false
-CONTROLLER_API_SERVICE_TYPE=ClusterIP
-CONTROLLER_PVC_ENABLED=true
-CONTROLLER_PVC_ACCESS_MODE=ReadWriteOnce
-CONTROLLER_STRATEGY_TYPE=Recreate
-```
-
-## 4. 实际打包命令
-
-### 4.1 构建 `MicroSegX core`
-
-```bash
-cd /home/wushuang/MicroSegX
-bash ops/full-release/build-and-package.sh ops/full-release/full-release.env
-```
-
-### 4.2 构建普通 Kubernetes 集群离线总包
+### 5.2 执行主线打包
 
 ```bash
 cd /home/wushuang/MicroSegX
 bash ops/full-release/build-k8s-containerd-suite.sh ops/full-release/full-release.k8s-delivery.env
 ```
 
-### 4.3 构建本机 `k3s` 一体化交付目录
+### 5.3 产物
 
-```bash
-cd /home/wushuang/MicroSegX
-bash ops/microsegx-local/build-and-package.sh ops/full-release/full-release.env
+```text
+artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz
+artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz.sha256
 ```
 
-## 5. 产物清单
-
-### 5.1 `MicroSegX core`
-
-关键文件：
-
-- `images-${CORE_TAG}.tar.gz`
-- `bundle/deploy-core.sh`
-- `bundle/load-local-images.sh`
-- `bundle/load-and-push.sh`
-- `bundle/import-core-images-containerd.sh`
-- `bundle/apply-core-containerd.sh`
-- `bundle/reset-microsegx.sh`
-- `bundle/full-release.env`
-- `bundle/full-release.containerd.env.example`
-
-### 5.2 普通 Kubernetes 集群离线总包
-
-关键文件：
+总包内至少应包含：
 
 - `microsegx-release-${CORE_TAG}.tar.gz`
 - `k8s-port-audit-containerd-${PORT_AUDIT_VERSION}.tar.gz`
@@ -193,47 +144,168 @@ bash ops/microsegx-local/build-and-package.sh ops/full-release/full-release.env
 - `DEPLOY.md`
 - `CHECKSUMS.sha256`
 
-### 5.3 本机 `k3s` 一体化交付目录
+## 6. 组件单独打包命令
 
-关键文件：
-
-- `core/`
-- `port-audit-stack/`
-- `deploy-local.sh`
-- `setup-k3s-offline-auto-import.sh`
-- `microsegx-local.env.example`
-
-## 6. 打包完成后的验证
-
-建议至少检查：
+### 6.1 只打 `MicroSegX core`
 
 ```bash
-find artifacts/full-release/${CORE_TAG}/bundle -maxdepth 1 -type f | sort
+cd /home/wushuang/MicroSegX
+bash ops/full-release/build-and-package.sh ops/full-release/full-release.k8s-delivery.env
 ```
+
+产物目录：
+
+```text
+artifacts/full-release/${CORE_TAG}
+```
+
+### 6.2 只打 `Port-Audit`
+
+```bash
+cd /home/wushuang/MicroSegX
+bash k8s-node-surface/scripts/build-containerd-bundle.sh
+```
+
+产物：
+
+```text
+k8s-node-surface/dist/k8s-port-audit-containerd-${VERSION}.tar.gz
+```
+
+### 6.3 只打 `OpenZiti`
+
+```bash
+cd /home/wushuang/MicroSegX
+OPENZITI_BUNDLE_TAG=${CORE_TAG} bash openziti/build-openziti-offline-bundle.sh
+```
+
+产物：
+
+```text
+openziti/dist/openziti-k8s-offline-${OPENZITI_BUNDLE_TAG}.tar.gz
+```
+
+## 7. 本地 `k3s` 一体化路径
+
+这条路径只适合：
+
+- 单机联调
+- 本地演示
+- 快速排障
+
+不作为你后续三节点 Kubernetes 集群的默认交付路径。
+
+命令：
+
+```bash
+cd /home/wushuang/MicroSegX
+bash ops/microsegx-local/build-and-package.sh ops/full-release/full-release.env
+```
+
+产物：
+
+```text
+artifacts/microsegx-local/${CORE_TAG}
+```
+
+## 8. 打包后最小校验
+
+### 8.1 总包是否存在
 
 ```bash
 ls -lh artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz
 ```
 
+### 8.2 校验和
+
 ```bash
 sha256sum artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz
+cat artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz.sha256
 ```
 
-## 7. 打包阶段最容易踩的坑
+### 8.3 解包结构检查
 
-- `BOOTSTRAP_PASSWORD` 为空
-  Fresh install 时会直接把安装链卡住。
+```bash
+tmp_dir="$(mktemp -d)"
+tar -xzf artifacts/k8s-delivery/microsegx-suite-${CORE_TAG}.tar.gz -C "$tmp_dir"
+find "$tmp_dir" -maxdepth 2 -type f | sort | sed -n '1,120p'
+```
 
-- `scanner/data/cvedb` 只是 Git LFS 指针
-  现在脚本会自动准备真实 DB，但如果你跳过默认脚本，仍然会踩这个坑。
+### 8.4 Core bundle 结构检查
 
-- 本地联调后又单独重打了 `manager/controller/enforcer`
-  这类“当前 live tag”不会自动进入旧交付包，后续迁移前要重新打包，或者重新导出这些精确 tag。
+```bash
+find artifacts/full-release/${CORE_TAG}/bundle -maxdepth 1 -type f | sort
+```
 
-- 复用过期 tag
-  最后容易出现“源码改了、镜像也打了、但线上实际跑的不是这次内容”。
+至少应该看到：
 
-下一步：
+- `deploy-core.sh`
+- `load-local-images.sh`
+- `import-core-images-containerd.sh`
+- `apply-core-containerd.sh`
+- `full-release.env`
+- `full-release.containerd.env.example`
 
-- 普通 Kubernetes 集群离线交付：看 [K8S-CONTAINERD-DELIVERY-MANUAL.md](./K8S-CONTAINERD-DELIVERY-MANUAL.md)
-- 本机 `k3s` 参考：看 [IMPORT-DEPLOYMENT.md](./IMPORT-DEPLOYMENT.md)
+## 9. 真正容易踩的坑
+
+### 9.1 `build-and-package.sh` 需要真实 env 文件路径
+
+不要用这种方式：
+
+```bash
+bash ops/full-release/build-and-package.sh <(sed '...')
+```
+
+因为脚本会先做 `-f` 检查，进程替换路径不稳定。
+
+正确做法是先复制一份临时 env 文件，再传真实路径。
+
+### 9.2 最终三节点集群一定是“每个可能调度的节点都要先导入镜像”
+
+这对三块组件都成立：
+
+- `MicroSegX`
+- `OpenZiti`
+- `Port-Audit`
+
+否则最典型报错就是：
+
+```text
+ErrImageNeverPull
+```
+
+### 9.3 `MicroSegX controller` 的持久化不能省
+
+至少要明确：
+
+- `CONTROLLER_PVC_ENABLED=true`
+- `CONTROLLER_PVC_STORAGE_CLASS=<你的 StorageClass>`
+- `BOOTSTRAP_PASSWORD=<首次登录密码>`
+
+### 9.4 `OpenZiti` 必须明确外部地址和存储类
+
+至少要设置：
+
+- `ZITI_PUBLIC_HOST`
+- `ZITI_STORAGE_CLASS_NAME`
+
+### 9.5 如果改了代码但只复用旧镜像，产物就不是真正最新
+
+尤其是下面几种情况：
+
+- 改了 `manager`
+- 改了 `controller`
+- 改了 `enforcer`
+- 改了 `scanner`
+- 改了 `k8s-node-surface`
+- 改了 `openziti` 清单或脚本
+
+这时应该重新打包对应组件，最终交付时最好重出总包。
+
+## 10. 推荐阅读顺序
+
+如果你要最终交付到普通 Kubernetes 集群：
+
+1. 先读这份文档
+2. 再读 [K8S-CONTAINERD-DELIVERY-MANUAL.md](./K8S-CONTAINERD-DELIVERY-MANUAL.md)
+3. 如果你是负责持续改代码和出包的 agent，再读 [PACKAGING-AGENT-EXECUTION.zh-CN.md](./PACKAGING-AGENT-EXECUTION.zh-CN.md)

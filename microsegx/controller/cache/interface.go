@@ -84,6 +84,16 @@ type CacheInterface interface {
 	GetPolicyRuleCount(acc *access.AccessControl) int
 	GetPolicyRule(id uint32, acc *access.AccessControl) (*api.RESTPolicyRule, error)
 	GetPolicyRuleCache(id uint32, acc *access.AccessControl) (*share.CLUSPolicyRule, error)
+	GetAutoPolicyStatus(acc *access.AccessControl) *api.RESTAutoPolicyStatus
+	GetAllAutoPolicyFeatures(acc *access.AccessControl) []*api.RESTAutoPolicyFeature
+	GetAllAutoPolicyRules(acc *access.AccessControl) []*api.RESTAutoPolicyRule
+	GetAutoPolicyRule(id uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error)
+	CreateAutoPolicyRule(req *api.RESTAutoPolicyRuleCreate, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error)
+	UpdateAutoPolicyRule(id uint32, req *api.RESTAutoPolicyRuleUpdate, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error)
+	DeleteAutoPolicyRules(ids []uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRuleDeleteResult, error)
+	GetAutoPolicyEvents(acc *access.AccessControl) []*api.RESTAutoPolicyEvent
+	SetAutoPolicyMode(mode string, acc *access.AccessControl) (*api.RESTAutoPolicyStatus, error)
+	IsAutoPolicyRule(id uint32) bool
 	PolicyRule2REST(rule *share.CLUSPolicyRule) *api.RESTPolicyRule
 	GetFedNetworkRulesCache() ([]*share.CLUSPolicyRule, []*share.CLUSRuleHead)
 	CheckPolicyRuleAccess(id uint32, accRead *access.AccessControl, accWrite *access.AccessControl) (bool, bool, bool)

@@ -32,6 +32,19 @@ export class ActionButtonsComponent implements ICellRendererAngularComp {
 
   agInit(params: ICellRendererParams): void {
     this.params = params;
+    if (this.params.data?.legacy_preview) {
+      this.isOperatableRuleType = false;
+      this.isPromotable = false;
+      this.buttonDisplayMap = {
+        add: false,
+        edit: false,
+        delete: false,
+        undelete: false,
+        revert: false,
+        promote: false,
+      };
+      return;
+    }
     this.isOperatableRuleType =
       this.params.data.cfg_type !== GlobalConstant.CFG_TYPE.GROUND &&
       !(

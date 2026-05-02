@@ -1776,8 +1776,18 @@ func StartRESTServer(isNewCluster, isLead bool, maxConcurrentRepoScanTasks, scan
 	r.PATCH("/v1/waf/group/:name", handlerWafGroupConfig)
 	r.GET("/v1/waf/rule", handlerWafRuleList)
 	r.GET("/v1/waf/rule/:name", handlerWafRuleShow)
-	r.GET("/v1/policy/rule", handlerPolicyRuleList)                           // supported 'scope' query parameter values: ""(all, default)/"fed"/"local". no payload
-	r.GET("/v1/policy/rule/:id", handlerPolicyRuleShow)                       // no payload
+	r.GET("/v1/policy/rule", handlerPolicyRuleList)     // supported 'scope' query parameter values: ""(all, default)/"fed"/"local". no payload
+	r.GET("/v1/policy/rule/:id", handlerPolicyRuleShow) // no payload
+	r.GET("/v1/policy/auto/status", handlerAutoPolicyStatus)
+	r.PATCH("/v1/policy/auto/config", handlerAutoPolicyConfig)
+	r.GET("/v1/policy/auto/feature", handlerAutoPolicyFeatureList)
+	r.GET("/v1/policy/auto/rule", handlerAutoPolicyRuleList)
+	r.POST("/v1/policy/auto/rule", handlerAutoPolicyRuleCreate)
+	r.GET("/v1/policy/auto/rule/:id", handlerAutoPolicyRuleShow)
+	r.PATCH("/v1/policy/auto/rule/:id", handlerAutoPolicyRuleUpdate)
+	r.DELETE("/v1/policy/auto/rule/:id", handlerAutoPolicyRuleDelete)
+	r.DELETE("/v1/policy/auto/rule", handlerAutoPolicyRuleBulkDelete)
+	r.GET("/v1/policy/auto/event", handlerAutoPolicyEventList)
 	r.PATCH("/v1/policy/rule", handlerPolicyRuleAction)                       // supported 'scope' query parameter values: "fed"/"local"(default).
 	r.PATCH("/v1/policy/rule/:id", handlerPolicyRuleConfig)                   //
 	r.DELETE("/v1/policy/rule/:id", handlerPolicyRuleDelete)                  // no payload

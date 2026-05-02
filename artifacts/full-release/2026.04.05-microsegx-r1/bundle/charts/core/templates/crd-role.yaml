@@ -459,7 +459,7 @@ userNames:
 
 ---
 
-# Clusterrolebinding for Neuvector to manage name referral for common groups
+# Clusterrolebinding for MicroSegX to manage name referral for common groups
 {{- if $oc3 }}
 apiVersion: authorization.openshift.io/v1
 {{- else if (semverCompare ">=1.8-0" (substr 1 -1 .Capabilities.KubeVersion.GitVersion)) }}

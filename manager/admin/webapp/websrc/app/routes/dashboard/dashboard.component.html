@@ -179,6 +179,57 @@
         </a>
       </div>
     </article>
+
+    <article class="dashboard-focus-card dashboard-focus-card--auto-policy">
+      <div class="dashboard-focus-card__headline">
+        <div>
+          <div class="dashboard-focus-card__eyebrow">
+            {{ 'MICROSEGX.AUTO_POLICY.TITLE' | translate }}
+          </div>
+          <strong class="dashboard-focus-card__value">
+            {{ autoPolicyCandidateFeatures }}
+          </strong>
+        </div>
+        <span class="dashboard-focus-card__badge">
+          {{ autoPolicyModeLabel }}
+        </span>
+      </div>
+      <p class="dashboard-focus-card__copy">
+        {{ 'MICROSEGX.AUTO_POLICY.HERO_COPY' | translate }}
+      </p>
+      <div class="dashboard-focus-card__metrics">
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.AUTO_POLICY.OBSERVED_EVENTS' | translate }}</span>
+          <strong>{{ autoPolicyObservedEvents }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.AUTO_POLICY.BASELINE_RULES' | translate }}</span>
+          <strong>{{ autoPolicyBaselineRules }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.AUTO_POLICY.PERIODIC_RULES' | translate }}</span>
+          <strong>{{ autoPolicyPeriodicRules }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{ 'MICROSEGX.AUTO_POLICY.ANOMALY_RULES' | translate }}</span>
+          <strong>{{ autoPolicyAnomalyRules }}</strong>
+        </div>
+        <div class="dashboard-focus-card__metric">
+          <span>{{
+            'MICROSEGX.AUTO_POLICY.PENDING_PROMOTION' | translate
+          }}</span>
+          <strong>{{ autoPolicyPendingPromotions }}</strong>
+        </div>
+      </div>
+      <div class="dashboard-focus-card__actions">
+        <a
+          mat-button
+          class="dashboard-inline-link"
+          [routerLink]="['/microsegx/auto-policy']">
+          {{ 'MICROSEGX.AUTO_POLICY.TITLE' | translate }}
+        </a>
+      </div>
+    </article>
   </section>
 
   <app-exposure-panel

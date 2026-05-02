@@ -1,6 +1,18 @@
-<div *ngIf="params.data.id > -1">
-  <div *ngIf="source === navSource.FED_POLICY; then onFed; else notOnFed"></div>
+<div *ngIf="params.data.legacy_preview; else normalIdCell">
+  <span
+    class="legacy-preview-id"
+    matTooltip="{{ params.data.comment }}"
+    matTooltipPosition="above">
+    {{ 'MICROSEGX.AUTO_POLICY.LEGACY_PREVIEW_ID' | translate }}
+  </span>
 </div>
+
+<ng-template #normalIdCell>
+  <div *ngIf="params.data.id > -1">
+    <div
+      *ngIf="source === navSource.FED_POLICY; then onFed; else notOnFed"></div>
+  </div>
+</ng-template>
 
 <ng-template #onFed>
   <div

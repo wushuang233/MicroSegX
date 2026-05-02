@@ -27,6 +27,11 @@ import scala.util.control.NonFatal
 class PolicyService() extends BaseService with DefaultJsonFormats with LazyLogging {
 
   private final val policyPath                 = "policy/rule"
+  private final val autoPolicyStatusPath       = "policy/auto/status"
+  private final val autoPolicyConfigPath       = "policy/auto/config"
+  private final val autoPolicyFeaturePath      = "policy/auto/feature"
+  private final val autoPolicyEventPath        = "policy/auto/event"
+  private final val autoPolicyRulePath         = "policy/auto/rule"
   private final val responseRulePath           = "response/rule"
   private final val scanConfigPath             = "scan/config"
   private final val scanRegistryPath           = "scan/registry"
@@ -350,6 +355,96 @@ class PolicyService() extends BaseService with DefaultJsonFormats with LazyLoggi
         tokenId
       )
     }
+  }
+
+  def getAutoPolicyStatus(tokenId: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyStatusPath",
+      GET,
+      "",
+      tokenId
+    )
+  }
+
+  def updateAutoPolicyConfig(tokenId: String, body: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyConfigPath",
+      PATCH,
+      body,
+      tokenId
+    )
+  }
+
+  def getAutoPolicyFeatures(tokenId: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyFeaturePath",
+      GET,
+      "",
+      tokenId
+    )
+  }
+
+  def getAutoPolicyEvents(tokenId: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyEventPath",
+      GET,
+      "",
+      tokenId
+    )
+  }
+
+  def getAutoPolicyRules(tokenId: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath",
+      GET,
+      "",
+      tokenId
+    )
+  }
+
+  def createAutoPolicyRule(tokenId: String, body: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath",
+      POST,
+      body,
+      tokenId
+    )
+  }
+
+  def getAutoPolicyRuleById(tokenId: String, id: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath/$id",
+      GET,
+      "",
+      tokenId
+    )
+  }
+
+  def updateAutoPolicyRuleById(tokenId: String, id: String, body: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath/$id",
+      PATCH,
+      body,
+      tokenId
+    )
+  }
+
+  def deleteAutoPolicyRules(tokenId: String, body: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath",
+      DELETE,
+      body,
+      tokenId
+    )
+  }
+
+  def deleteAutoPolicyRuleById(tokenId: String, id: String): Route = complete {
+    RestClient.httpRequestWithHeader(
+      s"${baseClusterUri(tokenId)}/$autoPolicyRulePath/$id",
+      DELETE,
+      "",
+      tokenId
+    )
   }
 
   def getPolicyApplications(tokenId: String): Route = complete {

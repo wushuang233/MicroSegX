@@ -24,7 +24,6 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    console.log('Auth intercepting...');
     let authToken;
     try {
       authToken = this.localStorage.has(GlobalConstant.LOCAL_STORAGE_TOKEN)
@@ -38,9 +37,7 @@ export class AuthInterceptor implements HttpInterceptor {
         )
       ) {
         if (authToken === '') {
-          if (!environment.previewMode) {
-            this.router.navigate([GlobalConstant.PATH_LOGIN]);
-          }
+          return next.handle(req);
         } else {
           const authReq = req.clone({
             headers: req.headers

@@ -7,10 +7,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 {{- else }}
 apiVersion: v1
 {{- end }}
-kind: Role
+kind: ClusterRole
 metadata:
   name: microsegx-binding-secret
-  namespace: {{ .Release.Namespace }}
   labels:
     chart: {{ template "microsegx.chart" . }}
     release: {{ .Release.Name }}
@@ -137,10 +136,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 {{- else }}
 apiVersion: v1
 {{- end }}
-kind: Role
+kind: ClusterRole
 metadata:
   name: microsegx-binding-secret-controller
-  namespace: {{ .Release.Namespace }}
   labels:
     chart: {{ template "microsegx.chart" . }}
     release: {{ .Release.Name }}
@@ -153,4 +151,29 @@ rules:
   - create
   - update
   - patch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 {{- end }}

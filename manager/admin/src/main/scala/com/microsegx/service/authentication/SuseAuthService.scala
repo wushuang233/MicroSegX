@@ -62,7 +62,9 @@ class SuseAuthService()(implicit
               performLogin(ip, password, "")
           }
         } catch {
-          case ex: DeserializationException =>
+          case ex: DeserializationException               =>
+            complete((StatusCodes.BadRequest, s"Invalid request body: ${ex.getMessage}"))
+          case ex: spray.json.JsonParser.ParsingException =>
             complete((StatusCodes.BadRequest, s"Invalid request body: ${ex.getMessage}"))
         }
 

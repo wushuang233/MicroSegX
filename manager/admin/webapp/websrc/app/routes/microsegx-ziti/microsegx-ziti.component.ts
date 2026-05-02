@@ -1,4 +1,10 @@
-import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalVariable } from '@common/variables/global.variable';
@@ -189,12 +195,14 @@ interface ZitiOverview {
     enrollments?: number;
   };
   error?: string;
+  read_only?: boolean;
 }
 
 interface ZitiSession {
   default_controller_url?: string;
   default_credentials_configured?: boolean;
   logged_in?: boolean;
+  auth_mode?: string;
   identity_name?: string;
   expires_at?: number;
   controller_url?: string;
@@ -244,6 +252,8 @@ interface QuickRoleOption {
 export class MicrosegxZitiComponent
   implements OnInit, AfterViewChecked, OnDestroy
 {
+  @Input() embedded = false;
+
   private static readonly DEFAULT_CONFIG_TYPE = 'Default';
   private readonly autoRefreshIntervalMs = 10000;
 
@@ -565,6 +575,23 @@ export class MicrosegxZitiComponent
 
   get isConfigured(): boolean {
     return this.session?.default_credentials_configured || false;
+  }
+
+  get hasOverviewData(): boolean {
+    return !!this.overview && Object.keys(this.overview).length > 0;
+  }
+
+  get isReadOnlySession(): boolean {
+    return (
+      this.session?.auth_mode === 'cli' || this.overview?.read_only === true
+    );
+  }
+
+  get canMutate(): boolean {
+    return (
+      !this.isReadOnlySession &&
+      (this.isLoggedIn || (this.isConfigured && this.hasOverviewData))
+    );
   }
 
   get counts() {
@@ -1086,6 +1113,25 @@ export class MicrosegxZitiComponent
     return 'disabled';
   }
 
+  private getAttachableRouterScore(router: EdgeRouter): number {
+    const workload = this.getRouterWorkload(router);
+    if (!workload) {
+      return 0;
+    }
+
+    let score = 10;
+    if (router.isOnline) {
+      score += 10;
+    }
+    if (this.getRouterTunnelState(router) === 'ready') {
+      score += 6;
+    }
+    if (workload.available || (workload.readyReplicas || 0) > 0) {
+      score += 4;
+    }
+    return score;
+  }
+
   getRouterTunnelLabelKey(router: EdgeRouter): string {
     switch (this.getRouterTunnelState(router)) {
       case 'ready':
@@ -1112,6 +1158,24 @@ export class MicrosegxZitiComponent
     return identity.isAdmin
       ? this.translate.instant('MICROSEGX.ZITI.TYPE_ADMIN')
       : this.translate.instant('MICROSEGX.ZITI.TYPE_STANDARD');
+  }
+
+  getIdentityTypeDisplay(type: unknown): string {
+    const normalized = this.normalizeIdentityTypeValue(type);
+    switch (normalized.toLowerCase()) {
+      case 'admin':
+        return this.translate.instant('MICROSEGX.ZITI.TYPE_ADMIN');
+      case 'default':
+        return this.translate.instant('MICROSEGX.ZITI.TYPE_DEFAULT');
+      case 'device':
+        return this.translate.instant('MICROSEGX.ZITI.TYPE_DEVICE');
+      case 'user':
+        return this.translate.instant('MICROSEGX.ZITI.TYPE_USER');
+      case 'service':
+        return this.translate.instant('MICROSEGX.ZITI.TYPE_SERVICE');
+      default:
+        return normalized;
+    }
   }
 
   getIdentityTypeName(identity: Identity): string {
@@ -1306,7 +1370,9 @@ export class MicrosegxZitiComponent
   getServiceHostingDetail(service: ZitiService): string {
     const routers = this.getServiceHostedRouters(service);
     if (routers.length > 0) {
-      return `${routers.join(', ')} · ${this.getServiceTerminatorCount(service)} terminator`;
+      return `${routers.join(', ')} · ${this.translate.instant(
+        'MICROSEGX.ZITI.SERVICES.TERMINATOR_LABEL'
+      )} ${this.getServiceTerminatorCount(service)}`;
     }
     const target = this.getServiceHostingTarget(service);
     return target || '-';
@@ -1346,22 +1412,58 @@ export class MicrosegxZitiComponent
   ): string {
     if (this.selectedPolicyType === 'edge-router-policies') {
       const edgeRouterPolicy = policy as EdgeRouterPolicy;
-      return `${edgeRouterPolicy.semantic || 'AnyOf'} · ${
+      return `${this.policySemanticLabel(edgeRouterPolicy.semantic || 'AnyOf')} · ${
         (edgeRouterPolicy.identityRoles || []).length
-      } identity / ${(edgeRouterPolicy.edgeRouterRoles || []).length} router`;
+      } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_IDENTITY')} / ${
+        (edgeRouterPolicy.edgeRouterRoles || []).length
+      } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_ROUTER')}`;
     }
 
     if (this.selectedPolicyType === 'service-edge-router-policies') {
       const serviceRouterPolicy = policy as ServiceEdgeRouterPolicy;
-      return `${serviceRouterPolicy.semantic || 'AnyOf'} · ${
+      return `${this.policySemanticLabel(serviceRouterPolicy.semantic || 'AnyOf')} · ${
         (serviceRouterPolicy.serviceRoles || []).length
-      } service / ${(serviceRouterPolicy.edgeRouterRoles || []).length} router`;
+      } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_SERVICE')} / ${
+        (serviceRouterPolicy.edgeRouterRoles || []).length
+      } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_ROUTER')}`;
     }
 
     const servicePolicy = policy as ServicePolicy;
-    return `${servicePolicy.type || 'Dial'} · ${servicePolicy.semantic || 'AnyOf'} · ${
+    return `${this.policyTypeLabel(servicePolicy.type || 'Dial')} · ${this.policySemanticLabel(
+      servicePolicy.semantic || 'AnyOf'
+    )} · ${
       (servicePolicy.identityRoles || []).length
-    } identity / ${(servicePolicy.serviceRoles || []).length} service`;
+    } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_IDENTITY')} / ${
+      (servicePolicy.serviceRoles || []).length
+    } ${this.translate.instant('MICROSEGX.ZITI.POLICIES.LABEL_SERVICE')}`;
+  }
+
+  policySemanticLabel(value?: string): string {
+    switch (
+      String(value || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'allof':
+        return this.translate.instant('MICROSEGX.ZITI.POLICIES.SEMANTIC_ALLOF');
+      case 'anyof':
+      default:
+        return this.translate.instant('MICROSEGX.ZITI.POLICIES.SEMANTIC_ANYOF');
+    }
+  }
+
+  policyTypeLabel(value?: string): string {
+    switch (
+      String(value || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'bind':
+        return this.translate.instant('MICROSEGX.ZITI.POLICIES.TYPE_BIND');
+      case 'dial':
+      default:
+        return this.translate.instant('MICROSEGX.ZITI.POLICIES.TYPE_DIAL');
+    }
   }
 
   getPolicyMatches(
@@ -1458,6 +1560,9 @@ export class MicrosegxZitiComponent
   }
 
   closeRouterDeployDialog(): void {
+    if (this.dialogLoading) {
+      return;
+    }
     this.showRouterDeployDialog = false;
     this.selectedEntity = null;
     this.dialogLoading = false;
@@ -1573,6 +1678,18 @@ export class MicrosegxZitiComponent
   get attachableRouters(): EdgeRouter[] {
     return this.memoize('attachableRouters', `${this.overviewRevision}`, () =>
       this.sortByName(this.overview?.edge_routers || [])
+        .filter(router => !!this.getRouterWorkload(router))
+        .sort((left, right) => {
+          const rank =
+            this.getAttachableRouterScore(right) -
+            this.getAttachableRouterScore(left);
+          if (rank !== 0) {
+            return rank;
+          }
+          return `${left.name || ''}${left.id || ''}`.localeCompare(
+            `${right.name || ''}${right.id || ''}`
+          );
+        })
     );
   }
 
@@ -1616,7 +1733,28 @@ export class MicrosegxZitiComponent
     );
   }
 
+  getAttachRouterDisabledTooltip(service: ZitiService): string {
+    if (!this.getServiceHostingConfig(service)) {
+      return this.translate.instant(
+        'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_DISABLED'
+      );
+    }
+
+    if (this.attachableRouters.length === 0) {
+      return this.translate.instant(
+        'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_DISABLED_NO_ROUTER'
+      );
+    }
+
+    return this.translate.instant('MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER');
+  }
+
   openAttachServiceDialog(service: ZitiService): void {
+    if (!this.canAttachServiceToRouter(service)) {
+      this.error = this.getAttachRouterDisabledTooltip(service);
+      return;
+    }
+
     this.selectedEntity = service;
     this.selectedEntityType = 'services';
     this.serviceAttachForm = {
@@ -1628,6 +1766,9 @@ export class MicrosegxZitiComponent
   }
 
   closeServiceAttachDialog(): void {
+    if (this.dialogLoading) {
+      return;
+    }
     this.showServiceAttachDialog = false;
     this.selectedEntity = null;
     this.selectedEntityType = '';
@@ -1650,6 +1791,12 @@ export class MicrosegxZitiComponent
       );
       return;
     }
+    if (!this.selectedAttachRouter) {
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.SERVICES.ATTACH_ROUTER_REQUIRED'
+      );
+      return;
+    }
 
     this.dialogLoading = true;
     this.dialogError = '';
@@ -1660,7 +1807,7 @@ export class MicrosegxZitiComponent
         {
           routerId: this.serviceAttachForm.routerId,
           autoEnableRouter: this.serviceAttachForm.autoEnableRouter,
-          waitTimeoutSeconds: 20,
+          waitTimeoutSeconds: 45,
         },
         { headers: this.getHeaders() }
       )
@@ -1806,6 +1953,13 @@ export class MicrosegxZitiComponent
     policy: ServicePolicy | EdgeRouterPolicy | ServiceEdgeRouterPolicy,
     policyType: PolicyType
   ): void {
+    if (this.isSystemManagedEntity(policy)) {
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.SYSTEM_MANAGED_EDIT_DISABLED'
+      );
+      return;
+    }
+
     this.selectedEntity = policy;
     this.selectedEntityType = policyType;
     this.setEntityForm({
@@ -1858,6 +2012,12 @@ export class MicrosegxZitiComponent
 
   private submitEntity(mode: 'create' | 'edit'): void {
     if (mode === 'edit' && !this.selectedEntity) {
+      return;
+    }
+    if (mode === 'edit' && this.isSystemManagedEntity(this.selectedEntity)) {
+      this.dialogError = this.translate.instant(
+        'MICROSEGX.ZITI.SYSTEM_MANAGED_EDIT_DISABLED'
+      );
       return;
     }
 
@@ -2418,7 +2578,18 @@ export class MicrosegxZitiComponent
     );
   }
 
+  getEditTooltip(entity: ZitiEntity | null | undefined): string {
+    return this.translate.instant(
+      this.isSystemManagedEntity(entity)
+        ? 'MICROSEGX.ZITI.SYSTEM_MANAGED_EDIT_DISABLED'
+        : 'MICROSEGX.ZITI.EDIT_ENTITY'
+    );
+  }
+
   closeCreateDialog(): void {
+    if (this.dialogLoading) {
+      return;
+    }
     this.showCreateDialog = false;
     this.selectedEntity = null;
     this.selectedEntityType = '';
@@ -2429,6 +2600,9 @@ export class MicrosegxZitiComponent
   }
 
   closeEditDialog(): void {
+    if (this.dialogLoading) {
+      return;
+    }
     this.showEditDialog = false;
     this.selectedEntity = null;
     this.selectedEntityType = '';
@@ -2439,6 +2613,9 @@ export class MicrosegxZitiComponent
   }
 
   closeDeleteConfirm(): void {
+    if (this.dialogLoading) {
+      return;
+    }
     this.showDeleteConfirm = false;
     this.selectedEntity = null;
     this.selectedEntityType = '';

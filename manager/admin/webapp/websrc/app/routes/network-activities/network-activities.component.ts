@@ -1,5 +1,12 @@
 import { Options } from '@angular-slider/ngx-slider';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  NgZone,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import G6, { Graph } from '@antv/g6';
 import { AssetsHttpService } from '@common/api/assets-http.service';
@@ -34,7 +41,8 @@ import { MultiClusterService } from '@services/multi-cluster.service';
 import { NotificationService } from '@services/notification.service';
 import { GridOptions } from 'ag-grid-community';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
-import { fromEvent, interval, Observable, Subscription } from 'rxjs';
+import { fromEvent, interval, Observable, of, Subscription } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 import { FrameService } from '../../frame/frame.service';
 import { ConversationPair } from './edge-details/edge-details.component';
 
@@ -98,6 +106,8 @@ export class NetworkActivitiesComponent implements OnInit, OnDestroy {
   //endregion
 
   conversationDetail: any;
+  edgeDetailLoading: boolean = false;
+  edgeDetailError: string = '';
   private showRuleId: boolean = false;
   entriesGridHeight: number = 0;
   convHisGridOptions!: GridOptions;
@@ -159,7 +169,9 @@ export class NetworkActivitiesComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private utils: UtilsService,
     private switchers: SwitchersService,
-    private frameService: FrameService
+    private frameService: FrameService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     this.w = GlobalVariable.window;
     this.popupState = new ActivityState(PopupState.onInit);
@@ -1240,40 +1252,82 @@ export class NetworkActivitiesComponent implements OnInit, OnDestroy {
       );
     };
 
-    const isGroupEdge = edge =>
-      edge.getSource().getModel().kind === 'group' ||
-      edge.getSource().getType() === 'combo' ||
-      edge.getTarget().getModel().kind === 'group' ||
-      edge.getTarget().getType() === 'combo';
-
     const showEdgeDetail = edgeItem => {
-      this.selectedEdge = edgeItem;
-      this.edgeDetails = edgeItem.getModel();
-      if (this.edgeDetails.kind === 'group' || isGroupEdge(edgeItem)) {
+      const model = { ...edgeItem.getModel() };
+      let from = model.source || model.from || model.fromGroup || '',
+        to = model.target || model.to || model.toGroup || '';
+      const fallbackConversation = () => ({
+        from: {
+          id: from,
+          display_name: model.fromGroup || from,
+        },
+        to: {
+          id: to,
+          display_name: model.toGroup || to,
+        },
+        entries: [],
+      });
+
+      this.ngZone.run(() => {
+        this.selectedEdge = edgeItem;
+        this.edgeDetails = model;
+        this.edgeDetailLoading = false;
+        this.edgeDetailError = '';
+        this.conversationDetail = fallbackConversation();
+        this.entriesGridHeight = this.getGridHeight([]);
+        this.popupState.transitTo(PopupState.onEdge);
+        this.cdr.detectChanges();
+      });
+
+      if (!from || !to) {
         this.graphService.keepLive();
         return;
       }
 
-      let from = this.edgeDetails.source,
-        to = this.edgeDetails.target;
-      this.graphService.getConversations(from, to).subscribe(
-        response => {
-          this.conversationDetail = response['conversation'];
-          this.popupState.leave();
-          this.stopRefreshSession();
-          this.showRuleId = false;
-          if (this.conversationDetail.entries!.length > 0)
-            this.entriesGridHeight = this.getGridHeight(
-              this.conversationDetail.entries
-            );
-          this.popupState.transitTo(PopupState.onEdge);
-        },
-        err => {
-          this.popupState.leave();
-          this.stopRefreshSession();
-          console.warn(err);
-        }
-      );
+      this.graphService
+        .getConversations(from, to)
+        .pipe(
+          timeout(3500),
+          catchError(err => {
+            return of({ conversation: fallbackConversation() });
+          })
+        )
+        .subscribe(
+          response => {
+            this.ngZone.run(() => {
+              const conversation =
+                response?.['conversation'] || fallbackConversation();
+              conversation.entries = conversation.entries || [];
+              conversation.from = conversation.from || {
+                id: from,
+                display_name: model.fromGroup || from,
+              };
+              conversation.to = conversation.to || {
+                id: to,
+                display_name: model.toGroup || to,
+              };
+              this.conversationDetail = conversation;
+              this.edgeDetailLoading = false;
+              this.edgeDetailError = '';
+              this.stopRefreshSession();
+              this.showRuleId = false;
+              this.entriesGridHeight = this.getGridHeight(
+                this.conversationDetail.entries
+              );
+              this.popupState.transitTo(PopupState.onEdge);
+              this.cdr.detectChanges();
+            });
+          },
+          err => {
+            this.ngZone.run(() => {
+              this.edgeDetailLoading = false;
+              this.edgeDetailError = '';
+              this.conversationDetail = fallbackConversation();
+              this.stopRefreshSession();
+              this.cdr.detectChanges();
+            });
+          }
+        );
     };
 
     const showCve = (message, position) => {

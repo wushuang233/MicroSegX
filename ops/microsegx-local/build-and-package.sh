@@ -21,6 +21,8 @@ source "${FULL_RELEASE_ENV}"
 FULL_RELEASE_ARTIFACT_DIR="${ARTIFACT_DIR:-${ROOT_DIR}/artifacts/full-release/${CORE_TAG}}"
 MICROSEGX_ARTIFACT_DIR="${MICROSEGX_ARTIFACT_DIR:-${ROOT_DIR}/artifacts/microsegx-local/${CORE_TAG}}"
 STACK_BUNDLE_DIR="${KNS_ROOT}/dist/k8s-port-audit-stack-local-${STACK_VERSION}"
+LOCAL_DEPLOYMENT_DOC_SOURCE="${ROOT_DIR}/docs/IMPORT-DEPLOYMENT.md"
+LOCAL_DEPLOYMENT_DOC_NAME="MicroSegX-本地K8s一体化部署说明.zh-CN.md"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -52,6 +54,11 @@ if [[ ! -d "${STACK_BUNDLE_DIR}" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${LOCAL_DEPLOYMENT_DOC_SOURCE}" ]]; then
+  echo "Expected local deployment doc does not exist: ${LOCAL_DEPLOYMENT_DOC_SOURCE}" >&2
+  exit 1
+fi
+
 rm -rf "${MICROSEGX_ARTIFACT_DIR}"
 mkdir -p "${MICROSEGX_ARTIFACT_DIR}/core" "${MICROSEGX_ARTIFACT_DIR}/port-audit-stack"
 
@@ -62,7 +69,7 @@ cp "${SCRIPT_DIR}/deploy-local.sh" "${MICROSEGX_ARTIFACT_DIR}/deploy-local.sh"
 cp "${SCRIPT_DIR}/setup-k3s-offline-auto-import.sh" "${MICROSEGX_ARTIFACT_DIR}/setup-k3s-offline-auto-import.sh"
 cp "${SCRIPT_DIR}/manager-microsegx.overlay.yaml.example" "${MICROSEGX_ARTIFACT_DIR}/manager-microsegx.overlay.yaml.example"
 cp "${SCRIPT_DIR}/microsegx-local.env.example" "${MICROSEGX_ARTIFACT_DIR}/microsegx-local.env.example"
-cp "${ROOT_DIR}/MicroSegX-本地K8s一体化部署说明.zh-CN.md" "${MICROSEGX_ARTIFACT_DIR}/MicroSegX-本地K8s一体化部署说明.zh-CN.md"
+cp "${LOCAL_DEPLOYMENT_DOC_SOURCE}" "${MICROSEGX_ARTIFACT_DIR}/${LOCAL_DEPLOYMENT_DOC_NAME}"
 
 cat >"${MICROSEGX_ARTIFACT_DIR}/README.md" <<EOF
 # MicroSegX 本地 K8s 交付包
@@ -88,7 +95,7 @@ bash ./setup-k3s-offline-auto-import.sh
 
 更详细说明：
 
-- \`MicroSegX-本地K8s一体化部署说明.zh-CN.md\`
+- \`${LOCAL_DEPLOYMENT_DOC_NAME}\`
 
 关键产物：
 

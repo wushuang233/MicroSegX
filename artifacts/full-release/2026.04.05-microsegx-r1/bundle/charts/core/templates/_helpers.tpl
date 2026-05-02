@@ -48,21 +48,26 @@ Lookup secret.
 {{- end -}}
 
 {{- define "microsegx.controller.image" -}}
+{{- $controllerTag := .Values.controller.image.tag | default .Values.tag -}}
 {{- if .Values.global.azure.enabled }}
   {{- printf "%s/%s:%s" .Values.global.azure.images.controller.registry .Values.global.azure.images.controller.image .Values.global.azure.images.controller.tag }}
-{{- else }}
-  {{- if eq .Values.registry "registry.microsegx.com" }}
-    {{- if .Values.oem }}
-      {{- printf "%s/%s/controller:%s" .Values.registry .Values.oem .Values.tag }}
-    {{- else }}
-      {{- printf "%s/controller:%s" .Values.registry .Values.tag }}
-    {{- end }}
+{{- else if eq .Values.registry "registry.microsegx.com" }}
+  {{- if .Values.oem }}
+    {{- printf "%s/%s/controller:%s" .Values.registry .Values.oem $controllerTag }}
   {{- else }}
-    {{- if .Values.controller.image.hash }}
-      {{- printf "%s/%s@%s" .Values.registry .Values.controller.image.repository .Values.controller.image.hash }}
-    {{- else }}
-      {{- printf "%s/%s:%s" .Values.registry .Values.controller.image.repository .Values.tag }}
-    {{- end }}
+    {{- printf "%s/controller:%s" .Values.registry $controllerTag }}
+  {{- end }}
+{{- else if .Values.controller.image.hash }}
+  {{- if .Values.registry }}
+    {{- printf "%s/%s@%s" .Values.registry .Values.controller.image.repository .Values.controller.image.hash }}
+  {{- else }}
+    {{- printf "%s@%s" .Values.controller.image.repository .Values.controller.image.hash }}
+  {{- end }}
+{{- else }}
+  {{- if .Values.registry }}
+    {{- printf "%s/%s:%s" .Values.registry .Values.controller.image.repository $controllerTag }}
+  {{- else }}
+    {{- printf "%s:%s" .Values.controller.image.repository $controllerTag }}
   {{- end }}
 {{- end }}
 {{- end -}}

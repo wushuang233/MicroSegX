@@ -1,11 +1,15 @@
-<div id="conversationHistory" class="infoBox topLeftSession" cdkDrag>
+<div
+  id="conversationHistory"
+  class="infoBox topLeftSession"
+  cdkDrag
+  *ngIf="conversationDetail?.from && conversationDetail?.to">
   <div
     cdkDragHandle
     class="d-flex align-items-center justify-content-between handle">
     <h4 class="mt-1">
-      {{ conversationDetail.from.display_name }}
+      {{ conversationDetail.from?.display_name || conversationDetail.from?.id }}
       <em class="fas fa-long-arrow-alt-right text-info"></em>
-      {{ conversationDetail.to.display_name }}
+      {{ conversationDetail.to?.display_name || conversationDetail.to?.id }}
     </h4>
     <button
       id="closeBlackList"
@@ -92,11 +96,14 @@
         class="mt-1"
         aria-label="clear sessions"
         (click)="
-          clearSessions(conversationDetail.from.id, conversationDetail.to.id)
+          clearSessions(conversationDetail.from?.id, conversationDetail.to?.id)
         "
         [disabled]="!isWriteNetworkAuthorized"
         *ngIf="
-          conversationDetail.entries && conversationDetail.entries.length > 0
+          conversationDetail.from?.id &&
+          conversationDetail.to?.id &&
+          conversationDetail.entries &&
+          conversationDetail.entries.length > 0
         ">
         <em class="fa fa-magic me-1"></em
         >{{ 'network.edgeDetails.CLEAR' | translate }}
@@ -104,8 +111,8 @@
     </div>
   </div>
 
-  <div *ngIf="onRule" class="col-sm-12">
-    <h4 *ngIf="rule.id !== 0">
+  <div *ngIf="onRule && rule" class="col-sm-12">
+    <h4 *ngIf="rule?.id !== 0">
       {{ 'policy.RULE_DETAILS' | translate }}
       <em class="far fa-hand-point-right mx-1 text-primary"></em>
       <small class="text-muted me-4">{{ rule.id }}</small>
@@ -118,7 +125,7 @@
         class="action-label px-1 customer-rule"
         translate="{{ 'group.CUSTOM' }}"></div>
     </h4>
-    <h4 *ngIf="rule.id === 0">
+    <h4 *ngIf="rule?.id === 0">
       {{ 'policy.NEW_RULE' | translate }}
       <em class="far fa-plus-square mx-1 text-primary"></em>
     </h4>
@@ -130,7 +137,7 @@
               <mat-label>{{ 'policy.editPolicy.FROM' | translate }}</mat-label>
               <input
                 matInput
-                value="{{ rule.from }}"
+                value="{{ rule?.from || '-' }}"
                 disabled
                 aria-label="From" />
             </mat-form-field>
@@ -138,7 +145,11 @@
           <div class="full-width me-2">
             <mat-form-field appearance="fill" class="full-width">
               <mat-label>{{ 'policy.editPolicy.TO' | translate }}</mat-label>
-              <input matInput value="{{ rule.to }}" disabled aria-label="To" />
+              <input
+                matInput
+                value="{{ rule?.to || '-' }}"
+                disabled
+                aria-label="To" />
             </mat-form-field>
           </div>
           <div class="full-width">
@@ -147,7 +158,7 @@
               <input
                 matInput
                 disabled
-                value="{{ rule.applications.join(', ') }}"
+                value="{{ (rule?.applications || []).join(', ') || 'any' }}"
                 aria-label="Applications" />
             </mat-form-field>
           </div>
@@ -159,7 +170,7 @@
               <input
                 matInput
                 disabled
-                value="{{ rule.ports }}"
+                value="{{ rule?.ports || 'any' }}"
                 aria-label="Port" />
             </mat-form-field>
           </div>
@@ -174,7 +185,8 @@
                   disabled
                   aria-label="Created date"
                   value="{{
-                    rule.created_timestamp * 1000 | date: 'MMM dd, y HH:mm:ss'
+                    (rule?.created_timestamp || 0) * 1000
+                      | date: 'MMM dd, y HH:mm:ss'
                   }}" />
               </mat-form-field>
             </ng-container>

@@ -72,27 +72,33 @@ spec:
         - name: microsegx-scanner-pod
           {{- if .Values.global.azure.enabled }}
           image: "{{ .Values.global.azure.images.scanner.registry }}/{{ .Values.global.azure.images.scanner.image }}:{{ .Values.global.azure.images.scanner.tag }}"
-          {{- else }}
-          {{- if eq .Values.registry "registry.microsegx.com" }}
+          {{- else if eq .Values.registry "registry.microsegx.com" }}
           {{- if .Values.oem }}
           image: "{{ .Values.registry }}/{{ .Values.oem }}/scanner:{{ .Values.cve.scanner.image.tag }}"
           {{- else }}
           image: "{{ .Values.registry }}/scanner:{{ .Values.cve.scanner.image.tag }}"
           {{- end }}
-          {{- else }}
-          {{- if .Values.cve.scanner.image.hash }}
+          {{- else if .Values.cve.scanner.image.hash }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.cve.scanner.image.repository }}@{{ .Values.cve.scanner.image.hash }}"
+          {{- else }}
+          image: "{{ .Values.cve.scanner.image.repository }}@{{ .Values.cve.scanner.image.hash }}"
+          {{- end }}
           {{- else if .Values.cve.scanner.image.registry }}
           image: "{{ .Values.cve.scanner.image.registry }}/{{ .Values.cve.scanner.image.repository }}:{{ .Values.cve.scanner.image.tag }}"
-          {{- else }}
+          {{- else if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.cve.scanner.image.repository }}:{{ .Values.cve.scanner.image.tag }}"
-          {{- end }}
-          {{- end }}
+          {{- else }}
+          image: "{{ .Values.cve.scanner.image.repository }}:{{ .Values.cve.scanner.image.tag }}"
           {{- end }}
           imagePullPolicy: {{ .Values.cve.scanner.image.imagePullPolicy }}
           env:
             - name: CLUSTER_JOIN_ADDR
               value: microsegx-svc-controller.{{ .Release.Namespace }}
+            - name: NO_PROXY
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,localhost,127.0.0.1"
+            - name: no_proxy
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,localhost,127.0.0.1"
           {{- if .Values.cve.scanner.dockerPath }}
             - name: SCANNER_DOCKER_URL
               value: {{ .Values.cve.scanner.dockerPath }}

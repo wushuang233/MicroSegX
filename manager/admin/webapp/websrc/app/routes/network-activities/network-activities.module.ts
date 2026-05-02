@@ -28,6 +28,7 @@ import { VulnerabilitiesGridModule } from '@components/vulnerabilities-grid/vuln
 import { ClientIpCellComponent } from './client-ip-cell/client-ip-cell.component';
 import { ServerIpCellComponent } from './server-ip-cell/server-ip-cell.component';
 import { FlagIpFqdnModule } from '@components/ui/flag-ip-fqdn/flag-ip-fqdn.module';
+import { AutoPolicyInspectorComponent } from './auto-policy-inspector/auto-policy-inspector.component';
 
 const routes: Routes = [
   { path: '', component: NetworkActivitiesComponent },
@@ -49,6 +50,7 @@ const routes: Routes = [
     AdvancedFilterComponent,
     ClientIpCellComponent,
     ServerIpCellComponent,
+    AutoPolicyInspectorComponent,
   ],
   imports: [
     CommonModule,

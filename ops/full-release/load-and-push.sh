@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="${1:-${SCRIPT_DIR}/full-release.env}"
+ARTIFACT_DIR_OVERRIDE="${ARTIFACT_DIR:-}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing env file: ${ENV_FILE}" >&2
@@ -11,6 +12,10 @@ fi
 
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
+
+if [[ -n "${ARTIFACT_DIR_OVERRIDE}" ]]; then
+  ARTIFACT_DIR="${ARTIFACT_DIR_OVERRIDE}"
+fi
 
 : "${REGISTRY:?REGISTRY is required}"
 

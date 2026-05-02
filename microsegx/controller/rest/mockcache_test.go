@@ -277,6 +277,46 @@ func (m *MockCache) GetPolicyRuleCache(id uint32, acc *access.AccessControl) (*s
 	return nil, nil
 }
 
+func (m *MockCache) GetAutoPolicyStatus(acc *access.AccessControl) *api.RESTAutoPolicyStatus {
+	return nil
+}
+
+func (m *MockCache) GetAllAutoPolicyFeatures(acc *access.AccessControl) []*api.RESTAutoPolicyFeature {
+	return nil
+}
+
+func (m *MockCache) GetAllAutoPolicyRules(acc *access.AccessControl) []*api.RESTAutoPolicyRule {
+	return nil
+}
+
+func (m *MockCache) GetAutoPolicyRule(id uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error) {
+	return nil, nil
+}
+
+func (m *MockCache) CreateAutoPolicyRule(req *api.RESTAutoPolicyRuleCreate, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error) {
+	return &api.RESTAutoPolicyRule{ID: 1}, nil
+}
+
+func (m *MockCache) UpdateAutoPolicyRule(id uint32, req *api.RESTAutoPolicyRuleUpdate, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error) {
+	return &api.RESTAutoPolicyRule{ID: id}, nil
+}
+
+func (m *MockCache) DeleteAutoPolicyRules(ids []uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRuleDeleteResult, error) {
+	return &api.RESTAutoPolicyRuleDeleteResult{Deleted: ids}, nil
+}
+
+func (m *MockCache) GetAutoPolicyEvents(acc *access.AccessControl) []*api.RESTAutoPolicyEvent {
+	return nil
+}
+
+func (m *MockCache) SetAutoPolicyMode(mode string, acc *access.AccessControl) (*api.RESTAutoPolicyStatus, error) {
+	return &api.RESTAutoPolicyStatus{Mode: mode}, nil
+}
+
+func (m *MockCache) IsAutoPolicyRule(id uint32) bool {
+	return false
+}
+
 func (m *MockCache) PolicyRule2REST(rule *share.CLUSPolicyRule) *api.RESTPolicyRule {
 	return nil
 }

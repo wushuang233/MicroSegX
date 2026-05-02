@@ -72,8 +72,11 @@ export class NodesGridComponent implements OnInit {
       {
         headerName: this.tr.instant('nodes.detail.NAME'),
         field: 'name',
-        width: 80,
-        minWidth: 80,
+        minWidth: 240,
+        flex: 1.35,
+        wrapText: true,
+        autoHeight: true,
+        tooltipField: 'name',
       },
       {
         headerName: 'ID',
@@ -93,11 +96,15 @@ export class NodesGridComponent implements OnInit {
       {
         headerName: this.tr.instant('nodes.detail.OS'),
         field: 'os',
+        minWidth: 140,
+        tooltipField: 'os',
         hide: this.isMemberData,
       },
       {
         headerName: this.tr.instant('nodes.detail.PLATFORM'),
         field: 'platform',
+        minWidth: 140,
+        tooltipField: 'platform',
         hide: this.isMemberData,
       },
       {
@@ -190,6 +197,7 @@ export class NodesGridComponent implements OnInit {
       });
     }
     this.gridApi.sizeColumnsToFit();
+    this.gridApi.resetRowHeights?.();
     this.gridApi.getDisplayedRowAtIndex(0)?.setSelected(true);
   }
 
@@ -217,5 +225,6 @@ export class NodesGridComponent implements OnInit {
 
   onResize(): void {
     this.gridApi.sizeColumnsToFit();
+    this.gridApi.resetRowHeights?.();
   }
 }

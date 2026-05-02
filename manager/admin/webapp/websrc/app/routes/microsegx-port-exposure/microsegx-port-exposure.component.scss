@@ -459,7 +459,40 @@
 }
 
 .auxiliary-ziti {
+  display: grid;
+  gap: 16px;
   min-width: 0;
+}
+
+.auxiliary-ziti__notice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  background: rgba(255, 251, 235, 0.82);
+  color: #92400e;
+
+  mat-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #d97706;
+  }
+
+  strong {
+    display: block;
+    color: #78350f;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #92400e;
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 .stats-grid {

@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="${1:-${SCRIPT_DIR}/full-release.env}"
+ARTIFACT_DIR_OVERRIDE="${ARTIFACT_DIR:-}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing env file: ${ENV_FILE}" >&2
@@ -11,6 +12,10 @@ fi
 
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
+
+if [[ -n "${ARTIFACT_DIR_OVERRIDE}" ]]; then
+  ARTIFACT_DIR="${ARTIFACT_DIR_OVERRIDE}"
+fi
 
 : "${DEPLOY_MODE:=registry}"
 : "${IMAGE_NAMESPACE:?IMAGE_NAMESPACE is required}"
@@ -46,6 +51,142 @@ require_cmd() {
     echo "Required command not found: $1" >&2
     exit 1
   }
+}
+
+wait_for_service_ip() {
+  local namespace="$1"
+  local service_name="$2"
+  local timeout_seconds="${3:-120}"
+  local elapsed=0
+  local ip=""
+
+  while (( elapsed < timeout_seconds )); do
+    ip=$(kubectl get svc -n "${namespace}" "${service_name}" -o jsonpath='{.spec.clusterIP}' 2>/dev/null || true)
+    if [[ -n "${ip}" && "${ip}" != "None" && "${ip}" != "<none>" ]]; then
+      printf '%s' "${ip}"
+      return 0
+    fi
+    sleep 2
+    elapsed=$((elapsed + 2))
+  done
+
+  return 1
+}
+
+resolve_first_node_internal_ip() {
+  kubectl get nodes -o jsonpath='{range .items[0].status.addresses[?(@.type=="InternalIP")]}{.address}{end}' 2>/dev/null || true
+}
+
+resolve_port_audit_host_port() {
+  local namespace="$1"
+  local deployment_name="$2"
+  kubectl get deployment -n "${namespace}" "${deployment_name}" \
+    -o jsonpath='{range .spec.template.spec.containers[0].ports[*]}{.hostPort}{"\n"}{end}' 2>/dev/null \
+    | awk 'NF { print; exit }'
+}
+
+patch_runtime_controller_addresses() {
+  local namespace="$1"
+  local api_ip="${FORCE_CONTROLLER_API_IP:-}"
+  local cluster_join_addr="${FORCE_CONTROLLER_CLUSTER_JOIN_IP:-}"
+
+  if [[ -z "${api_ip}" ]]; then
+    api_ip=$(wait_for_service_ip "${namespace}" "microsegx-svc-controller-api" 180 || true)
+  fi
+  if [[ -z "${cluster_join_addr}" ]]; then
+    cluster_join_addr="microsegx-svc-controller.${namespace}.svc.cluster.local"
+  fi
+
+  if [[ -z "${api_ip}" && -z "${cluster_join_addr}" ]]; then
+    echo "==> Skipping runtime controller address patch: service IPs not ready"
+    return 0
+  fi
+
+  echo "==> Patching runtime controller addresses"
+  [[ -n "${api_ip}" ]] && echo "    manager/controller-api IP: ${api_ip}"
+  [[ -n "${cluster_join_addr}" ]] && echo "    cluster join address: ${cluster_join_addr}"
+
+  if [[ -n "${api_ip}" ]] && kubectl get deployment -n "${namespace}" microsegx-manager-pod >/dev/null 2>&1; then
+    kubectl set env -n "${namespace}" deployment/microsegx-manager-pod CTRL_SERVER_IP="${api_ip}" >/dev/null
+    kubectl rollout status -n "${namespace}" deployment/microsegx-manager-pod --timeout=180s
+  fi
+
+  if [[ -n "${cluster_join_addr}" ]]; then
+    if kubectl get deployment -n "${namespace}" microsegx-scanner-pod >/dev/null 2>&1; then
+      kubectl set env -n "${namespace}" deployment/microsegx-scanner-pod CLUSTER_JOIN_ADDR="${cluster_join_addr}" >/dev/null
+      kubectl rollout status -n "${namespace}" deployment/microsegx-scanner-pod --timeout=180s
+    fi
+
+    if kubectl get daemonset -n "${namespace}" microsegx-enforcer-pod >/dev/null 2>&1; then
+      kubectl set env -n "${namespace}" daemonset/microsegx-enforcer-pod CLUSTER_JOIN_ADDR="${cluster_join_addr}" >/dev/null
+      kubectl rollout status -n "${namespace}" daemonset/microsegx-enforcer-pod --timeout=300s
+    fi
+
+    if kubectl get deployment -n "${namespace}" microsegx-registry-adapter-pod >/dev/null 2>&1; then
+      kubectl set env -n "${namespace}" deployment/microsegx-registry-adapter-pod CLUSTER_JOIN_ADDR="${cluster_join_addr}" >/dev/null
+      kubectl rollout status -n "${namespace}" deployment/microsegx-registry-adapter-pod --timeout=180s
+    fi
+  fi
+}
+
+patch_runtime_port_audit_address() {
+  local manager_namespace="$1"
+  local port_audit_namespace="${2:-port-audit}"
+  local base_url="${FORCE_PORT_AUDIT_BASE_URL:-}"
+
+  if [[ -z "${base_url}" ]]; then
+    base_url="http://k8s-port-audit.${port_audit_namespace}.svc.cluster.local:8080"
+  fi
+
+  if [[ -z "${base_url}" ]]; then
+    echo "==> Skipping runtime port-audit address patch: base URL is empty"
+    return 0
+  fi
+
+  if ! kubectl get deployment -n "${manager_namespace}" microsegx-manager-pod >/dev/null 2>&1; then
+    echo "==> Skipping runtime port-audit address patch: manager deployment not found"
+    return 0
+  fi
+
+  echo "==> Patching runtime port-audit address"
+  echo "    manager/port-audit base URL: ${base_url}"
+  kubectl set env -n "${manager_namespace}" deployment/microsegx-manager-pod MICROSEGX_PORT_AUDIT_BASE_URL="${base_url}" >/dev/null
+  kubectl rollout status -n "${manager_namespace}" deployment/microsegx-manager-pod --timeout=180s
+}
+
+adopt_existing_cluster_join_service() {
+  local namespace="$1"
+  local service_name="microsegx-svc-controller-cluster"
+
+  if ! kubectl get service -n "${namespace}" "${service_name}" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "==> Adopting existing ${service_name} service into Helm release metadata"
+  kubectl label service -n "${namespace}" "${service_name}" app.kubernetes.io/managed-by=Helm --overwrite >/dev/null
+  kubectl annotate service -n "${namespace}" "${service_name}" \
+    meta.helm.sh/release-name="${RELEASE_NAME}" \
+    meta.helm.sh/release-namespace="${namespace}" \
+    --overwrite >/dev/null
+}
+
+yaml_escape() {
+  local value="${1//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '%s' "${value}"
+}
+
+append_controller_env() {
+  local name="$1"
+  local value="${2:-}"
+  [[ -n "${value}" ]] || return 0
+
+  if [[ -z "${CONTROLLER_EXTRA_ENV_YAML:-}" ]]; then
+    CONTROLLER_EXTRA_ENV_YAML=$'  env:\n'
+  fi
+
+  CONTROLLER_EXTRA_ENV_YAML+="    - name: ${name}"$'\n'
+  CONTROLLER_EXTRA_ENV_YAML+="      value: \"$(yaml_escape "${value}")\""$'\n'
 }
 
 require_cmd helm
@@ -228,6 +369,13 @@ if [[ -n "${EXTRA_VALUES_FILES}" ]]; then
   done
 fi
 
+CONTROLLER_EXTRA_ENV_YAML=""
+append_controller_env "AUTO_POLICY_MODE" "${AUTO_POLICY_MODE:-}"
+append_controller_env "AUTO_POLICY_WINDOW_SECONDS" "${AUTO_POLICY_WINDOW_SECONDS:-}"
+append_controller_env "AUTO_POLICY_SLOT_MINUTES" "${AUTO_POLICY_SLOT_MINUTES:-}"
+append_controller_env "AUTO_POLICY_DISTINCT_DAY_DURATION" "${AUTO_POLICY_DISTINCT_DAY_DURATION:-}"
+append_controller_env "AUTO_POLICY_TTL_CHECK_SECONDS" "${AUTO_POLICY_TTL_CHECK_SECONDS:-}"
+
 cat >"${VALUES_FILE}" <<EOF
 openshift: false
 registry: ${REGISTRY}
@@ -256,6 +404,7 @@ ${CONTROLLER_PVC_YAML}
       repository: ${IMAGE_NAMESPACE}/compliance-config
       imagePullPolicy: ${IMAGE_PULL_POLICY}
       tag: ${COMPLIANCE_CONFIG_TAG:-1.0.11}
+${CONTROLLER_EXTRA_ENV_YAML}
 
 manager:
   route:
@@ -340,12 +489,19 @@ fi
 echo "==> Installing CRDs"
 helm upgrade --install "${RELEASE_NAME}-crd" "${CHART_ROOT}/crd" \
   -n "${NAMESPACE}" \
+  --force-conflicts \
   --create-namespace
+
+adopt_existing_cluster_join_service "${NAMESPACE}"
 
 echo "==> Installing core services"
 helm upgrade --install "${RELEASE_NAME}" "${CHART_ROOT}/core" \
   -n "${NAMESPACE}" \
+  --force-conflicts \
   "${HELM_VALUE_ARGS[@]}"
+
+patch_runtime_controller_addresses "${NAMESPACE}"
+patch_runtime_port_audit_address "${NAMESPACE}" "${PORT_AUDIT_NAMESPACE:-port-audit}"
 
 echo
 echo "Helm release applied."

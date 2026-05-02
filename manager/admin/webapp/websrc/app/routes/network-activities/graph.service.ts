@@ -193,8 +193,8 @@ export class GraphService {
     this.http
       .get(PathConstant.CONVERSATION_HISTORY_URL, {
         params: {
-          from: encodeURIComponent(from),
-          to: encodeURIComponent(to),
+          from,
+          to,
         },
       })
       .pipe();

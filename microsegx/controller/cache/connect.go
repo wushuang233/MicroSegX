@@ -802,6 +802,7 @@ func UpdateConnections(conns []*share.CLUSConnection) {
 		if !postQualifyConnect(conn, ca, sa) {
 			continue
 		}
+		normalizeAutoPolicyConnectionAttribution(conn, ca, sa)
 
 		cctx.ConnLog.WithFields(log.Fields{
 			"agent":          container.ShortContainerId(conn.AgentID),
@@ -841,6 +842,7 @@ func UpdateConnections(conns []*share.CLUSConnection) {
 			"EpByteIn12":     conn.EpByteIn12,
 		}).Debug()
 
+		observeAutoPolicyEvent(conn, ca, sa, stip)
 		addConnectToGraph(conn, ca, sa, stip)
 
 		//add additional conversation link between sidecar and app
@@ -1829,6 +1831,17 @@ func getNonWorkloadEndpoint(node string) *api.RESTConversationEndpoint {
 			brief.Name = node[len(api.LearnedWorkloadPrefix):]
 			if strings.Contains(brief.Name, api.EndpointIngress) {
 				brief.ServiceGroup = node
+			} else if ip := net.ParseIP(brief.Name); ip != nil {
+				if svcGroup := getSvcAddrGroupName(ip, 0); svcGroup != "" {
+					kind = api.EndpointKindIPSvcGroup
+					brief.Name = svcGroup
+					brief.ServiceGroup = svcGroup
+					if cache, ok := groupCacheMap[svcGroup]; ok {
+						brief.Domain = cache.group.Domain
+						brief.PolicyMode = cache.group.PolicyMode
+						brief.CapChgMode = cache.capChgMode
+					}
+				}
 			}
 		} else {
 			// It gets here only if endpoint is workload and managed, however container

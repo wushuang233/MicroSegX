@@ -10,7 +10,11 @@ if [[ ! -f "${ENV_FILE}" ]]; then
   exit 1
 fi
 
+# Export every variable from the env file so deploy-openziti-k8s.sh
+# receives the intended values after exec.
+set -a
 # shellcheck disable=SC1090
 source "${ENV_FILE}"
+set +a
 
 exec "${SCRIPT_DIR}/deploy-openziti-k8s.sh"

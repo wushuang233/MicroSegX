@@ -218,6 +218,42 @@ func (m *mockCache) GetPolicyRuleCache(id uint32, acc *access.AccessControl) (*s
 	return nil, common.ErrObjectNotFound
 }
 
+func (m *mockCache) GetAutoPolicyStatus(acc *access.AccessControl) *api.RESTAutoPolicyStatus {
+	return nil
+}
+
+func (m *mockCache) GetAllAutoPolicyFeatures(acc *access.AccessControl) []*api.RESTAutoPolicyFeature {
+	return nil
+}
+
+func (m *mockCache) GetAllAutoPolicyRules(acc *access.AccessControl) []*api.RESTAutoPolicyRule {
+	return nil
+}
+
+func (m *mockCache) GetAutoPolicyRule(id uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error) {
+	return nil, common.ErrObjectNotFound
+}
+
+func (m *mockCache) UpdateAutoPolicyRule(id uint32, req *api.RESTAutoPolicyRuleUpdate, acc *access.AccessControl) (*api.RESTAutoPolicyRule, error) {
+	return &api.RESTAutoPolicyRule{ID: id}, nil
+}
+
+func (m *mockCache) DeleteAutoPolicyRules(ids []uint32, acc *access.AccessControl) (*api.RESTAutoPolicyRuleDeleteResult, error) {
+	return &api.RESTAutoPolicyRuleDeleteResult{Deleted: ids}, nil
+}
+
+func (m *mockCache) GetAutoPolicyEvents(acc *access.AccessControl) []*api.RESTAutoPolicyEvent {
+	return nil
+}
+
+func (m *mockCache) SetAutoPolicyMode(mode string, acc *access.AccessControl) (*api.RESTAutoPolicyStatus, error) {
+	return &api.RESTAutoPolicyStatus{Mode: mode}, nil
+}
+
+func (m *mockCache) IsAutoPolicyRule(id uint32) bool {
+	return false
+}
+
 func (m *mockCache) DoesGroupExist(name string, acc *access.AccessControl) (bool, error) {
 	if _, ok := m.groups[name]; ok {
 		return true, nil

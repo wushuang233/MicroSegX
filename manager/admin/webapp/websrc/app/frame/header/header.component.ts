@@ -76,9 +76,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
       titleKey: 'MICROSEGX.PORT_EXPOSURE.TITLE',
       captionKey: 'MICROSEGX.PORT_EXPOSURE.SUBTITLE',
     },
+    '/microsegx/auto-policy': {
+      titleKey: 'MICROSEGX.AUTO_POLICY.TITLE',
+      captionKey: 'MICROSEGX.AUTO_POLICY.SUBTITLE',
+    },
     '/microsegx/ziti': {
-      titleKey: 'MICROSEGX.ZITI.TITLE',
-      captionKey: 'MICROSEGX.ZITI.SUBTITLE',
+      titleKey: 'MICROSEGX.PORT_EXPOSURE.TITLE',
+      captionKey: 'MICROSEGX.PORT_EXPOSURE.AUXILIARY_WORKSPACE_DESC',
     },
     '/regScan': {
       titleKey: 'customUi.header.routes.registries',

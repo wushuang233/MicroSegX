@@ -1292,46 +1292,33 @@ func calculateIPPolicyFromCache() []share.CLUSGroupIPPolicy {
 	 * to/from host mode system container being denied we put
 	 * user created host related deny rules to the end
 	 */
-	adjustRuleHeads := adjustPolicyRuleHeads()
-
 	c2cAny := false
-	for _, head := range adjustRuleHeads {
-		if rule, ok := policyCache.ruleMap[head.ID]; !ok {
-			log.WithFields(log.Fields{"ID": head.ID}).Debug()
-		} else if !rule.Disable {
-			if c2cAny && isC2cRule(rule) {
-				continue
-			}
-			if !c2cAny && isAllC2cAnyRule(rule) {
-				c2cAny = true
-			}
-
-			policy := share.CLUSGroupIPPolicy{
-				ID:     head.ID,
-				Action: C.DP_POLICY_ACTION_ALLOW,
-			}
-			if rule.Action == share.PolicyActionDeny {
-				policy.Action = C.DP_POLICY_ACTION_DENY
-			}
-
-			// assume the from/to contains only one group
-			/*
-				log.WithFields(log.Fields{
-					"c2cAny": c2cAny, "from": rule.From, "to": rule.To, "ports": rule.Ports, "app": rule.Applications,
-				}).Debug("Calculate rule")
-			*/
-
-			policy.From = fillAddrForGroup(rule.From, "", rule.FromHost, nil, false)
-			if len(policy.From) == 0 {
-				continue
-			}
-			policy.To = fillAddrForGroup(rule.To, rule.Ports, rule.ToHost, rule.Applications, true)
-			if len(policy.To) == 0 {
-				continue
-			}
-			groupIPPolicies = append(groupIPPolicies, policy)
-			printOneGroupIPPolicy(&policy)
+	for _, rule := range compileActiveAutoRules(autoPolicyNow()) {
+		if c2cAny && isC2cRule(rule) {
+			continue
 		}
+		if !c2cAny && isAllC2cAnyRule(rule) {
+			c2cAny = true
+		}
+
+		policy := share.CLUSGroupIPPolicy{
+			ID:     rule.ID,
+			Action: C.DP_POLICY_ACTION_ALLOW,
+		}
+		if rule.Action == share.PolicyActionDeny {
+			policy.Action = C.DP_POLICY_ACTION_DENY
+		}
+
+		policy.From = fillAddrForGroup(rule.From, "", rule.FromHost, nil, false)
+		if len(policy.From) == 0 {
+			continue
+		}
+		policy.To = fillAddrForGroup(rule.To, rule.Ports, rule.ToHost, rule.Applications, true)
+		if len(policy.To) == 0 {
+			continue
+		}
+		groupIPPolicies = append(groupIPPolicies, policy)
+		printOneGroupIPPolicy(&policy)
 	}
 	if !c2cAny {
 		if policyApplyIngress {
@@ -2234,6 +2221,10 @@ func scheduleIPPolicyCalculation(fast bool) {
 	log.WithFields(log.Fields{"fast": fast, "policyCalculated": policyCalculated}).Debug("")
 	//no need to reset timer if network policy is disabled
 	if getDisableNetPolicyStatus() {
+		return
+	}
+	if policyCalculatingTimer == nil {
+		log.Debug("Skip policy recalculation schedule before policy timer is initialized")
 		return
 	}
 

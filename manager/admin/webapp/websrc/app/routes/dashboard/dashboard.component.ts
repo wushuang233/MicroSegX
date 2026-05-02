@@ -8,12 +8,17 @@ import {
 import { GlobalVariable } from '@common/variables/global.variable';
 import { GlobalConstant } from '@common/constants/global.constant';
 import { DashboardService } from '@services/dashboard.service';
-import { SystemSummaryDetails, InternalSystemInfo } from '@common/types';
+import {
+  MicrosegxAutoPolicyStatus,
+  SystemSummaryDetails,
+  InternalSystemInfo,
+} from '@common/types';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { AssetsHttpService } from '@common/api/assets-http.service';
 import { MicrosegxHttpService } from '@common/api/microsegx-http.service';
 import { MicrosegxOverview } from '@common/types';
+import { TranslateService } from '@ngx-translate/core';
 import { ReportByNamespaceModalComponent } from './report-by-namespace-modal/report-by-namespace-modal.component';
 import { isAuthorized } from '@common/utils/common.utils';
 import { SummaryService } from '@services/summary.service';
@@ -47,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   reportInfo: any;
   isShowingScore: boolean = false;
   microsegxOverview: MicrosegxOverview | null = null;
+  autoPolicyStatus: MicrosegxAutoPolicyStatus | null = null;
 
   securityEvents: any;
   details: any;
@@ -175,6 +181,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get microsegxTerminatorCount(): number {
     return this.microsegxTerminators.length;
   }
+  get autoPolicyMode(): string {
+    return this.autoPolicyStatus?.mode || '--';
+  }
+  get autoPolicyModeLabel(): string {
+    switch (String(this.autoPolicyStatus?.mode || '').toLowerCase()) {
+      case 'legacy':
+        return this.translate.instant('MICROSEGX.AUTO_POLICY.MODE_LEGACY');
+      case 'enforce':
+        return this.translate.instant('MICROSEGX.AUTO_POLICY.MODE_ENFORCE');
+      case 'shadow':
+        return this.translate.instant('MICROSEGX.AUTO_POLICY.MODE_SHADOW');
+      default:
+        return this.autoPolicyMode;
+    }
+  }
+  get autoPolicyObservedEvents(): number {
+    return this.autoPolicyStatus?.observed_event_count || 0;
+  }
+  get autoPolicyCandidateFeatures(): number {
+    return this.autoPolicyStatus?.feature_count || 0;
+  }
+  get autoPolicyBaselineRules(): number {
+    return this.autoPolicyStatus?.baseline_rule_count || 0;
+  }
+  get autoPolicyPeriodicRules(): number {
+    return this.autoPolicyStatus?.periodic_rule_count || 0;
+  }
+  get autoPolicyAnomalyRules(): number {
+    return this.autoPolicyStatus?.anomaly_rule_count || 0;
+  }
+  get autoPolicyPendingPromotions(): number {
+    return this.autoPolicyStatus?.pending_promotion_count || 0;
+  }
   get leadRiskContainer(): any {
     return this.details?.highPriorityVulnerabilities?.containers
       ?.top5Containers?.[0];
@@ -186,7 +225,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private assetsHttpService: AssetsHttpService,
     private microsegxHttpService: MicrosegxHttpService,
     private summaryService: SummaryService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -211,6 +251,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (refresh) this.getBasicData(true);
     });
     this.loadMicrosegxOverview();
+    this.loadAutoPolicyStatus();
 
     if (!GlobalVariable.hasInitializedSummary) {
       this.getSummary();
@@ -318,6 +359,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.microsegxOverview = null;
+      },
+    });
+  };
+
+  private loadAutoPolicyStatus = () => {
+    this.microsegxHttpService.getAutoPolicyStatus().subscribe({
+      next: response => {
+        this.autoPolicyStatus = response.status;
+      },
+      error: () => {
+        this.autoPolicyStatus = null;
       },
     });
   };

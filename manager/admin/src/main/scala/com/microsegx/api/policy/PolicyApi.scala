@@ -136,6 +136,78 @@ class PolicyApi(resourceService: PolicyService) extends BaseApi {
           }
         } ~
         pathPrefix("policy") {
+          pathPrefix("auto") {
+            path("status") {
+              get {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.getAutoPolicyStatus(tokenId)
+                }
+              }
+            } ~
+            path("config") {
+              patch {
+                entity(as[String]) { body =>
+                  Utils.respondWithWebServerHeaders() {
+                    resourceService.updateAutoPolicyConfig(tokenId, body)
+                  }
+                }
+              }
+            } ~
+            path("feature") {
+              get {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.getAutoPolicyFeatures(tokenId)
+                }
+              }
+            } ~
+            path("event") {
+              get {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.getAutoPolicyEvents(tokenId)
+                }
+              }
+            } ~
+            path("rule") {
+              get {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.getAutoPolicyRules(tokenId)
+                }
+              } ~
+              post {
+                entity(as[String]) { body =>
+                  Utils.respondWithWebServerHeaders() {
+                    resourceService.createAutoPolicyRule(tokenId, body)
+                  }
+                }
+              } ~
+              delete {
+                entity(as[String]) { body =>
+                  Utils.respondWithWebServerHeaders() {
+                    resourceService.deleteAutoPolicyRules(tokenId, body)
+                  }
+                }
+              }
+            } ~
+            path("rule" / Segment) { id =>
+              get {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.getAutoPolicyRuleById(tokenId, id)
+                }
+              } ~
+              patch {
+                entity(as[String]) { body =>
+                  Utils.respondWithWebServerHeaders() {
+                    resourceService.updateAutoPolicyRuleById(tokenId, id, body)
+                  }
+                }
+              } ~
+              delete {
+                Utils.respondWithWebServerHeaders() {
+                  resourceService.deleteAutoPolicyRuleById(tokenId, id)
+                }
+              }
+            }
+          } ~
           pathEnd {
             get {
               parameters(Symbol("scope").?, Symbol("start").?, Symbol("limit").?) {

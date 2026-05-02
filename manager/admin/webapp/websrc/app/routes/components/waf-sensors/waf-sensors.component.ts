@@ -158,6 +158,8 @@ export class WafSensorsComponent implements OnInit {
     const addEditDialogRef = this.dialog.open(AddEditRuleModalComponent, {
       width: '1120px',
       maxWidth: 'calc(100vw - 48px)',
+      maxHeight: 'calc(100vh - 32px)',
+      autoFocus: false,
       data: {
         sensor: this.selectedSensor,
         opType: GlobalConstant.MODAL_OP.ADD,

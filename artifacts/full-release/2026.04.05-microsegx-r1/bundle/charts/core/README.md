@@ -67,6 +67,7 @@ Parameter | Description | Default | Notes
 `controller.prime.enabled` | MicroSegX prime deployment | `false` |
 `controller.image.repository` | controller image repository | `microsegx/controller` |
 `controller.image.imagePullPolicy` | controller image pull policy | `IfNotPresent` |
+`controller.image.tag` | controller image tag override. Falls back to `tag` when empty. | `nil` |
 `controller.image.hash` | controller image hash in the format of sha256:xxxx. If present it overwrites the image tag value. | |
 `controller.replicas` | controller replicas | `3` |
 `controller.schedulerName` | kubernetes scheduler name | `nil` |
@@ -75,14 +76,15 @@ Parameter | Description | Default | Notes
 `controller.tolerations` | List of node taints to tolerate | `nil` |
 `controller.resources` | Add resources requests and limits to controller deployment | `{}` | see examples in [values.yaml](values.yaml)
 `controller.nodeSelector` | Enable and specify nodeSelector labels | `{}` |
+`controller.hostNetwork` | Run controller on the host network namespace. Leave disabled to keep REST/webhook ports inside Pod networking. | `false` |
 `controller.disruptionbudget` | controller PodDisruptionBudget. 0 to disable. Recommended value: 2. | `0` |
 `controller.priorityClassName` | controller priorityClassName. Must exist prior to helm deployment. Leave empty to disable. | `nil` |
 `controller.podLabels` | Specify the pod labels. | `{}` |
 `controller.podAnnotations` | Specify the pod annotations. | `{}` |
 `controller.env` | User-defined environment variables for controller. | `[]` |
 `controller.ranchersso.enabled` | If true, enable single sign on for Rancher | `false` | Required for Rancher Authentication. |
-`controller.pvc.enabled` | If true, enable persistence for controller using PVC | `false` | Require persistent volume type RWX, and storage 1Gi
-`controller.pvc.accessModes` | Access modes for the created PVC. | `["ReadWriteMany"]` |
+`controller.pvc.enabled` | If true, enable persistence for controller using PVC | `false` | Multi-controller deployments require RWX. Single-controller local deployments can use RWO and should pair it with `strategy.type=Recreate`.
+`controller.pvc.accessModes` | Access modes for the created PVC. | `["ReadWriteMany"]` | Use `ReadWriteOnce` for single-controller local-path / k3s deployments.
 `controller.pvc.existingClaim` | If `false`, a new PVC will be created. If a string is provided, an existing PVC with this name will be used. | `false` |
 `controller.pvc.storageClass` | Storage Class to be used | `default` |
 `controller.pvc.capacity` | Storage capacity | `1Gi` |
@@ -91,7 +93,7 @@ Parameter | Description | Default | Notes
 `controller.azureFileShare.secretName` | The name of the secret containing the Azure file share storage account name and key | `nil` |
 `controller.azureFileShare.shareName` | The name of the Azure file share to use | `nil` |
 `controller.apisvc.ctrlServerPort` | Controller REST API service port | `10443` |
-`controller.apisvc.type` | Controller REST API service type | `nil` |
+`controller.apisvc.type` | Controller REST API service type | `ClusterIP` |
 `controller.apisvc.nodePort` | Controller REST API service NodePort number | `nil` |
 `controller.apisvc.annotations` | Add annotations to controller REST API service | `{}` |
 `controller.apisvc.route.enabled` | If true, create a OpenShift route to expose the Controller REST API service | `false` |
@@ -171,8 +173,10 @@ Parameter | Description | Default | Notes
 `controller.certupgrader.runAsUser` | Specify the run as User ID | `nil` |
 `controller.certupgrader.imagePullPolicy` | cert upgrader image pull policy | `IfNotPresent` |
 `enforcer.enabled` | If true, create enforcer | `true` |
+`enforcer.hostNetwork` | Run enforcer in the host network namespace. Leave disabled to keep agent gRPC, Consul client LAN, and healthz ports inside Pod networking. | `false` |
 `enforcer.image.repository` | enforcer image repository | `microsegx/enforcer` |
 `enforcer.image.imagePullPolicy` | enforcer image pull policy | `IfNotPresent` |
+`enforcer.image.tag` | enforcer image tag override. Falls back to `tag` when empty. | `nil` |
 `enforcer.image.hash` | enforcer image hash in the format of sha256:xxxx. If present it overwrites the image tag value. | |
 `enforcer.updateStrategy.type` | enforcer update strategy type. | `RollingUpdate` |
 `enforcer.priorityClassName` | enforcer priorityClassName. Must exist prior to helm deployment. Leave empty to disable. | `nil` |
@@ -188,6 +192,7 @@ Parameter | Description | Default | Notes
 `manager.enabled` | If true, create manager | `true` |
 `manager.image.repository` | manager image repository | `microsegx/manager` |
 `manager.image.imagePullPolicy` | manager image pull policy | `IfNotPresent` |
+`manager.image.tag` | manager image tag override. Falls back to `tag` when empty. | `nil` |
 `manager.image.hash` | manager image hash in the format of sha256:xxxx. If present it overwrites the image tag value. | |
 `manager.priorityClassName` | manager priorityClassName. Must exist prior to helm deployment. Leave empty to disable. | `nil` |
 `manager.podLabels` | Specify the pod labels. | `{}` |

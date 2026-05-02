@@ -73,77 +73,126 @@
                 {{ ruleCount }}
               </span>
             </div>
+            <div class="network-rules-toolbar__filters">
+              <mat-button-toggle-group
+                [value]="ruleSourceFilter"
+                (change)="applyRuleSourceFilter($event.value)">
+                <mat-button-toggle value="all">
+                  {{ 'enum.ALL' | translate }}
+                  ({{ ruleSourceCounts.all }})
+                </mat-button-toggle>
+                <mat-button-toggle value="auto">
+                  {{ 'MICROSEGX.AUTO_POLICY.AUTO_RULES' | translate }}
+                  ({{ ruleSourceCounts.auto }})
+                </mat-button-toggle>
+                <mat-button-toggle
+                  *ngIf="ruleSourceCounts.legacy > 0"
+                  value="legacy">
+                  {{ 'MICROSEGX.AUTO_POLICY.LEGACY_RULES' | translate }}
+                  ({{ ruleSourceCounts.legacy }})
+                </mat-button-toggle>
+                <mat-button-toggle value="legacy_preview">
+                  {{ 'MICROSEGX.AUTO_POLICY.LEGACY_PREVIEW_RULES' | translate }}
+                  ({{ ruleSourceCounts.legacyPreview }})
+                </mat-button-toggle>
+                <mat-button-toggle value="user">
+                  {{ 'MICROSEGX.AUTO_POLICY.USER_RULES' | translate }}
+                  ({{ ruleSourceCounts.user }})
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+              <div
+                *ngIf="ruleSourceFilter === 'legacy_preview'"
+                class="network-rules-toolbar__hint">
+                {{ 'MICROSEGX.AUTO_POLICY.LEGACY_PREVIEW_HINT' | translate }}
+              </div>
+              <mat-button-toggle-group
+                *ngIf="ruleSourceFilter === 'auto'"
+                [value]="autoClassFilter"
+                (change)="applyAutoClassFilter($event.value)">
+                <mat-button-toggle value="all">
+                  {{ 'enum.ALL' | translate }}
+                </mat-button-toggle>
+                <mat-button-toggle value="baseline">{{
+                  autoPolicyClassLabel('baseline')
+                }}</mat-button-toggle>
+                <mat-button-toggle value="periodic">{{
+                  autoPolicyClassLabel('periodic')
+                }}</mat-button-toggle>
+                <mat-button-toggle value="anomaly">{{
+                  autoPolicyClassLabel('anomaly')
+                }}</mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
           </div>
           <div class="network-rules-toolbar__actions">
             <div
               class="network-rules-toolbar__action-row d-flex justify-content-end align-items-center flex-wrap">
-              <button
-                *ngIf="
-                  selectedNetworkRules.length > 0 &&
-                  isWriteGlobalRulesAuthorized &&
-                  !isIncludingCRD &&
-                  !isIncludingFed
-                "
-                class="me-2"
-                mat-stroked-button
-                (click)="removeNetworkRules()">
-                <em class="eos-icons icon-18">delete</em>
-                {{ 'policy.toolBar.REMOVE' | translate }}
-              </button>
-              <button
-                *ngIf="
-                  selectedNetworkRules.length > 0 &&
-                  isWriteGlobalRulesAuthorized &&
-                  !isIncludingCRD &&
-                  !isIncludingFed
-                "
-                class="me-2"
-                mat-stroked-button
-                (click)="openMoveNetworkRulesModal()">
-                <em class="eos-icons icon-18">move</em>
-                {{ 'policy.toolBar.MOVE_TO' | translate }}
-              </button>
-              <ng-container *appDisplayControl="'multi_cluster'">
+              <div class="network-rules-toolbar__selection-actions">
                 <button
                   *ngIf="
                     selectedNetworkRules.length > 0 &&
-                    !containsUnpromotableEndpoint &&
-                    isWriteNetworkRuleAuthorized &&
-                    source !== navSource['FED_POLICY'] &&
+                    isWriteGlobalRulesAuthorized &&
+                    !isIncludingCRD &&
                     !isIncludingFed
                   "
-                  class="me-2"
                   mat-stroked-button
-                  (click)="promoteRuleOnTop()">
-                  <em class="eos-icons icon-18">navigation</em>
-                  {{ 'policy.PROMOTE' | translate }}
+                  (click)="removeNetworkRules()">
+                  <em class="eos-icons icon-18">delete</em>
+                  {{ 'policy.toolBar.REMOVE' | translate }}
                 </button>
-              </ng-container>
-              <button
-                *ngIf="isNetworkRuleDirty() && isWriteGlobalRulesAuthorized"
-                class="me-2"
-                mat-stroked-button
-                (click)="refresh()">
-                <em class="eos-icons icon-18">replay</em>
-                {{ 'policy.toolBar.UNDO' | translate }}
-              </button>
-              <button
-                *ngIf="isNetworkRuleDirty() && isWriteGlobalRulesAuthorized"
-                class="me-2"
-                mat-raised-button
-                color="primary"
-                (click)="submit()">
-                <em class="eos-icons icon-18">save</em>
-                {{ 'policy.toolBar.SAVE' | translate }}
-              </button>
-              <button
-                class="me-3"
-                mat-stroked-button
-                *ngIf="isWriteNetworkRuleAuthorized"
-                (click)="addNetworkRuleToTop()">
-                <em class="eos-icons icon-18">add_circle</em>
-                {{ 'policy.toolBar.INSERT_TO_TOP' | translate }}
-              </button>
+                <button
+                  *ngIf="
+                    selectedNetworkRules.length > 0 &&
+                    isWriteGlobalRulesAuthorized &&
+                    !isIncludingCRD &&
+                    !isIncludingFed
+                  "
+                  mat-stroked-button
+                  (click)="openMoveNetworkRulesModal()">
+                  <em class="eos-icons icon-18">move</em>
+                  {{ 'policy.toolBar.MOVE_TO' | translate }}
+                </button>
+                <ng-container *appDisplayControl="'multi_cluster'">
+                  <button
+                    *ngIf="
+                      selectedNetworkRules.length > 0 &&
+                      !containsUnpromotableEndpoint &&
+                      isWriteNetworkRuleAuthorized &&
+                      source !== navSource['FED_POLICY'] &&
+                      !isIncludingFed
+                    "
+                    mat-stroked-button
+                    (click)="promoteRuleOnTop()">
+                    <em class="eos-icons icon-18">navigation</em>
+                    {{ 'policy.PROMOTE' | translate }}
+                  </button>
+                </ng-container>
+                <button
+                  *ngIf="isNetworkRuleDirty() && isWriteGlobalRulesAuthorized"
+                  mat-stroked-button
+                  (click)="refresh()">
+                  <em class="eos-icons icon-18">replay</em>
+                  {{ 'policy.toolBar.UNDO' | translate }}
+                </button>
+                <button
+                  *ngIf="isNetworkRuleDirty() && isWriteGlobalRulesAuthorized"
+                  mat-raised-button
+                  color="primary"
+                  (click)="submit()">
+                  <em class="eos-icons icon-18">save</em>
+                  {{ 'policy.toolBar.SAVE' | translate }}
+                </button>
+              </div>
+              <div class="network-rules-toolbar__persistent-actions">
+                <button
+                  class="network-rules-toolbar__insert-button"
+                  mat-stroked-button
+                  *ngIf="isWriteNetworkRuleAuthorized"
+                  (click)="addNetworkRuleToTop()">
+                  <em class="eos-icons icon-18">add_circle</em>
+                  {{ 'policy.toolBar.INSERT_TO_TOP' | translate }}
+                </button>
+              </div>
               <app-quick-filter
                 class="network-rules-toolbar__filter"
                 (filterCountChange)="filterCountChanged($event)"
@@ -198,6 +247,66 @@
           [gridOptions]="gridOptions"
           [context]="context">
         </ag-grid-angular>
+
+        <section
+          *ngIf="selectedAutoRuleDetail as autoRule"
+          class="network-rules-auto-detail">
+          <div class="network-rules-auto-detail__headline">
+            <div>
+              <div class="network-rules-auto-detail__eyebrow">
+                {{ 'MICROSEGX.AUTO_POLICY.TITLE' | translate }}
+              </div>
+              <h2>
+                {{ autoRule.rule?.from || '--' }} ->
+                {{ autoRule.rule?.to || '--' }}
+              </h2>
+            </div>
+            <a
+              mat-button
+              color="primary"
+              [routerLink]="['/microsegx/auto-policy']">
+              {{ 'MICROSEGX.AUTO_POLICY.OPEN_WORKSPACE' | translate }}
+            </a>
+          </div>
+
+          <div class="network-rules-auto-detail__chips">
+            <span class="network-rules-auto-chip">{{
+              autoPolicyClassLabel(autoRule.class)
+            }}</span>
+            <span class="network-rules-auto-chip">{{
+              autoPolicyCompileStateLabel(autoRule.compile_state)
+            }}</span>
+            <span class="network-rules-auto-chip">
+              {{ 'MICROSEGX.AUTO_POLICY.CONFIDENCE' | translate }}
+              {{ autoRule.confidence | number: '1.2-2' }}
+            </span>
+          </div>
+
+          <div class="network-rules-auto-detail__meta">
+            <span>
+              {{ autoPolicyActionLabel(autoRule.rule?.action) }} /
+              {{
+                autoRule.rule?.ports ||
+                  (autoRule.rule?.applications || []).join(', ')
+              }}
+            </span>
+            <span *ngIf="autoRule.last_observed_timestamp">
+              {{ 'MICROSEGX.AUTO_POLICY.LAST_OBSERVED' | translate }}
+              {{ formatAutoPolicyTimestamp(autoRule.last_observed_timestamp) }}
+            </span>
+            <span *ngIf="autoRule.expires_timestamp">
+              {{ 'MICROSEGX.AUTO_POLICY.EXPIRES_AT' | translate }}
+              {{ formatAutoPolicyTimestamp(autoRule.expires_timestamp) }}
+            </span>
+          </div>
+
+          <div class="network-rules-auto-detail__reason">
+            <strong>{{
+              'MICROSEGX.AUTO_POLICY.REASON_CODES' | translate
+            }}</strong>
+            <span>{{ (autoRule.reason_codes || []).join(', ') || '--' }}</span>
+          </div>
+        </section>
       </div>
     </div>
   </div>

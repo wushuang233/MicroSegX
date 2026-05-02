@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host ::ng-deep #nodes-grid .ag-cell-wrapper {
+  align-items: flex-start;
+}
+
+:host ::ng-deep #nodes-grid .ag-cell-value {
+  line-height: 1.5;
+}
+
+:host ::ng-deep #nodes-grid .ag-cell[col-id='name'] .ag-cell-value {
+  white-space: normal;
+  word-break: break-word;
+}

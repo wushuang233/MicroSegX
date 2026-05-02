@@ -1,6 +1,6 @@
 <div
   *ngIf="
-    params.context.componentParent._conversationDetail.from.id === 'external';
+    params.context.componentParent._conversationDetail?.from?.id === 'external';
     else internalEndpoint
   ">
   <app-flag-ip-fqdn

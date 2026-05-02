@@ -11,10 +11,21 @@ const NETWORK_ACTIVITY = {
   icon: 'neural_network',
 };
 const MICROSEGX = {
-  text: '端口管理',
-  translate: 'sidebar.nav.PORT_EXPOSURE',
+  text: 'MicroSegX',
+  translate: 'sidebar.nav.MICROSEGX',
   icon: 'security',
-  link: '/microsegx/port-exposure',
+  submenu: [
+    {
+      text: '自动策略',
+      translate: 'sidebar.nav.AUTO_POLICY',
+      link: '/microsegx/auto-policy',
+    },
+    {
+      text: '端口暴露与零信任',
+      translate: 'sidebar.nav.PORT_EXPOSURE',
+      link: '/microsegx/port-exposure',
+    },
+  ],
 };
 const ASSETS = {
   text: '资产',

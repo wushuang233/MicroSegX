@@ -21,6 +21,7 @@
 {{- $runtimePath = .Values.docker.path -}}
 {{- end }}
 {{- if .Values.enforcer.enabled -}}
+{{- $enforcerTag := .Values.enforcer.image.tag | default .Values.tag -}}
 {{- if (semverCompare ">=1.9-0" (substr 1 -1 .Capabilities.KubeVersion.GitVersion)) }}
 apiVersion: apps/v1
 {{- else }}
@@ -60,6 +61,8 @@ spec:
 {{ toYaml .Values.enforcer.tolerations | indent 8 }}
     {{- end }}
       hostPID: true
+      hostNetwork: {{ .Values.enforcer.hostNetwork | default false }}
+      dnsPolicy: {{ ternary "ClusterFirstWithHostNet" "ClusterFirst" (.Values.enforcer.hostNetwork | default false) }}
     {{- if .Values.enforcer.priorityClassName }}
       priorityClassName: {{ .Values.enforcer.priorityClassName }}
     {{- end }}
@@ -74,19 +77,23 @@ spec:
         - name: microsegx-enforcer-pod
           {{- if .Values.global.azure.enabled }}
           image: "{{ .Values.global.azure.images.enforcer.registry }}/{{ .Values.global.azure.images.enforcer.image }}:{{ .Values.global.azure.images.enforcer.tag }}"
-          {{- else }}
-          {{- if eq .Values.registry "registry.microsegx.com" }}
+          {{- else if eq .Values.registry "registry.microsegx.com" }}
           {{- if .Values.oem }}
           image: "{{ .Values.registry }}/{{ .Values.oem }}/enforcer:{{ .Values.tag }}"
           {{- else }}
           image: "{{ .Values.registry }}/enforcer:{{ .Values.tag }}"
           {{- end }}
-          {{- else }}
-          {{- if .Values.enforcer.image.hash }}
+          {{- else if .Values.enforcer.image.hash }}
+          {{- if .Values.registry }}
           image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}@{{ .Values.enforcer.image.hash }}"
           {{- else }}
-          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ .Values.tag }}"
+          image: "{{ .Values.enforcer.image.repository }}@{{ .Values.enforcer.image.hash }}"
           {{- end }}
+          {{- else }}
+          {{- if .Values.registry }}
+          image: "{{ .Values.registry }}/{{ .Values.enforcer.image.repository }}:{{ $enforcerTag }}"
+          {{- else }}
+          image: "{{ .Values.enforcer.image.repository }}:{{ $enforcerTag }}"
           {{- end }}
           {{- end }}
           imagePullPolicy: {{ .Values.enforcer.image.imagePullPolicy }}
@@ -104,11 +111,19 @@ spec:
             - name: CLUSTER_ADVERTISED_ADDR
               valueFrom:
                 fieldRef:
-                  fieldPath: status.podIP
+                  fieldPath: {{ ternary "status.hostIP" "status.podIP" (.Values.enforcer.hostNetwork | default false) }}
             - name: CLUSTER_BIND_ADDR
               valueFrom:
                 fieldRef:
-                  fieldPath: status.podIP
+                  fieldPath: {{ ternary "status.hostIP" "status.podIP" (.Values.enforcer.hostNetwork | default false) }}
+            - name: NO_PROXY
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,localhost,127.0.0.1"
+            - name: no_proxy
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local,localhost,127.0.0.1"
+            - name: CLUSTER_LAN_PORT
+              value: "18311"
+            - name: CLUSTER_HTTP_PORT
+              value: "8501"
           {{- if or .Values.internal.certmanager.enabled .Values.enforcer.internal.certificate.secret }}
           {{- else if (and .Values.internal.autoGenerateCert (not $pre540))}}
             - name: AUTO_INTERNAL_CERT

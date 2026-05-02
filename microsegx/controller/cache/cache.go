@@ -2264,6 +2264,7 @@ func Init(ctx *Context, leader bool, leadAddr, restoredFedRole string) CacheInte
 	// admissionRuleInit needs to be called before startWorkerThread so that
 	// we know whether we need to modify namesapce for admCtrl's namespaceSelector feature before orch watcher starts
 	admissionRuleInit()
+	autoPolicyInit()
 
 	startWorkerThread(ctx) // timer and orch channel
 	startPolicyThread()

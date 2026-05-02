@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 import { PathConstant } from '@common/constants/path.constant';
-import { MicrosegxOverview } from '@common/types';
+import {
+  MicrosegxAutoPolicyEvent,
+  MicrosegxAutoPolicyFeature,
+  MicrosegxAutoPolicyConfigRequest,
+  MicrosegxAutoPolicyDeleteResult,
+  MicrosegxAutoPolicyRuleCreateRequest,
+  MicrosegxAutoPolicyRuleUpdateRequest,
+  MicrosegxAutoPolicyRuleSummary,
+  MicrosegxAutoPolicyStatus,
+  MicrosegxOverview,
+} from '@common/types';
 import { GlobalVariable } from '@common/variables/global.variable';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -15,6 +25,7 @@ export class MicrosegxHttpService {
     const token = GlobalVariable.nvToken || localStorage.getItem('token');
     return new HttpHeaders({
       Token: token || '',
+      'X-Auth-Token': token || '',
       'Content-Type': 'application/json',
     });
   }
@@ -22,6 +33,134 @@ export class MicrosegxHttpService {
   getOverview(): Observable<MicrosegxOverview> {
     return this.http.get<MicrosegxOverview>(
       PathConstant.MICROSEGX_OVERVIEW_URL,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getAutoPolicyStatus(): Observable<{ status: MicrosegxAutoPolicyStatus }> {
+    return this.http.get<{ status: MicrosegxAutoPolicyStatus }>(
+      PathConstant.AUTO_POLICY_STATUS_URL,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateAutoPolicyConfig(
+    mode: MicrosegxAutoPolicyConfigRequest['config']['mode']
+  ): Observable<{ status: MicrosegxAutoPolicyStatus }> {
+    const body: MicrosegxAutoPolicyConfigRequest = {
+      config: { mode },
+    };
+    return this.http.patch<{ status: MicrosegxAutoPolicyStatus }>(
+      PathConstant.AUTO_POLICY_CONFIG_URL,
+      body,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateGlobalNetworkPolicyMode(
+    mode: 'Discover' | 'Monitor' | 'Protect'
+  ): Observable<any> {
+    return this.http.patch(
+      PathConstant.SERVICE_ALL,
+      {
+        policy_mode: mode,
+        profile_mode: 'Discover',
+        baseline_profile: 'zero-drift',
+      },
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateSystemNetworkPolicyMode(
+    mode: 'Discover' | 'Monitor' | 'Protect'
+  ): Observable<any> {
+    return this.http.patch(
+      PathConstant.CONFIG_V2_URL,
+      {
+        net_config: {
+          net_service_status: false,
+          net_service_policy_mode: mode,
+          disable_net_policy: false,
+          strict_group_mode: false,
+        },
+        config_v2: {
+          svc_cfg: {
+            new_service_policy_mode: mode,
+            new_service_profile_mode: 'Discover',
+            new_service_profile_baseline: 'zero-drift',
+          },
+        },
+      },
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getAutoPolicyRules(): Observable<{
+    rules: MicrosegxAutoPolicyRuleSummary[];
+  }> {
+    return this.http.get<{ rules: MicrosegxAutoPolicyRuleSummary[] }>(
+      PathConstant.AUTO_POLICY_RULES_URL,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getAutoPolicyRuleDetail(
+    id: number | string
+  ): Observable<{ rule: MicrosegxAutoPolicyRuleSummary }> {
+    return this.http.get<{ rule: MicrosegxAutoPolicyRuleSummary }>(
+      `${PathConstant.AUTO_POLICY_RULES_URL}/${id}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  createAutoPolicyRule(
+    config: MicrosegxAutoPolicyRuleCreateRequest['config']
+  ): Observable<{ rule: MicrosegxAutoPolicyRuleSummary }> {
+    const body: MicrosegxAutoPolicyRuleCreateRequest = { config };
+    return this.http.post<{ rule: MicrosegxAutoPolicyRuleSummary }>(
+      PathConstant.AUTO_POLICY_RULES_URL,
+      body,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateAutoPolicyRule(
+    id: number | string,
+    config: MicrosegxAutoPolicyRuleUpdateRequest['config']
+  ): Observable<{ rule: MicrosegxAutoPolicyRuleSummary }> {
+    const body: MicrosegxAutoPolicyRuleUpdateRequest = { config };
+    return this.http.patch<{ rule: MicrosegxAutoPolicyRuleSummary }>(
+      `${PathConstant.AUTO_POLICY_RULES_URL}/${id}`,
+      body,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteAutoPolicyRules(
+    ids: Array<number | string>
+  ): Observable<{ result: MicrosegxAutoPolicyDeleteResult }> {
+    return this.http.request<{ result: MicrosegxAutoPolicyDeleteResult }>(
+      'delete',
+      PathConstant.AUTO_POLICY_RULES_URL,
+      {
+        body: { ids: ids.map(id => Number(id)).filter(id => id > 0) },
+        headers: this.getHeaders(),
+      }
+    );
+  }
+
+  getAutoPolicyFeatures(): Observable<{
+    features: MicrosegxAutoPolicyFeature[];
+  }> {
+    return this.http.get<{ features: MicrosegxAutoPolicyFeature[] }>(
+      PathConstant.AUTO_POLICY_FEATURES_URL,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getAutoPolicyEvents(): Observable<{ events: MicrosegxAutoPolicyEvent[] }> {
+    return this.http.get<{ events: MicrosegxAutoPolicyEvent[] }>(
+      PathConstant.AUTO_POLICY_EVENTS_URL,
       { headers: this.getHeaders() }
     );
   }

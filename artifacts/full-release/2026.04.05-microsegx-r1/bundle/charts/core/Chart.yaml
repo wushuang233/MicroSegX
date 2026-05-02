@@ -4,9 +4,9 @@ version: 2.8.12
 appVersion: 5.5.0
 description: Helm chart for MicroSegX's core services
 home: https://microsegx.com
-icon: https://avatars2.githubusercontent.com/u/19367275?s=200&v=4
+icon: https://microsegx.com/icon.png
 maintainers:
-  - name: becitsthere
+  - name: microsegx-team
     email: support@microsegx.com
 engine: gotpl
 sources:

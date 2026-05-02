@@ -17,4 +17,13 @@ export interface NetworkRule {
   state?: string;
   remove?: boolean;
   selected?: boolean;
+  rule_source?: string;
+  legacy_preview?: boolean;
+  auto_policy_class?: string;
+  auto_policy_confidence?: number;
+  auto_policy_active?: boolean;
+  auto_policy_last_observed_timestamp?: number;
+  auto_policy_expires_timestamp?: number;
+  auto_policy_periodic_slots?: number[];
+  auto_policy_reason_codes?: string[];
 }

@@ -1672,6 +1672,8 @@ func configUpdate(nType cluster.ClusterNotifyType, key string, value []byte, mod
 		groupConfigUpdate(nType, key, value)
 	case share.CFGEndpointPolicy:
 		policyConfigUpdate(nType, key, value)
+	case share.CFGEndpointAutoPolicy:
+		autoPolicyConfigUpdate(nType, key, value)
 	case share.CFGEndpointScan:
 		scanConfigUpdate(nType, value)
 	case share.CFGEndpointLicense:

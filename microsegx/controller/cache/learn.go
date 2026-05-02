@@ -623,6 +623,9 @@ func replaceLearnedRulePortAny(pair *groupPair, rw *learnedPolicyRuleWrapper) {
 const MaxSvcPortNum int = 20
 
 func learnAppPort(fromNode, toNode string, app *uint32, port *string) uint32 {
+	if autoPolicyEnabled() {
+		return 0
+	}
 	if app == nil && port == nil {
 		log.WithFields(log.Fields{
 			"from": fromNode, "to": toNode,
@@ -704,6 +707,9 @@ func getLearnedPolicy(fromNode, toNode string, app *uint32, port *string) uint32
 }
 
 func unlearnAppPort(fromNode, toNode string, app *uint32, port *string) {
+	if autoPolicyEnabled() {
+		return
+	}
 	pair := getLearnedPolicyRuleKey(fromNode, toNode, app, port)
 	if pair == nil {
 		return
@@ -763,7 +769,7 @@ func adjustMaxLearnRuleID(id uint32) {
 }
 
 func deleteRuleFromLprWrapperMap(r *share.CLUSPolicyRule) {
-	if r.CfgType != share.Learned {
+	if r.CfgType != share.Learned || isAutoPolicyRuleID(r.ID) {
 		return
 	}
 
@@ -1149,6 +1155,14 @@ func SyncLearnedPolicyFromCluster() {
 				dels.Add(r.ID)
 				continue
 			}
+			if isAutoPolicyRuleID(r.ID) {
+				lprActiveRuleIDs.Add(r.ID)
+				if maxLearnRuleID < r.ID {
+					maxLearnRuleID = r.ID
+				}
+				continue
+			}
+
 			pair := groupPair{from: cr.From, to: cr.To}
 			rw := &learnedPolicyRuleWrapper{
 				id: r.ID,
@@ -1230,12 +1244,25 @@ func startPolicyThread() {
 	dlpCalculatingTimer.Stop()
 	vulProfUpdateTimer = time.NewTimer(vulProfUpdateDelayIdle)
 	vulProfUpdateTimer.Stop()
+	if autoPolicyEnabled() {
+		scheduleIPPolicyCalculation(true)
+	}
 
 	syncCheckTicker := time.Tick(time.Second * time.Duration(120))
+	autoPolicyWindowTicker := time.NewTicker(autoPolicyConfig.WindowDuration)
+	autoPolicyScheduleTicker := time.NewTicker(autoPolicyConfig.ScheduleCheckInterval)
+	autoPolicyTTLTicker := time.NewTicker(autoPolicyConfig.TTLCheckInterval)
+	autoPolicyAgingTicker := time.NewTicker(autoPolicyConfig.AgingInterval)
 
 	// In case there are already learned rule in cluster, fetch the rules.
 	// This can happen when controller restarts
 	SyncLearnedPolicyFromCluster()
+	if autoPolicyEnforceEnabled() {
+		promoteAutoPolicyCandidatesOnModeSwitch()
+	}
+	if autoPolicyEnabled() {
+		cleanupInvalidAutoPolicyRules()
+	}
 
 	go func() {
 		// Wait until graph is synced
@@ -1289,6 +1316,15 @@ func startPolicyThread() {
 				scanVulProfUpdate()
 			case <-syncCheckTicker:
 				syncCheck(isLeader())
+			case <-autoPolicyWindowTicker.C:
+				processObservationWindow()
+			case <-autoPolicyScheduleTicker.C:
+				checkAutoPolicySchedule()
+			case <-autoPolicyTTLTicker.C:
+				cleanupExpiredAnomalyRules()
+				cleanupInvalidAutoPolicyRules()
+			case <-autoPolicyAgingTicker.C:
+				cleanupAutoPolicyRules()
 			}
 		}
 	}()
@@ -1526,6 +1562,9 @@ func syncGraphTx() *syncDataMsg {
 
 	learnedRules := make([]*graphSyncLearnedRule, 0, len(lprWrapperMap))
 	for pair, rw := range lprWrapperMap {
+		if isAutoPolicyRuleID(rw.id) {
+			continue
+		}
 		learnedRules = append(learnedRules, getSyncLearnedRule(&pair, rw))
 	}
 
@@ -1659,6 +1698,13 @@ func syncGraphRx(msg *syncDataMsg) int {
 			lprWrapperMap = make(map[groupPair]*learnedPolicyRuleWrapper)
 			for _, s := range gd.LearnedRules {
 				pair, rw := recoverLearnedRule(s)
+				if isAutoPolicyRuleID(rw.id) {
+					lprActiveRuleIDs.Add(rw.id)
+					if maxLearnRuleID < rw.id {
+						maxLearnRuleID = rw.id
+					}
+					continue
+				}
 				lprWrapperMap[*pair] = rw
 				//keep track of id being synced
 				lprActiveRuleIDs.Add(rw.id)

@@ -40,17 +40,16 @@ apiVersion: rbac.authorization.k8s.io/v1
 {{- else }}
 apiVersion: v1
 {{- end }}
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: microsegx-binding-secret
-  namespace: {{ .Release.Namespace }}
   labels:
     chart: {{ template "microsegx.chart" . }}
     release: {{ .Release.Name }}
 roleRef:
 {{- if not $oc3 }}
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
 {{- end }}
   name: microsegx-binding-secret
 subjects:
@@ -147,17 +146,16 @@ apiVersion: rbac.authorization.k8s.io/v1
 {{- else }}
 apiVersion: v1
 {{- end }}
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: microsegx-binding-secret-controller
-  namespace: {{ .Release.Namespace }}
   labels:
     chart: {{ template "microsegx.chart" . }}
     release: {{ .Release.Name }}
 roleRef:
 {{- if not $oc3 }}
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
 {{- end }}
   name: microsegx-binding-secret-controller
 subjects:

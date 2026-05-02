@@ -45,7 +45,7 @@ spec:
         {{- if .Values.cve.updater.priorityClassName }}
           priorityClassName: {{ .Values.cve.updater.priorityClassName }}
         {{- end }}
-        {{- if .Values.leastPrivilege }}
+        {{- if and .Values.rbac (or .Values.leastPrivilege .Values.cve.updater.enabled) }}
           serviceAccountName: updater
           serviceAccount: updater
         {{- else }}

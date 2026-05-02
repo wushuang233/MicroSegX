@@ -13,6 +13,10 @@
 - [打包文档](./PACKAGING.md)
 - [Kubernetes `ctr/containerd` 离线交付主手册](./K8S-CONTAINERD-DELIVERY-MANUAL.md)
 
+如果你是负责持续改代码并重新出包的本地 agent，再补读：
+
+- [打包执行手册（给本地 Agent）](./PACKAGING-AGENT-EXECUTION.zh-CN.md)
+
 如果你只想看最短命令版，再看：
 
 - [普通 Kubernetes 集群最简交付文档](./MINIMAL-TRANSFER-DEPLOY-K8S.md)

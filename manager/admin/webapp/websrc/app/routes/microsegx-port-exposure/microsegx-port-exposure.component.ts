@@ -1,7 +1,10 @@
+import { Location } from '@angular/common';
 import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalVariable } from '@common/variables/global.variable';
+import { Subscription } from 'rxjs';
 
 interface PortItem {
   key: string;
@@ -233,13 +236,18 @@ export class MicrosegxPortExposureComponent
   private readonly handleWindowFocus = (): void => {
     this.triggerAutoRefresh(true);
   };
+  private routeQuerySubscription: Subscription | null = null;
 
   constructor(
     private http: HttpClient,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
+    this.bindAuxiliaryWorkspaceTabToRoute();
     this.setViewMode('exposure');
     this.refresh();
     this.startAutoRefresh();
@@ -253,6 +261,8 @@ export class MicrosegxPortExposureComponent
     this.stopAutoRefresh();
     this.clearScanStatusTimer();
     this.releaseDialogBodyState();
+    this.routeQuerySubscription?.unsubscribe();
+    this.routeQuerySubscription = null;
   }
 
   setViewMode(nextMode: 'exposure' | 'services'): void {
@@ -265,7 +275,55 @@ export class MicrosegxPortExposureComponent
   }
 
   setAuxiliaryWorkspaceTab(nextTab: 'summary' | 'ziti'): void {
+    if (this.auxiliaryWorkspaceTab === nextTab) {
+      return;
+    }
+    const scrollTop = this.getCurrentScrollTop();
     this.auxiliaryWorkspaceTab = nextTab;
+    this.syncAuxiliaryWorkspaceQuery(nextTab);
+    this.restoreScrollTop(scrollTop);
+  }
+
+  private bindAuxiliaryWorkspaceTabToRoute(): void {
+    this.routeQuerySubscription = this.route.queryParamMap.subscribe(params => {
+      const nextTab =
+        params.get('workspace') === 'ziti' ||
+        this.router.url.includes('/microsegx/ziti')
+          ? 'ziti'
+          : 'summary';
+      if (this.auxiliaryWorkspaceTab !== nextTab) {
+        this.auxiliaryWorkspaceTab = nextTab;
+      }
+    });
+  }
+
+  private syncAuxiliaryWorkspaceQuery(nextTab: 'summary' | 'ziti'): void {
+    const nextUrl = this.router.serializeUrl(
+      this.router.createUrlTree([], {
+        relativeTo: this.route,
+        queryParams: {
+          workspace: nextTab === 'ziti' ? 'ziti' : null,
+        },
+        queryParamsHandling: 'merge',
+      })
+    );
+    this.location.replaceState(nextUrl);
+  }
+
+  private getCurrentScrollTop(): number {
+    if (typeof window === 'undefined') {
+      return 0;
+    }
+    return window.scrollY || document.documentElement.scrollTop || 0;
+  }
+
+  private restoreScrollTop(scrollTop: number): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollTop, left: 0, behavior: 'auto' });
+    });
   }
 
   private getHeaders(): HttpHeaders {
@@ -834,6 +892,140 @@ export class MicrosegxPortExposureComponent
         return 'MICROSEGX.PORT_EXPOSURE.SCOPE_PLATFORM';
       default:
         return 'MICROSEGX.PORT_EXPOSURE.SCOPE_MANAGEABLE';
+    }
+  }
+
+  getExposureTypeLabel(type?: string): string {
+    switch (
+      String(type || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'loadbalancer':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_LOADBALANCER'
+        );
+      case 'nodeport':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_NODEPORT'
+        );
+      case 'hostport':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_HOSTPORT'
+        );
+      case 'nodelistener':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_NODELISTENER'
+        );
+      case 'externalip':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_EXTERNALIP'
+        );
+      case 'ingress':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_INGRESS'
+        );
+      case 'clusterip':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.EXPOSURE_CLUSTERIP'
+        );
+      case '':
+        return '-';
+      default:
+        return type || '-';
+    }
+  }
+
+  getServiceTypeLabel(type?: string): string {
+    switch (
+      String(type || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'clusterip':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.SERVICE_TYPE_CLUSTERIP'
+        );
+      case 'nodeport':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.SERVICE_TYPE_NODEPORT'
+        );
+      case 'loadbalancer':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.SERVICE_TYPE_LOADBALANCER'
+        );
+      case 'externalname':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.SERVICE_TYPE_EXTERNALNAME'
+        );
+      case '':
+        return '-';
+      default:
+        return type || '-';
+    }
+  }
+
+  getResourceKindLabel(kind?: string): string {
+    switch (
+      String(kind || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'service':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.RESOURCE_SERVICE'
+        );
+      case 'ingress':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.RESOURCE_INGRESS'
+        );
+      case 'node':
+        return this.translate.instant('MICROSEGX.PORT_EXPOSURE.RESOURCE_NODE');
+      case 'pod':
+        return this.translate.instant('MICROSEGX.PORT_EXPOSURE.RESOURCE_POD');
+      case 'deployment':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.RESOURCE_DEPLOYMENT'
+        );
+      case 'statefulset':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.RESOURCE_STATEFULSET'
+        );
+      case 'daemonset':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.RESOURCE_DAEMONSET'
+        );
+      case '':
+        return '-';
+      default:
+        return kind || '-';
+    }
+  }
+
+  getAddressTypeLabel(addressType?: string): string {
+    switch (
+      String(addressType || '')
+        .trim()
+        .toLowerCase()
+    ) {
+      case 'internalip':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.ADDRESS_INTERNAL_IP'
+        );
+      case 'externalip':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.ADDRESS_EXTERNAL_IP'
+        );
+      case 'hostname':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.ADDRESS_HOSTNAME'
+        );
+      case '':
+        return this.translate.instant(
+          'MICROSEGX.PORT_EXPOSURE.NODE_OVERVIEW_ADDRESS'
+        );
+      default:
+        return addressType || '-';
     }
   }
 

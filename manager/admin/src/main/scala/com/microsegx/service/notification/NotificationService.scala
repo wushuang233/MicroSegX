@@ -24,6 +24,8 @@ import org.joda.time.DateTime
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.io.PrintWriter
 import java.io.StringWriter
 import scala.concurrent.Await
@@ -42,6 +44,9 @@ class NotificationService()(implicit
   final val serverErrorStatus = "Status: 503"
   val topLimit                = 5
   val client                  = "client"
+
+  private def controllerPathSegment(value: String): String =
+    URLEncoder.encode(value, StandardCharsets.UTF_8.toString).replace("+", "%20")
 
   def getIpLocations(ipList: Array[String]): Route = complete {
     logger.info("Getting ip locations")
@@ -335,7 +340,7 @@ class NotificationService()(implicit
   def deleteNetworkConversation(tokenId: String, from: String, to: String): Route = complete {
     logger.info("Clear from {} to {}", from, to)
     RestClient.httpRequestWithHeader(
-      s"${baseClusterUri(tokenId)}/conversation/$from/$to",
+      s"${baseClusterUri(tokenId)}/conversation/${controllerPathSegment(from)}/${controllerPathSegment(to)}",
       DELETE,
       "",
       tokenId
@@ -346,7 +351,7 @@ class NotificationService()(implicit
     complete {
       logger.info("Renaming endpoint: {}", config.config.id)
       RestClient.httpRequestWithHeader(
-        s"${baseClusterUri(tokenId)}/conversation_endpoint/${config.config.id}",
+        s"${baseClusterUri(tokenId)}/conversation_endpoint/${controllerPathSegment(config.config.id)}",
         PATCH,
         endpointConfigWrapToJson(config),
         tokenId
@@ -356,7 +361,7 @@ class NotificationService()(implicit
   def deleteNetworkConversationEndpoint(tokenId: String, id: String): Route = complete {
     logger.info("Removing unmanaged endpoint: {}", id)
     RestClient.httpRequestWithHeader(
-      s"${baseClusterUri(tokenId)}/conversation_endpoint/$id",
+      s"${baseClusterUri(tokenId)}/conversation_endpoint/${controllerPathSegment(id)}",
       DELETE,
       "",
       tokenId
@@ -364,12 +369,31 @@ class NotificationService()(implicit
   }
 
   def getNetworkConversationHistory(tokenId: String, from: String, to: String): Route = complete {
-    RestClient.httpRequestWithHeader(
-      s"${baseClusterUri(tokenId)}/conversation/$from/$to",
-      GET,
-      "",
-      tokenId
-    )
+    def jsonEscape(value: String): String =
+      value.replace("\\", "\\\\").replace("\"", "\\\"")
+
+    val fallback =
+      s"""{"conversation":{"from":{"id":"${jsonEscape(from)}"},"to":{"id":"${jsonEscape(
+          to
+        )}"},"entries":[],"sessions":0,"bytes":0}}"""
+    RestClient
+      .httpRequestWithHeaderDecode(
+        s"${baseClusterUri(tokenId)}/conversation/${controllerPathSegment(from)}/${controllerPathSegment(to)}",
+        GET,
+        "",
+        tokenId
+      )
+      .map { response =>
+        if (response.status == StatusCodes.NotFound) {
+          HttpResponse(
+            status = StatusCodes.OK,
+            headers = Nil,
+            entity = HttpEntity(ContentTypes.`application/json`, fallback)
+          )
+        } else {
+          response
+        }
+      }
   }
 
   def getNetworkGraph(tokenId: String, user: String): Route = complete {

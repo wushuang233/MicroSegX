@@ -9,13 +9,19 @@
   gap: 12px;
   width: 100%;
   max-width: none;
+  max-height: calc(100vh - 72px);
+  overflow: hidden;
 }
 
 [mat-dialog-content] {
   width: 100%;
   box-sizing: border-box;
-  max-height: calc(100vh - 220px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - 210px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
 }
 
 .rule-form {
@@ -97,8 +103,14 @@
 }
 
 .rule-form__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 14px 0 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, #fff 42%);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 :host ::ng-deep #waf-pattern-edit-grid .ag-root-wrapper {

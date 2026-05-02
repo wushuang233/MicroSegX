@@ -830,7 +830,7 @@ func removeFromNetworkEPGroup(nepID string) {
 func createServiceIPGroup(r *resource.Service) *share.CLUSGroup {
 	// Ignore the service in the same domain/namespace of the controller. If other container services
 	// are deployed in the same domain/namespace, we won't be able to see it.
-	if localDev.Ctrler.Domain != "" && localDev.Ctrler.Domain == r.Domain {
+	if localDev.Ctrler.Domain != "" && localDev.Ctrler.Domain == r.Domain && !autoPolicyIsProtectedNamespace(r.Domain) {
 		log.WithFields(log.Fields{"domain": r.Domain}).Debug("Ignore service in self's domain")
 		return nil
 	}

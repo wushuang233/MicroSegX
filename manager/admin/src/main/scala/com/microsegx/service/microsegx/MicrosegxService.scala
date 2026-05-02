@@ -23,8 +23,10 @@ import java.net.http.{
   HttpResponse as JavaHttpResponse
 }
 import java.time.Duration
+import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
 import scala.util.Try
+import scala.util.control.NonFatal
 
 class MicrosegxService extends DefaultJsonFormats with LazyLogging {
 
@@ -37,10 +39,13 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
   private final val HeaderPragma           = "Pragma"
   private final val IgnoredResponseHeaders = Set(
     "content-length",
+    "content-type",
     "connection",
     "transfer-encoding",
     "keep-alive",
-    "upgrade"
+    "upgrade",
+    "date",
+    "server"
   )
 
   private val baseUrl = sys.env
@@ -54,20 +59,75 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
       .getOrElse(30L)
   )
 
+  private val overviewUpstreamTimeout = Duration.ofSeconds(
+    sys.env
+      .get("MICROSEGX_OVERVIEW_UPSTREAM_TIMEOUT_SECONDS")
+      .flatMap(value => Try(value.toLong).toOption)
+      .getOrElse(4L)
+  )
+
+  private val overviewCacheTtlMillis = Duration
+    .ofSeconds(
+      sys.env
+        .get("MICROSEGX_OVERVIEW_CACHE_SECONDS")
+        .flatMap(value => Try(value.toLong).toOption)
+        .getOrElse(10L)
+    )
+    .toMillis
+
   private val httpClient = HttpClient
     .newBuilder()
     .connectTimeout(requestTimeout)
     .followRedirects(HttpClient.Redirect.NORMAL)
     .build()
 
+  private val overviewCacheLock = new Object
+  private val overviewCache     = mutable.Map.empty[String, CachedOverview]
+
   def getOverview(request: HttpRequest): JsObject = {
+    val cacheKey = overviewCacheKey(request)
+    val now      = System.currentTimeMillis()
+
+    overviewCacheLock.synchronized {
+      overviewCache.get(cacheKey).filter(_.expiresAtMillis > now).map(_.payload)
+    } match {
+      case Some(cached) =>
+        cached
+      case None         =>
+        val stale = overviewCacheLock.synchronized {
+          overviewCache.get(cacheKey).map(_.payload)
+        }
+        try {
+          val fresh = buildOverview(request)
+          overviewCacheLock.synchronized {
+            overviewCache.update(
+              cacheKey,
+              CachedOverview(fresh, System.currentTimeMillis() + overviewCacheTtlMillis)
+            )
+          }
+          fresh
+        } catch {
+          case NonFatal(e) =>
+            logger.warn("Unable to build MicroSegX overview: {}", e.getMessage)
+            stale.getOrElse(buildUnavailableOverview(e.getMessage))
+        }
+    }
+  }
+
+  private def buildOverview(request: HttpRequest): JsObject = {
     val forwardedHeaders = forwardedOverviewHeaders(request)
-    val dashboardPayload = requestJson(HttpMethods.GET.value, "/api/dashboard").asJsObject
+    val dashboardPayload =
+      requestJson(
+        HttpMethods.GET.value,
+        "/api/dashboard",
+        timeout = overviewUpstreamTimeout
+      ).asJsObject
     val zitiSession      =
       requestJson(
         HttpMethods.GET.value,
         "/api/ziti/session",
-        headers = forwardedHeaders
+        headers = forwardedHeaders,
+        timeout = overviewUpstreamTimeout
       ).asJsObject
     val zitiSnapshot     = fetchZitiSnapshot(zitiSession, forwardedHeaders)
 
@@ -80,6 +140,36 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
       "zitiOverview" -> zitiSnapshot.getOrElse(JsObject())
     )
   }
+
+  private def buildUnavailableOverview(reason: String): JsObject =
+    JsObject(
+      "baseUrl"      -> JsString(baseUrl),
+      "portExposure" -> JsObject(
+        "managedServices" -> JsNumber(0),
+        "openPorts"       -> JsNumber(0),
+        "exposedTargets"  -> JsNumber(0),
+        "resourceCount"   -> JsNumber(0),
+        "trafficTargets"  -> JsNumber(0),
+        "nodes"           -> JsNumber(0),
+        "generatedAt"     -> JsString(""),
+        "scanInProgress"  -> JsBoolean(false)
+      ),
+      "ziti"         -> JsObject(
+        "available"                    -> JsBoolean(false),
+        "defaultControllerUrl"         -> JsString(""),
+        "defaultCredentialsConfigured" -> JsBoolean(false),
+        "aliveRouters"                 -> JsNumber(0),
+        "deployedRouters"              -> JsNumber(0),
+        "services"                     -> JsNumber(0),
+        "configs"                      -> JsNumber(0),
+        "identities"                   -> JsNumber(0),
+        "controllerError"              -> JsString(reason)
+      ),
+      "dashboard"    -> JsObject("error" -> JsString(reason)),
+      "zitiSession"  -> JsObject(),
+      "zitiOverview" -> JsObject(),
+      "degraded"     -> JsBoolean(true)
+    )
 
   def proxyApi(request: HttpRequest, remainingPath: Uri.Path): HttpResponse = {
     val upstreamPath = buildApiTargetPath(remainingPath, request.uri.rawQueryString)
@@ -175,7 +265,8 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
         requestJson(
           HttpMethods.GET.value,
           "/api/ziti/overview",
-          headers = forwardedHeaders
+          headers = forwardedHeaders,
+          timeout = overviewUpstreamTimeout
         ).asJsObject
       ).toOption
 
@@ -195,7 +286,8 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
         method = HttpMethods.POST.value,
         path = "/api/ziti/login",
         body = ByteString("{}").toArray,
-        headers = Seq(HeaderContentType -> "application/json")
+        headers = Seq(HeaderContentType -> "application/json"),
+        timeout = overviewUpstreamTimeout
       )
 
     if (!isSuccess(loginResponse.statusCode)) {
@@ -211,7 +303,8 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
       requestJson(
         HttpMethods.GET.value,
         "/api/ziti/overview",
-        headers = cookieHeader.toSeq.map(value => HeaderCookie -> value)
+        headers = cookieHeader.toSeq.map(value => HeaderCookie -> value),
+        timeout = overviewUpstreamTimeout
       ).asJsObject
     ).toOption
 
@@ -224,7 +317,8 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
           headers = Seq(
             HeaderCookie      -> cookie,
             HeaderContentType -> "application/json"
-          )
+          ),
+          timeout = overviewUpstreamTimeout
         )
       )
     }
@@ -294,6 +388,9 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
         header.name() -> header.value()
     }
 
+  private def overviewCacheKey(request: HttpRequest): String =
+    forwardedOverviewHeaders(request).map(_._2).mkString("|")
+
   private def requestBody(request: HttpRequest): Array[Byte] =
     request.entity match {
       case strict: HttpEntity.Strict => strict.data.toArray
@@ -304,9 +401,11 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
     method: String,
     path: String,
     body: Array[Byte] = Array.emptyByteArray,
-    headers: Seq[(String, String)] = Nil
+    headers: Seq[(String, String)] = Nil,
+    timeout: Duration = requestTimeout
   ): JsValue = {
-    val response = send(method = method, path = path, body = body, headers = headers)
+    val response =
+      send(method = method, path = path, body = body, headers = headers, timeout = timeout)
     if (!isSuccess(response.statusCode)) {
       throw new IllegalStateException(
         s"MicroSegX upstream request failed: ${response.statusCode} ${new String(response.body)}"
@@ -319,12 +418,13 @@ class MicrosegxService extends DefaultJsonFormats with LazyLogging {
     method: String,
     path: String,
     body: Array[Byte] = Array.emptyByteArray,
-    headers: Seq[(String, String)] = Nil
+    headers: Seq[(String, String)] = Nil,
+    timeout: Duration = requestTimeout
   ): UpstreamResponse = {
     val requestBuilder = JavaHttpRequest
       .newBuilder()
       .uri(URI.create(s"$baseUrl$path"))
-      .timeout(requestTimeout)
+      .timeout(timeout)
 
     headers.foreach { case (name, value) =>
       requestBuilder.header(name, value)
@@ -419,3 +519,5 @@ private case class UpstreamResponse(
   headers: Seq[(String, String)],
   body: Array[Byte]
 )
+
+private case class CachedOverview(payload: JsObject, expiresAtMillis: Long)

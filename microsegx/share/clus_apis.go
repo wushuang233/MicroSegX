@@ -80,6 +80,7 @@ const (
 	CFGEndpointApikey               = "apikey"
 	CFGEndpointSigstoreRootsOfTrust = "sigstore_roots_of_trust"
 	CFGEndpointQuerySession         = "querysession"
+	CFGEndpointAutoPolicy           = "auto_policy"
 )
 const CLUSConfigStore string = CLUSObjectStore + "config/"
 const CLUSConfigSystemKey string = CLUSConfigStore + CFGEndpointSystem
@@ -113,6 +114,9 @@ const CLUSConfigPwdProfileStore string = CLUSConfigStore + CFGEndpointPwdProfile
 const CLUSConfigApikeyStore string = CLUSConfigStore + CFGEndpointApikey + "/"
 const CLUSConfigSigstoreRootsOfTrust string = CLUSConfigStore + CFGEndpointSigstoreRootsOfTrust + "/"
 const CLUSConfigQuerySessionStore string = CLUSConfigStore + CFGEndpointQuerySession + "/"
+const CLUSConfigAutoPolicyStore string = CLUSConfigStore + CFGEndpointAutoPolicy + "/"
+const CLUSConfigAutoPolicyRuleStore string = CLUSConfigAutoPolicyStore + "rule/"
+const CLUSConfigAutoPolicyEngineKey string = CLUSConfigAutoPolicyStore + "engine"
 
 // !!! NOTE: When adding new config items, update the import/export list as well !!!
 
@@ -369,6 +373,10 @@ func CLUSPolicyZipRuleListKey(name string) string {
 	return fmt.Sprintf("%s%s/ziprules", CLUSConfigPolicyStore, name)
 }
 
+func CLUSAutoPolicyMetaKey(id uint32) string {
+	return fmt.Sprintf("%s%v", CLUSConfigAutoPolicyRuleStore, id)
+}
+
 func CLUSScanDataHostKey(id string) string {
 	return fmt.Sprintf("%sreport/host/%s", CLUSScanDataStore, id)
 }
@@ -586,6 +594,12 @@ func CLUSPolicyRuleKey2ID(key string) uint32 {
 	return uint32(id)
 }
 
+func CLUSAutoPolicyMetaKey2ID(key string) uint32 {
+	s := keyLastToken(key)
+	id, _ := strconv.Atoi(s)
+	return uint32(id)
+}
+
 func CLUSKeyLastToken(key string) string {
 	return keyLastToken(key)
 }
@@ -609,6 +623,10 @@ func CLUSIsPolicyRuleListKey(key string) bool {
 
 func CLUSIsPolicyZipRuleListKey(key string) bool {
 	return CLUSKeyNthToken(key, 4) == "ziprules"
+}
+
+func CLUSIsAutoPolicyMetaKey(key string) bool {
+	return strings.HasPrefix(key, CLUSConfigAutoPolicyRuleStore)
 }
 
 func CLUSNetworkKey2Subject(key string) string {
@@ -1264,6 +1282,30 @@ type CLUSPolicyRule struct {
 	Priority       uint32    `json:"priority"`
 	MatchCntr      uint64    `json:"match_cntr"`
 	LastMatchAt    time.Time `json:"last_match_at"`
+}
+
+type AutoPolicyClass string
+
+const (
+	AutoPolicyBaseline AutoPolicyClass = "baseline"
+	AutoPolicyPeriodic AutoPolicyClass = "periodic"
+	AutoPolicyAnomaly  AutoPolicyClass = "anomaly"
+)
+
+type CLUSAutoPolicyMeta struct {
+	RuleID        uint32          `json:"rule_id"`
+	Class         AutoPolicyClass `json:"class"`
+	Confidence    float64         `json:"confidence"`
+	CreatedAt     time.Time       `json:"created_at"`
+	LastObserved  time.Time       `json:"last_observed"`
+	ExpiresAt     time.Time       `json:"expires_at,omitempty"`
+	PeriodicSlots []uint16        `json:"periodic_slots,omitempty"`
+	ReasonCodes   []string        `json:"reason_codes,omitempty"`
+}
+
+type CLUSAutoPolicyEngineConfig struct {
+	Mode      string    `json:"mode"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 type CLUSRuleHead struct {

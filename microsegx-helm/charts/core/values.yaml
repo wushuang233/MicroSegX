@@ -76,6 +76,9 @@ controller:
   # If false, controller will not be installed
   enabled: true
   annotations: {}
+  clustersvc:
+    enabled: true
+    clusterIP:
   strategy:
     type: RollingUpdate
     rollingUpdate:

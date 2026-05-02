@@ -923,6 +923,88 @@ S_anomaly =
 - periodic_slots
 - reason_codes
 
+### 7.3 `/v1/policy/auto/rule/:id`
+
+前端解释面板和规则详情必须依赖此接口。
+
+最少返回：
+
+- 7.2 中的全部摘要字段
+- stage
+- compile_state
+- active_now
+- source_feature_keys
+- baseline_score
+- baseline_score_breakdown
+- periodic_score
+- periodic_slot_summary
+- anomaly_score
+- anomaly_signal_breakdown
+- ttl_remaining_seconds
+- promotion_reason
+- pending_reason
+
+说明：
+
+- `compile_state` 用于说明该规则是否已进入当前编译结果
+- `active_now` 主要用于周期规则和 anomaly deny
+- `pending_reason` 用于前端展示“为什么暂未生效”
+
+### 7.4 `/v1/policy/auto/feature`
+
+为了支撑“观察视图”和“网络活动页自动策略侧栏”，第一版应新增只读候选特征接口。
+
+最少返回：
+
+- feature_key
+- from
+- to
+- action_hint
+- class_hint
+- stage
+- baseline_score
+- periodic_score
+- anomaly_score
+- consecutive_windows
+- historical_windows
+- distinct_days
+- workload_coverage
+- active_slot_count
+- active_slots
+- last_seen_at
+- related_rule_id
+- reason_codes
+
+说明：
+
+- 不要求一次返回海量历史窗口原始数据
+- 第一版只返回页面展示和解释所需的聚合结果
+
+### 7.5 `/v1/policy/auto/event`
+
+该接口用于“最近窗口处理 / promotion / aging / TTL delete”事件流展示。
+
+如果时间不足，可延后到前端 Phase F5；但若实现，则最少返回：
+
+- id
+- event_type
+- event_class
+- target_type
+- target_id
+- target_key
+- summary
+- created_at
+- extra
+
+推荐的 `event_type`：
+
+- `window_processed`
+- `baseline_promoted`
+- `periodic_promoted`
+- `anomaly_promoted`
+- `rule_aged`
+- `deny_ttl_deleted`
+
 ---
 
 ## 8. 测试要求
@@ -1145,5 +1227,683 @@ S_anomaly =
 7. 单元测试和集成验证完成
 8. 不修改 agent 协议
 9. 不破坏现有编译和下发链路
+10. Dashboard 可展示自动策略状态卡
+11. `/microsegx/auto-policy` 自动策略工作台可用
+12. 网络规则页与网络活动页具备自动策略解释入口
 
 以上全部满足，才算本项目第一版完成。
+
+---
+
+## 15. 前端实施总原则
+
+### 15.1 前端范围与仓库工作根路径
+
+本项目自动策略前端必须直接集成到现有 Angular 管理台中，不允许另起一个独立前端项目。
+
+当前仓库根路径：
+
+- `/home/wushuang/MicroSegX`
+
+前端主工作路径：
+
+- `/home/wushuang/MicroSegX/manager/admin/webapp/websrc/app/routes/`
+- `/home/wushuang/MicroSegX/manager/admin/webapp/websrc/app/common/api/`
+- `/home/wushuang/MicroSegX/manager/admin/webapp/websrc/app/common/types/`
+- `/home/wushuang/MicroSegX/manager/admin/webapp/websrc/assets/i18n/`
+
+与构建和重部署直接相关的路径：
+
+- `/home/wushuang/MicroSegX/manager/admin/webapp/`
+- `/home/wushuang/MicroSegX/manager/`
+- `/home/wushuang/MicroSegX/docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md`
+
+### 15.2 前端最终形态
+
+前端最终采用：
+
+- 一个主页面
+- 三个嵌入点
+
+即：
+
+1. Dashboard 增加自动策略状态卡
+2. `MicroSegX` 菜单下新增 `/microsegx/auto-policy` 自动策略工作台
+3. 网络规则页增加自动规则筛选与解释能力
+4. 网络活动页增加自动策略视角侧栏
+
+### 15.3 前端必须遵守的边界
+
+1. 不新建 React/Vue/独立静态站
+2. 不新建第二套规则中心
+3. 不在前端实现规则判定逻辑
+4. 不做手工规则编辑器作为第一版重点
+5. 不做运行时模式切换按钮
+   - `legacy/shadow/enforce` 由后端环境变量与重启控制
+   - 前端只显示当前模式，不提供热切换
+6. 不重写网络活动图谱
+   - 只允许增加自动策略视角侧栏
+7. 不直接修改：
+   - `manager/admin/webapp/root/`
+   - `manager/admin/target/`
+
+### 15.4 前端在论文与演示中的职责
+
+前端不是论文的算法主体，但必须承担以下职责：
+
+1. 展示系统“正在工作”
+2. 展示系统“生成了什么”
+3. 展示系统“为什么这么生成”
+4. 展示系统“从观察到规则”的闭环过程
+
+因此前端关键词必须是：
+
+- 自动化
+- 状态感知
+- 可解释性
+- 生命周期
+
+---
+
+## 16. 前端信息架构最终版
+
+### 16.1 Dashboard 状态卡
+
+工作目标：
+
+- 让老师或评审一进系统就知道自动策略能力已接入并在运行
+- 不把 Dashboard 变成第二个规则页
+
+位置：
+
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.ts`
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.html`
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.scss`
+
+必须展示的字段：
+
+- 当前模式：`legacy / shadow / enforce`
+- 已观察事件数
+- 候选特征数
+- baseline 规则数
+- periodic 规则数
+- anomaly 规则数
+- 最近一次窗口处理时间
+- 最近一次 promotion 时间
+- 最近一次 aging / TTL 删除时间
+
+实现要求：
+
+- 通过 `MicrosegxHttpService.getAutoPolicyStatus()` 单独取数
+- 不要求把自动策略状态硬塞进现有 `overview` 响应
+- 卡片区块应与现有 `MicroSegX` 状态卡视觉一致
+
+禁止事项：
+
+- 不要在 Dashboard 放大表格
+- 不要在 Dashboard 放可编辑表单
+- 不要在 Dashboard 放复杂图表优先于状态卡
+
+### 16.2 自动策略工作台
+
+这是前端主页面，也是第一优先级页面。
+
+路由：
+
+- `/microsegx/auto-policy`
+
+建议中文名：
+
+- 自动策略工作台
+
+建议目录：
+
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/`
+
+页面职责：
+
+1. 展示全局运行状态
+2. 展示自动规则结果
+3. 展示候选特征观察过程
+4. 展示规则详情解释
+5. 展示最近生命周期事件流
+
+页面布局必须至少包含：
+
+1. Hero 区
+   - 当前模式
+   - 最近一次窗口处理时间
+   - 当前自动规则总数
+   - 最近变化摘要
+
+2. 指标卡区
+   - observed events
+   - candidate features
+   - baseline rules
+   - periodic rules
+   - anomaly rules
+   - pending promotion
+
+3. 主工作区
+   - `规则视图`
+   - `观察视图`
+
+4. 右侧详情面板
+   - 解释当前选中的规则或候选特征
+
+5. 底部或次级区域事件流
+   - 最近 20 条窗口处理、promotion、aging、TTL delete 事件
+
+### 16.3 网络规则页增强
+
+本页定位为：
+
+- 结果页
+- 对照页
+
+不是自动策略主页面。
+
+真正需要改的不是 `network-rules-page` 包装页，而是实际规则组件：
+
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.ts`
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.html`
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.scss`
+
+`network-rules-page` 本身只负责包裹：
+
+- `manager/admin/webapp/websrc/app/routes/network-rules-page/network-rules-page.component.ts`
+- `manager/admin/webapp/websrc/app/routes/network-rules-page/network-rules-page.component.html`
+
+必须增加的前端能力：
+
+1. 顶部筛选：
+   - 全部规则
+   - 自动规则
+   - 传统 learned
+   - 用户规则
+
+2. 当选中“自动规则”时，增加二级筛选：
+   - baseline
+   - periodic
+   - anomaly
+
+3. 表格新增列：
+   - 来源
+   - 分类
+   - 置信度 / 异常分
+   - 最近观察时间
+   - 过期时间
+   - 周期槽摘要
+
+4. 自动规则详情解释入口：
+   - 简版右侧抽屉或弹窗
+   - 并提供“在自动策略工作台中打开”跳转
+
+### 16.4 网络活动页自动策略视角
+
+本页定位为：
+
+- 流量过程解释页
+- 答辩展示页
+
+路径：
+
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.ts`
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.html`
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.scss`
+
+如需拆分新子组件，建议放在：
+
+- `manager/admin/webapp/websrc/app/routes/network-activities/auto-policy-inspector/`
+
+必须展示的信息：
+
+- 当前选中连线是否已被 observer 捕获
+- 归一化后的 feature key
+- 当前阶段：`observing / candidate / promoted / aging / expired`
+- 对应 rule id
+- 若为 periodic：当前时间是否在允许槽内
+- 若为 anomaly：触发了哪些 heuristic signals
+
+实现要求：
+
+- 只增加侧栏或辅助抽屉
+- 不重写原有图谱
+- 不影响现有 edge detail 的基础功能
+
+---
+
+## 17. 前端文件改动清单
+
+### 17.1 必须新增的文件
+
+第一版前端建议至少新增：
+
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/microsegx-auto-policy.component.ts`
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/microsegx-auto-policy.component.html`
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/microsegx-auto-policy.component.scss`
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/microsegx-auto-policy.module.ts`
+
+如页面复杂度上升，可继续新增，但必须保持在该目录内收敛：
+
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/partial/auto-policy-detail-drawer/`
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/partial/auto-policy-status-banner/`
+- `manager/admin/webapp/websrc/app/routes/microsegx-auto-policy/partial/auto-policy-event-timeline/`
+
+网络活动页若需单独组件，建议新增：
+
+- `manager/admin/webapp/websrc/app/routes/network-activities/auto-policy-inspector/auto-policy-inspector.component.ts`
+- `manager/admin/webapp/websrc/app/routes/network-activities/auto-policy-inspector/auto-policy-inspector.component.html`
+- `manager/admin/webapp/websrc/app/routes/network-activities/auto-policy-inspector/auto-policy-inspector.component.scss`
+
+### 17.2 必须修改的文件
+
+路由与菜单：
+
+- `manager/admin/webapp/websrc/app/routes/routes.ts`
+- `manager/admin/webapp/websrc/app/routes/menu.ts`
+- `manager/admin/webapp/websrc/app/frame/header/header.component.ts`
+
+Dashboard：
+
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.ts`
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.html`
+- `manager/admin/webapp/websrc/app/routes/dashboard/dashboard.component.scss`
+
+规则页：
+
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.ts`
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.html`
+- `manager/admin/webapp/websrc/app/routes/components/network-rules/network-rules.component.scss`
+
+如仅在包装页增加跳转入口，也可同步修改：
+
+- `manager/admin/webapp/websrc/app/routes/network-rules-page/network-rules-page.component.ts`
+
+网络活动页：
+
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.ts`
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.html`
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.component.scss`
+- `manager/admin/webapp/websrc/app/routes/network-activities/network-activities.module.ts`
+
+类型与 API：
+
+- `manager/admin/webapp/websrc/app/common/api/microsegx-http.service.ts`
+- `manager/admin/webapp/websrc/app/common/types/microsegx/microsegx.ts`
+- `manager/admin/webapp/websrc/app/common/types/index.ts`
+
+国际化：
+
+- `manager/admin/webapp/websrc/assets/i18n/zh_cn-common.json`
+- `manager/admin/webapp/websrc/assets/i18n/en-common.json`
+
+### 17.3 菜单与页面标题的明确要求
+
+当前 `menu.ts` 中 `MICROSEGX` 还是单一链接：
+
+- `/microsegx/port-exposure`
+
+第一版应改造成 `submenu` 结构，至少包含：
+
+1. 自动策略工作台
+   - `/microsegx/auto-policy`
+2. 端口管理
+   - `/microsegx/port-exposure`
+3. Ziti
+   - `/microsegx/ziti`
+
+同时必须在：
+
+- `manager/admin/webapp/websrc/app/frame/header/header.component.ts`
+
+新增路由标题映射：
+
+- `/microsegx/auto-policy`
+
+建议新增的 i18n key：
+
+- `MICROSEGX.AUTO_POLICY.TITLE`
+- `MICROSEGX.AUTO_POLICY.SUBTITLE`
+- `sidebar.nav.AUTO_POLICY`
+- `customUi.microsegx.autoPolicy.*`
+
+### 17.4 类型接口命名建议
+
+为减少命名漂移，建议在：
+
+- `manager/admin/webapp/websrc/app/common/types/microsegx/microsegx.ts`
+
+新增：
+
+- `MicrosegxAutoPolicyStatus`
+- `MicrosegxAutoPolicyRuleSummary`
+- `MicrosegxAutoPolicyRuleDetail`
+- `MicrosegxAutoPolicyFeature`
+- `MicrosegxAutoPolicyEvent`
+
+`MicrosegxOverview` 可保持原样，也可以在后续扩展增加：
+
+- `autoPolicy?: MicrosegxAutoPolicyStatus`
+
+但第一版 Dashboard 不强制依赖该字段。
+
+---
+
+## 18. 前端开发分阶段执行路线
+
+### Phase F0：前端脚手架与数据契约
+
+目标：
+
+- 先把路由、菜单、API、类型接好
+- 不先追求视觉完整
+
+必须完成：
+
+1. 新增 `/microsegx/auto-policy` 路由
+2. 新增菜单入口
+3. 新增 header 标题映射
+4. 在 `MicrosegxHttpService` 中增加：
+   - `getAutoPolicyStatus()`
+   - `getAutoPolicyRules()`
+   - `getAutoPolicyRuleDetail(id: number | string)`
+   - `getAutoPolicyFeatures()`
+   - `getAutoPolicyEvents()`（如后端已准备）
+5. 补齐前端类型定义
+6. 新建工作台页面空壳并能成功编译
+
+验收标准：
+
+- 页面能进入 `/microsegx/auto-policy`
+- 菜单可见
+- header 标题正确
+- `npm build` 通过
+
+### Phase F1：自动策略工作台主页面
+
+目标：
+
+- 先把最核心展示页做出来
+
+必须完成：
+
+1. Hero 区
+2. 指标卡区
+3. 规则视图 tab
+4. 观察视图 tab
+5. 右侧详情面板
+
+规则视图必须能展示：
+
+- baseline
+- periodic
+- anomaly
+
+观察视图必须能展示：
+
+- 候选特征
+- 阶段
+- 三类分数
+- 最近观察时间
+
+详情面板必须至少支持：
+
+- baseline 分数拆解
+- periodic 活跃槽摘要
+- anomaly reason codes
+
+验收标准：
+
+- 在只接 `status + rule + rule/:id + feature` 的情况下页面可完整显示
+- 没有任何写操作依赖
+- 页面可用于论文截图与演示
+
+### Phase F2：Dashboard 状态卡
+
+目标：
+
+- 在总览页体现系统正在工作
+
+必须完成：
+
+1. 在 Dashboard 添加自动策略状态卡区块
+2. 使用独立接口拉取自动策略状态
+3. 增加工作台跳转按钮
+
+验收标准：
+
+- Dashboard 进入后 3 秒内能看到状态卡
+- 接口失败时卡片优雅降级，不影响其他总览卡
+
+### Phase F3：网络规则页增强
+
+目标：
+
+- 让自动规则与 legacy learned 在既有规则页中可区分
+
+必须完成：
+
+1. 顶部规则来源筛选
+2. 自动规则分类筛选
+3. 表格新增自动策略列
+4. 自动规则解释入口
+
+关键注意：
+
+- 真正需要修改的是：
+  - `routes/components/network-rules/`
+- 不是只改 `network-rules-page` 包装页
+
+验收标准：
+
+- 规则页能够筛出自动规则
+- 能够区分 baseline / periodic / anomaly
+- 点开某条自动规则能看到解释信息
+
+### Phase F4：网络活动页自动策略侧栏
+
+目标：
+
+- 展示“流量如何变成规则”
+
+必须完成：
+
+1. 选中某条边后显示自动策略侧栏
+2. 根据 feature key 或关联数据展示当前阶段
+3. 显示规则映射关系
+4. 若为 periodic / anomaly，显示对应特殊解释
+
+验收标准：
+
+- 选中连线后，能看到自动策略状态，不破坏现有图谱功能
+
+### Phase F5：事件流、文案和收尾
+
+目标：
+
+- 补齐演示感和完成度
+
+可以完成：
+
+1. 最近事件流列表
+2. 模式 banner
+3. 空态、错误态、加载态
+4. i18n 文案收尾
+5. SCSS 收尾
+
+验收标准：
+
+- 页面不出现硬编码中文散落
+- 关键状态均有视觉反馈
+
+### 18.6 前端阶段顺序约束
+
+必须按如下顺序推进：
+
+1. `F0`
+2. `F1`
+3. `F2`
+4. `F3`
+5. `F4`
+6. `F5`
+
+如果时间不足，毕业论文前端最低可交付顺序是：
+
+1. `F0`
+2. `F1`
+3. `F2`
+
+这三步完成后，已经能形成完整的答辩主页面。
+
+---
+
+## 19. 前端页面字段与解释要求
+
+### 19.1 工作台规则视图字段
+
+每一行至少显示：
+
+- 分类
+- 源组
+- 目标组
+- 协议 / 端口 / 应用
+- 动作
+- 置信度或异常分
+- 状态
+- 最近观察时间
+- 创建时间
+- 过期时间
+
+### 19.2 工作台观察视图字段
+
+每一行至少显示：
+
+- feature key
+- 源组
+- 目标组
+- 协议 / 端口 / 应用
+- 当前阶段
+- baseline 分
+- periodic 分
+- anomaly 分
+- 连续窗口数
+- 历史窗口数
+- distinct days
+- 最后出现时间
+
+### 19.3 baseline 详情解释要求
+
+必须显示：
+
+- baseline score
+- baseline score breakdown
+- 连续窗口数
+- 历史窗口占比
+- workload coverage
+- distinct days
+- promotion reason
+- 当前是否已进入编译结果
+
+### 19.4 periodic 详情解释要求
+
+必须显示：
+
+- periodic score
+- active slots
+- active slot summary
+- 当前是否在允许槽内
+- 下次预计激活时间
+- 当前 compile_state
+
+### 19.5 anomaly 详情解释要求
+
+必须显示：
+
+- anomaly score
+- reason codes
+- anomaly signal breakdown
+- TTL 剩余时间
+- 当前是否仍处于 deny 生效期
+
+### 19.6 颜色与视觉约束
+
+必须保持以下语义颜色：
+
+- baseline：蓝绿系
+- periodic：青蓝或靛蓝
+- anomaly：橙红
+- legacy learned：灰色
+- shadow 模式：浅黄色提示条
+
+禁止：
+
+- 大面积纯红闪烁
+- 与现有控制台完全不同的设计语言
+- 为了炫技加入大量无意义动画
+
+---
+
+## 20. 前端构建、验证与打包要求
+
+### 20.1 前端源码改动后的固定验证顺序
+
+必须按以下顺序执行：
+
+1. Angular 生产构建
+2. manager jar 重建
+3. manager 镜像重打
+4. 本机 k3s 验证
+5. 纳入正式离线交付包
+
+详细命令和部署细节，必须遵循：
+
+- `docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md`
+
+### 20.2 最少验证命令
+
+```bash
+cd /home/wushuang/MicroSegX/manager/admin/webapp
+npm run build -- --configuration production
+
+cd /home/wushuang/MicroSegX/manager
+bash ./make_jar.sh
+```
+
+然后按前端工作流文档继续：
+
+- 重打 `manager` 镜像
+- 导入本机 `k3s`
+- 更新 `microsegx-manager-pod`
+- 校验 jar SHA256
+
+### 20.3 自动策略前端专项验收
+
+前端完成后至少手工验证：
+
+1. `/microsegx/auto-policy` 可访问
+2. Dashboard 可显示自动策略状态卡
+3. 规则页可筛选自动规则
+4. 网络活动页侧栏不会破坏原图谱
+5. 在 `legacy` 模式下页面优雅降级
+6. 在 `shadow` 模式下页面显示候选和解释，但不误显示“强制生效”
+7. 在 `enforce` 模式下页面能看到 active 规则和周期/TTL 状态
+
+### 20.4 给后续 coding agent 的强制提示
+
+后续 agent 在开始前端开发时，必须先明确：
+
+1. 自动策略前端不是单独项目，必须写入现有 Angular 管理台
+2. 主页面必须是 `/microsegx/auto-policy`
+3. 规则页增强必须改真实组件 `routes/components/network-rules/`
+4. 模式只能显示，不能做运行时切换按钮
+5. 任何页面改完后都必须按 `docs/FRONTEND-CHANGE-WORKFLOW.zh-CN.md` 重建验证
+
+如果后续 agent 只完成了页面静态代码、没有完成：
+
+- `npm build`
+- `make_jar.sh`
+- 镜像重打
+- 本地验证
+
+则该阶段不能视为完成。
