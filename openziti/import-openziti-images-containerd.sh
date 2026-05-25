@@ -7,6 +7,7 @@ IMAGE_ARCHIVE="${1:-${IMAGE_ARCHIVE:-${DEFAULT_IMAGE_ARCHIVE}}}"
 CONTAINERD_NAMESPACE="${CONTAINERD_NAMESPACE:-k8s.io}"
 CTR_BIN="${CTR_BIN:-ctr}"
 CONTAINERD_ADDRESS="${CONTAINERD_ADDRESS:-}"
+IMPORT_ALL_PLATFORMS="${IMPORT_ALL_PLATFORMS:-false}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -37,7 +38,12 @@ if [[ -n "${CONTAINERD_ADDRESS}" ]]; then
   CTR_ARGS=(-a "${CONTAINERD_ADDRESS}" "${CTR_ARGS[@]}")
 fi
 
-"${CTR_BIN}" "${CTR_ARGS[@]}" images import --all-platforms "${TMP_IMAGE_TAR}"
+CTR_IMPORT_ARGS=()
+if [[ "${IMPORT_ALL_PLATFORMS}" == "true" ]]; then
+  CTR_IMPORT_ARGS+=(--all-platforms)
+fi
+
+"${CTR_BIN}" "${CTR_ARGS[@]}" images import "${CTR_IMPORT_ARGS[@]}" "${TMP_IMAGE_TAR}"
 
 echo "OpenZiti images imported into containerd namespace ${CONTAINERD_NAMESPACE}."
 echo "Run this script on every Kubernetes node that may schedule cert-manager, trust-manager, ziti-controller, or ziti-router."

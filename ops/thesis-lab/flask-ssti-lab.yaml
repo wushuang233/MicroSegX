@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-ssti
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-ssti
+  template:
+    metadata:
+      labels:
+        app: flask-ssti
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: flask-ssti
+          image: docker.io/vulhub/flask:1.1.1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: app-src
+              mountPath: /app
+      volumes:
+        - name: app-src
+          hostPath:
+            path: /home/wushuang/test-py/flask-ssti/src
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-ssti-svc
+  namespace: web
+spec:
+  selector:
+    app: flask-ssti
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30083
+  type: NodePort

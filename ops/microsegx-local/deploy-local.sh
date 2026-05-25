@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MICROSEGX_PORT_AUDIT_BASE_URL="${MICROSEGX_PORT_AUDIT_BASE_URL:-http://k8s-port-audit.port-audit.svc.cluster.local:8080}"
-STACK_LOCAL_RUNTIME="${STACK_LOCAL_RUNTIME:-k3s}"
+STACK_LOCAL_RUNTIME="${STACK_LOCAL_RUNTIME:-containerd}"
 STACK_CONTAINERD_NAMESPACE="${STACK_CONTAINERD_NAMESPACE:-k8s.io}"
 K3S_IMPORT_HELPER_NAMESPACE="${K3S_IMPORT_HELPER_NAMESPACE:-default}"
 K3S_IMPORT_HELPER_NAME="${K3S_IMPORT_HELPER_NAME:-k3s-import-helper}"
@@ -119,10 +119,6 @@ EOF
     echo "==> Applying default local auto-policy shadow settings for single-node validation"
   fi
 
-  if [[ "${STACK_LOCAL_RUNTIME}" != "k3s" ]]; then
-    return
-  fi
-
   require_cmd kubectl
 
   local node_count
@@ -136,7 +132,7 @@ CONTROLLER_REPLICAS=1
 SCANNER_REPLICAS=1
 EOF
 
-  echo "==> Single-node k3s detected, overriding core/scanner replicas to 1 for local deployment"
+  echo "==> Single-node Kubernetes detected, overriding core/scanner replicas to 1 for local deployment"
 }
 
 ensure_k3s_import_helper() {
@@ -216,7 +212,7 @@ import_stack_image() {
       ;;
     *)
       echo "Unsupported STACK_LOCAL_RUNTIME: ${STACK_LOCAL_RUNTIME}" >&2
-      echo "Supported values: k3s, containerd, nerdctl, docker" >&2
+      echo "Supported values: containerd, nerdctl, docker, k3s" >&2
       exit 1
       ;;
   esac

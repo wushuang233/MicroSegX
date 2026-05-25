@@ -117,6 +117,7 @@ const CLUSConfigQuerySessionStore string = CLUSConfigStore + CFGEndpointQuerySes
 const CLUSConfigAutoPolicyStore string = CLUSConfigStore + CFGEndpointAutoPolicy + "/"
 const CLUSConfigAutoPolicyRuleStore string = CLUSConfigAutoPolicyStore + "rule/"
 const CLUSConfigAutoPolicyEngineKey string = CLUSConfigAutoPolicyStore + "engine"
+const CLUSConfigAutoPolicyFeatureStateKey string = CLUSConfigAutoPolicyStore + "feature_state"
 
 // !!! NOTE: When adding new config items, update the import/export list as well !!!
 

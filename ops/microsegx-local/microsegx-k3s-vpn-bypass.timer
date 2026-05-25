@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically restore MicroSegX k3s VPN bypass routes
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=30s
+AccuracySec=5s
+Unit=microsegx-k3s-vpn-bypass.service
+
+[Install]
+WantedBy=timers.target
+

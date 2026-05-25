@@ -87,7 +87,7 @@ cat >"${MICROSEGX_ARTIFACT_DIR}/README.md" <<EOF
 FULL_RELEASE_ENV=/abs/path/to/full-release.env bash ./deploy-local.sh
 \`\`\`
 
-部署完成后，如果目标机器是单机 k3s，本地离线模式建议再执行：
+部署完成后，如果你仍在旧 k3s 环境做兼容联调，才需要再执行：
 
 \`\`\`bash
 bash ./setup-k3s-offline-auto-import.sh
@@ -103,7 +103,7 @@ bash ./setup-k3s-offline-auto-import.sh
 - Core helm charts：\`core/bundle/charts/\`
 - Port-audit stack 镜像：\`port-audit-stack/k8s-port-audit-stack-${STACK_VERSION}.tar\`
 - Port-audit installer：\`port-audit-stack/openziti-stack-installer-local.yaml\`
-- 开机自动导入脚本：\`setup-k3s-offline-auto-import.sh\`
+- 旧 k3s 自动导入脚本：\`setup-k3s-offline-auto-import.sh\`
 EOF
 
 echo

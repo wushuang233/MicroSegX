@@ -1,0 +1,11 @@
+[Unit]
+Description=Keep MicroSegX kubeadm Kubernetes Pod/Service CIDRs out of Mihomo/Clash TUN routing
+After=network-online.target kubelet.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/wushuang/MicroSegX/ops/microsegx-local/vpn-bypass-k8s.sh
+
+[Install]
+WantedBy=multi-user.target

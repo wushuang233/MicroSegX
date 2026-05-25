@@ -1,0 +1,9 @@
+[Unit]
+Description=Keep MicroSegX k3s Pod/Service CIDRs out of Mihomo/Clash TUN routing
+After=network-online.target k3s.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/wushuang/MicroSegX/ops/microsegx-local/vpn-bypass-k3s.sh
+

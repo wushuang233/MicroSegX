@@ -1,0 +1,5 @@
+ARG BASE_IMAGE=local.microsegx/nv/controller:2026.04.05-microsegx-r1
+
+FROM ${BASE_IMAGE}
+
+COPY controller/controller /usr/local/bin/controller

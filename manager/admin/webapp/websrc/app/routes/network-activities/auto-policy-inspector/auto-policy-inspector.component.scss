@@ -1,0 +1,106 @@
+:host {
+  position: fixed;
+  top: 88px;
+  right: 22px;
+  z-index: 9;
+}
+
+.auto-policy-inspector {
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px 20px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+}
+
+.auto-policy-inspector__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auto-policy-inspector__eyebrow {
+  color: var(--saas-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.auto-policy-inspector__header h3 {
+  margin: 8px 0 0;
+  color: var(--saas-text);
+  font-size: 18px;
+}
+
+.auto-policy-inspector__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auto-policy-inspector__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auto-policy-inspector__content {
+  display: grid;
+  gap: 12px;
+}
+
+.auto-policy-inspector__content p,
+.auto-policy-inspector__reason span {
+  margin: 0;
+  color: var(--saas-text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.auto-policy-inspector__score {
+  display: grid;
+  gap: 6px;
+}
+
+.auto-policy-inspector__score span,
+.auto-policy-inspector__reason strong {
+  color: var(--saas-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auto-policy-inspector__reason {
+  display: grid;
+  gap: 6px;
+}
+
+.auto-policy-inspector__empty {
+  color: var(--saas-text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media screen and (max-width: 767px) {
+  :host {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+  }
+}

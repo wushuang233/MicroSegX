@@ -1,0 +1,93 @@
+<section class="auto-policy-inspector">
+  <div class="auto-policy-inspector__header">
+    <div>
+      <div class="auto-policy-inspector__eyebrow">
+        {{ 'MICROSEGX.AUTO_POLICY.TITLE' | translate }}
+      </div>
+      <h3>{{ 'MICROSEGX.AUTO_POLICY.OBSERVE_VIEW' | translate }}</h3>
+    </div>
+    <a mat-button color="primary" [routerLink]="['/microsegx/auto-policy']">
+      {{ 'MICROSEGX.AUTO_POLICY.OPEN_WORKSPACE' | translate }}
+    </a>
+  </div>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <ng-container *ngIf="!loading; else emptyInspector">
+    <div
+      class="auto-policy-inspector__chips"
+      *ngIf="feature || rule; else noMatch">
+      <span class="auto-policy-inspector__chip" *ngIf="feature">
+        {{ stageLabel(feature.stage) }}
+      </span>
+      <span class="auto-policy-inspector__chip" *ngIf="feature?.class_hint">
+        {{ classLabel(feature?.class_hint) }}
+      </span>
+      <span class="auto-policy-inspector__chip" *ngIf="rule">
+        #{{ rule.id }}
+      </span>
+      <span class="auto-policy-inspector__chip" *ngIf="rule?.compile_state">
+        {{ compileStateLabel(rule?.compile_state) }}
+      </span>
+    </div>
+
+    <div
+      class="auto-policy-inspector__content"
+      *ngIf="feature || rule; else noMatch">
+      <p *ngIf="feature">{{ feature.from }} -> {{ feature.to }}</p>
+      <p *ngIf="rule">
+        {{ actionLabel(rule.rule?.action) }} /
+        {{ rule.rule?.ports || (rule.rule?.applications || []).join(', ') }}
+      </p>
+
+      <div class="auto-policy-inspector__score" *ngIf="feature">
+        <span>{{ scoreLabel('baseline') }}</span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="scorePercentage(feature.baseline_score)"></mat-progress-bar>
+      </div>
+      <div class="auto-policy-inspector__score" *ngIf="feature">
+        <span>{{ scoreLabel('periodic') }}</span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="scorePercentage(feature.periodic_score)"></mat-progress-bar>
+      </div>
+      <div class="auto-policy-inspector__score" *ngIf="feature">
+        <span>{{ scoreLabel('anomaly') }}</span>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="scorePercentage(feature.anomaly_score)"></mat-progress-bar>
+      </div>
+
+      <div
+        class="auto-policy-inspector__reason"
+        *ngIf="feature?.reason_codes?.length || rule?.reason_codes?.length">
+        <strong>{{ 'MICROSEGX.AUTO_POLICY.REASON_CODES' | translate }}</strong>
+        <span>{{
+          (feature?.reason_codes || rule?.reason_codes || []).join(', ')
+        }}</span>
+      </div>
+
+      <div
+        class="auto-policy-inspector__reason"
+        *ngIf="rule?.periodic_slots?.length">
+        <strong>{{
+          'MICROSEGX.AUTO_POLICY.PERIODIC_SLOTS' | translate
+        }}</strong>
+        <span>{{ rule?.periodic_slots?.join(', ') }}</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noMatch>
+    <div class="auto-policy-inspector__empty">
+      {{ 'MICROSEGX.AUTO_POLICY.NO_EDGE_MATCH' | translate }}
+    </div>
+  </ng-template>
+
+  <ng-template #emptyInspector>
+    <div class="auto-policy-inspector__empty">
+      {{ 'general.LOADING' | translate }}
+    </div>
+  </ng-template>
+</section>

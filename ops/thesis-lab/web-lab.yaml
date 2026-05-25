@@ -1,0 +1,646 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thesis-lab-scripts
+  namespace: web
+data:
+  frontend.py: |
+    import json
+    import os
+    import time
+    import urllib.request
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    BACKEND_URL = os.getenv("BACKEND_URL", "http://backend.web.svc.cluster.local:8080/api/data")
+
+
+    class Handler(BaseHTTPRequestHandler):
+      def _write(self, status, body, content_type="text/html; charset=utf-8"):
+        encoded = body.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        try:
+          self.wfile.write(encoded)
+        except BrokenPipeError:
+          pass
+
+      def do_GET(self):
+        if self.path == "/healthz":
+          self._write(200, "ok", "text/plain; charset=utf-8")
+          return
+
+        try:
+          with urllib.request.urlopen(BACKEND_URL, timeout=5) as resp:
+            backend = json.loads(resp.read().decode("utf-8"))
+        except Exception as exc:
+          backend = {"status": "error", "error": str(exc)}
+
+        html = f"""
+        <html>
+          <head><title>AMS4Muc Frontend</title></head>
+          <body>
+            <h1>Frontend Service</h1>
+            <p>Generated at: {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <pre>{json.dumps(backend, ensure_ascii=False, indent=2)}</pre>
+          </body>
+        </html>
+        """
+        self._write(200, html)
+
+
+    if __name__ == "__main__":
+      ThreadingHTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
+  backend.py: |
+    import json
+    import os
+    import socket
+    import time
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    DB_HOST = os.getenv("DB_HOST", "db.web.svc.cluster.local")
+    DB_PORT = int(os.getenv("DB_PORT", "6379"))
+
+
+    def ping_db():
+      with socket.create_connection((DB_HOST, DB_PORT), timeout=5) as conn:
+        conn.sendall(b"PING\n")
+        return conn.recv(128).decode("utf-8", errors="replace").strip()
+
+
+    class Handler(BaseHTTPRequestHandler):
+      def _json(self, status, payload):
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        try:
+          self.wfile.write(body)
+        except BrokenPipeError:
+          pass
+
+      def do_GET(self):
+        if self.path == "/healthz":
+          self._json(200, {"status": "ok"})
+          return
+
+        try:
+          reply = ping_db()
+          payload = {
+            "service": "backend",
+            "path": self.path,
+            "db_reply": reply,
+            "time": time.strftime('%Y-%m-%d %H:%M:%S'),
+          }
+          self._json(200, payload)
+        except Exception as exc:
+          self._json(500, {"service": "backend", "error": str(exc)})
+
+
+    if __name__ == "__main__":
+      ThreadingHTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
+  db.py: |
+    import socket
+    import threading
+
+    HOST = "0.0.0.0"
+    PORT = 6379
+
+
+    def handle_client(conn):
+      try:
+        data = conn.recv(1024)
+        if data:
+          conn.sendall(b"PONG\n")
+      finally:
+        conn.close()
+
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+      server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      server.bind((HOST, PORT))
+      server.listen()
+      while True:
+        conn, _ = server.accept()
+        threading.Thread(target=handle_client, args=(conn,), daemon=True).start()
+  cron.py: |
+    import os
+    import socket
+
+    TARGET_HOST = os.getenv("CRON_TARGET_HOST", "db.web.svc.cluster.local")
+    TARGET_PORT = int(os.getenv("CRON_TARGET_PORT", "6379"))
+
+    with socket.create_connection((TARGET_HOST, TARGET_PORT), timeout=10) as conn:
+      conn.sendall(b"PING\\n")
+      print(conn.recv(128).decode("utf-8", errors="replace"))
+  attack.py: |
+    import socket
+
+    targets = [
+      ("nginx.web.svc.cluster.local", 80),
+      ("frontend.web.svc.cluster.local", 8080),
+      ("backend.web.svc.cluster.local", 8080),
+      ("db.web.svc.cluster.local", 6379),
+      ("flask-ssti-svc.web.svc.cluster.local", 8000),
+      ("microsegx-service-webui.microsegx.svc.cluster.local", 8443),
+      ("ziti-controller-client.openziti.svc.cluster.local", 31280),
+    ]
+
+    for host, port in targets:
+      try:
+        with socket.create_connection((host, port), timeout=3):
+          print(f"OPEN {host}:{port}")
+      except Exception as exc:
+        print(f"FAIL {host}:{port} -> {exc}")
+  banner_server.py: |
+    import argparse
+    import socket
+    import threading
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", type=int, required=True)
+    parser.add_argument("--banner", required=True)
+    args = parser.parse_args()
+
+    def handle_client(conn):
+      try:
+        conn.sendall((args.banner + "\r\n").encode("utf-8"))
+        conn.recv(1024)
+      except Exception:
+        pass
+      finally:
+        conn.close()
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+      server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      server.bind((args.host, args.port))
+      server.listen()
+      while True:
+        conn, _ = server.accept()
+        threading.Thread(target=handle_client, args=(conn,), daemon=True).start()
+  client_loop.py: |
+    import time
+    import urllib.request
+
+    TARGET = "http://nginx.web.svc.cluster.local/"
+
+    while True:
+      try:
+        with urllib.request.urlopen(TARGET, timeout=10) as resp:
+          print(resp.status, resp.read().decode("utf-8", errors="replace")[:200])
+      except Exception as exc:
+        print("ERR", exc)
+      time.sleep(20)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thesis-lab-nginx
+  namespace: web
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name _;
+
+      location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://frontend.web.svc.cluster.local:8080;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: nginx
+          image: docker.io/local/exp-nginx:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: thesis-lab-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: frontend
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/frontend.py"]
+          env:
+            - name: BACKEND_URL
+              value: http://backend.web.svc.cluster.local:8080/api/data
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: backend
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/backend.py"]
+          env:
+            - name: DB_HOST
+              value: db.web.svc.cluster.local
+            - name: DB_PORT
+              value: "6379"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: db
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/db.py"]
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: attacker
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: attacker
+  template:
+    metadata:
+      labels:
+        app: attacker
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      containers:
+        - name: attacker
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["sh", "-lc", "sleep infinity"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      containers:
+        - name: client
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/client_loop.py"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ftp
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ftp
+  template:
+    metadata:
+      labels:
+        app: ftp
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: ftp
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/banner_server.py", "--port", "2121", "--banner", "220 (vsftpd-lab)"]
+          ports:
+            - containerPort: 2121
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssh-demo
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssh-demo
+  template:
+    metadata:
+      labels:
+        app: ssh-demo
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: ssh-demo
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/banner_server.py", "--port", "2222", "--banner", "SSH-2.0-OpenSSH_9.6p1 demo"]
+          ports:
+            - containerPort: 2222
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: wushuang-vmware-virtual-platform
+      containers:
+        - name: echo
+          image: docker.io/local/k8s-port-audit:0.2.2-bylw
+          imagePullPolicy: Never
+          command: ["python", "/lab/banner_server.py", "--port", "9000", "--banner", "hello-from-echo"]
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: scripts
+              mountPath: /lab
+      volumes:
+        - name: scripts
+          configMap:
+            name: thesis-lab-scripts
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: periodic-sync
+  namespace: web
+spec:
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: periodic-sync
+        spec:
+          nodeSelector:
+            kubernetes.io/hostname: wushuang-vmware-virtual-platform
+          restartPolicy: Never
+          containers:
+            - name: periodic-sync
+              image: docker.io/local/k8s-port-audit:0.2.2-bylw
+              imagePullPolicy: Never
+              command: ["python", "/lab/cron.py"]
+              env:
+                - name: CRON_TARGET_HOST
+                  value: db.web.svc.cluster.local
+                - name: CRON_TARGET_PORT
+                  value: "6379"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /lab
+          volumes:
+            - name: scripts
+              configMap:
+                name: thesis-lab-scripts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: web
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: web
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30081
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: web
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30082
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: web
+spec:
+  selector:
+    app: db
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ftp
+  namespace: web
+spec:
+  selector:
+    app: ftp
+  ports:
+    - port: 21
+      targetPort: 2121
+      nodePort: 30084
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssh-demo
+  namespace: web
+spec:
+  selector:
+    app: ssh-demo
+  ports:
+    - port: 22
+      targetPort: 2222
+      nodePort: 30085
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: web
+spec:
+  selector:
+    app: echo
+  ports:
+    - port: 9000
+      targetPort: 9000
+      nodePort: 30086
+  type: NodePort

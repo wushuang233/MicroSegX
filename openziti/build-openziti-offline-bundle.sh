@@ -11,9 +11,9 @@ CHARTS_DIR="${BUNDLE_DIR}/charts"
 IMAGE_ARCHIVE="${BUNDLE_DIR}/openziti-images-${OPENZITI_BUNDLE_TAG}.tar.gz"
 ARCHIVE_PATH="${OUTPUT_ROOT}/openziti-k8s-offline-${OPENZITI_BUNDLE_TAG}.tar.gz"
 README_PATH="${BUNDLE_DIR}/README.md"
-K3S_CONTAINERD_SOCKET="${K3S_CONTAINERD_SOCKET:-/run/k3s/containerd/containerd.sock}"
-K3S_BIN_PATH="${K3S_BIN_PATH:-/usr/local/bin/k3s}"
-K3S_EXPORT_HELPER_IMAGE="${K3S_EXPORT_HELPER_IMAGE:-ubuntu:24.04}"
+CONTAINERD_ADDRESS="${CONTAINERD_ADDRESS:-/var/run/containerd/containerd.sock}"
+CTR_BIN_PATH="${CTR_BIN_PATH:-$(command -v ctr 2>/dev/null || true)}"
+CONTAINERD_EXPORT_HELPER_IMAGE="${CONTAINERD_EXPORT_HELPER_IMAGE:-ubuntu:24.04}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -46,23 +46,23 @@ source "${ENV_TEMPLATE}"
 : "${ZITI_CONTROLLER_CHART_VERSION:=3.1.1}"
 : "${ZITI_ROUTER_CHART_VERSION:=2.1.0}"
 
-load_image_via_k3s_containerd() {
+load_image_via_containerd() {
   local image="$1"
   local tmp_tar="$2"
 
-  if [[ ! -S "${K3S_CONTAINERD_SOCKET}" || ! -x "${K3S_BIN_PATH}" ]]; then
+  if [[ -z "${CTR_BIN_PATH}" || ! -S "${CONTAINERD_ADDRESS}" ]]; then
     return 1
   fi
 
   chmod 666 "${tmp_tar}"
 
   docker run --rm -u 0 \
-    -v "${K3S_CONTAINERD_SOCKET}:${K3S_CONTAINERD_SOCKET}" \
-    -v "${K3S_BIN_PATH}:${K3S_BIN_PATH}" \
+    -v "${CONTAINERD_ADDRESS}:${CONTAINERD_ADDRESS}" \
+    -v "${CTR_BIN_PATH}:${CTR_BIN_PATH}" \
     -v "$(dirname "${tmp_tar}"):/out" \
-    --entrypoint "${K3S_BIN_PATH}" \
-    "${K3S_EXPORT_HELPER_IMAGE}" \
-    ctr -a "${K3S_CONTAINERD_SOCKET}" -n k8s.io images export "/out/$(basename "${tmp_tar}")" "${image}" >/dev/null
+    --entrypoint "${CTR_BIN_PATH}" \
+    "${CONTAINERD_EXPORT_HELPER_IMAGE}" \
+    ctr -a "${CONTAINERD_ADDRESS}" -n k8s.io images export "/out/$(basename "${tmp_tar}")" "${image}" >/dev/null
 
   docker load -i "${tmp_tar}" >/dev/null
 }
@@ -87,7 +87,7 @@ while IFS= read -r image; do
     if ! docker image inspect "${image}" >/dev/null 2>&1; then
     if ! docker pull "${image}" >/dev/null 2>&1; then
       tmp_tar="$(mktemp -p "${BUNDLE_DIR}" image.XXXXXX.tar)"
-      if ! load_image_via_k3s_containerd "${image}" "${tmp_tar}"; then
+      if ! load_image_via_containerd "${image}" "${tmp_tar}"; then
         rm -f "${tmp_tar}"
         echo "Unable to obtain image: ${image}" >&2
         exit 1

@@ -1,0 +1,1445 @@
+<div class="screen-area auto-policy-page">
+  <section class="auto-policy-hero">
+    <div class="auto-policy-hero__content">
+      <div class="auto-policy-hero__eyebrow">
+        {{ 'MICROSEGX.AUTO_POLICY.HERO_EYEBROW' | translate }}
+      </div>
+      <h1 class="auto-policy-hero__title">
+        {{ 'MICROSEGX.AUTO_POLICY.TITLE' | translate }}
+      </h1>
+      <p class="auto-policy-hero__copy">
+        {{ 'MICROSEGX.AUTO_POLICY.HERO_COPY' | translate }}
+      </p>
+
+      <div class="auto-policy-hero__meta" *ngIf="status as currentStatus">
+        <span class="auto-policy-badge auto-policy-badge--mode">
+          {{ modeLabel(currentStatus.mode) }}
+        </span>
+        <span class="auto-policy-badge">
+          {{ totalAutoRules }}
+          {{ 'MICROSEGX.AUTO_POLICY.TOTAL_RULES' | translate }}
+        </span>
+        <span
+          class="auto-policy-badge"
+          *ngIf="currentStatus.last_window_processed_timestamp">
+          {{ 'MICROSEGX.AUTO_POLICY.LAST_WINDOW' | translate }}
+          {{
+            currentStatus.last_window_processed_timestamp * 1000
+              | date: 'yyyy-MM-dd HH:mm:ss'
+          }}
+        </span>
+        <span class="auto-policy-badge auto-policy-badge--muted">
+          {{ distinctDayUnitLabel() }}
+        </span>
+      </div>
+    </div>
+
+    <div class="auto-policy-hero__actions">
+      <button
+        *ngIf="!protectModeActive"
+        mat-flat-button
+        color="primary"
+        class="auto-policy-hero__button auto-policy-hero__button--protect"
+        [disabled]="modeSaving"
+        (click)="setMode('enforce')">
+        <em class="eos-icons icon-18 me-1">shield</em>
+        {{ 'MICROSEGX.AUTO_POLICY.ENABLE_PROTECT' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        class="auto-policy-hero__button auto-policy-hero__button--refresh"
+        (click)="refresh()">
+        <em class="eos-icons icon-18 me-1">refresh</em>
+        {{ 'network.REFRESH' | translate }}
+      </button>
+      <button
+        mat-stroked-button
+        class="auto-policy-hero__button"
+        (click)="openCreateRule()">
+        <em class="eos-icons icon-18 me-1">add</em>
+        {{ 'MICROSEGX.AUTO_POLICY.CREATE_RULE' | translate }}
+      </button>
+      <a
+        mat-stroked-button
+        class="auto-policy-hero__button"
+        [routerLink]="['/policy']">
+        <em class="eos-icons icon-18 me-1">policy</em>
+        {{ 'MICROSEGX.AUTO_POLICY.OPEN_RULES' | translate }}
+      </a>
+      <a
+        mat-stroked-button
+        class="auto-policy-hero__button"
+        [routerLink]="['/graph']">
+        <em class="eos-icons icon-18 me-1">monitoring</em>
+        {{ 'MICROSEGX.AUTO_POLICY.OPEN_ACTIVITY' | translate }}
+      </a>
+    </div>
+  </section>
+
+  <section class="auto-policy-mode-banner" *ngIf="status?.mode === 'shadow'">
+    <em class="eos-icons icon-18">visibility</em>
+    <span>{{ 'MICROSEGX.AUTO_POLICY.SHADOW_HINT' | translate }}</span>
+  </section>
+
+  <section class="auto-policy-mode-card" *ngIf="status as currentStatus">
+    <div>
+      <h2>{{ 'MICROSEGX.AUTO_POLICY.MODE_TITLE' | translate }}</h2>
+      <p>{{ modeDescription(modeControl) }}</p>
+      <small>{{ 'MICROSEGX.AUTO_POLICY.MODE_DESC' | translate }}</small>
+      <ol class="auto-policy-mode-card__steps">
+        <li>{{ 'MICROSEGX.AUTO_POLICY.ACTIVATION_STEP_LEARN' | translate }}</li>
+        <li>
+          {{ 'MICROSEGX.AUTO_POLICY.ACTIVATION_STEP_PROTECT' | translate }}
+        </li>
+        <li>
+          {{ 'MICROSEGX.AUTO_POLICY.ACTIVATION_STEP_RUNTIME' | translate }}
+        </li>
+      </ol>
+    </div>
+    <div class="auto-policy-mode-card__controls">
+      <mat-button-toggle-group
+        [value]="modeControl"
+        [disabled]="modeSaving"
+        (change)="setMode($event.value)">
+        <mat-button-toggle value="shadow">
+          {{ modeLabel('shadow') }}
+        </mat-button-toggle>
+        <mat-button-toggle value="enforce">
+          {{ modeLabel('enforce') }}
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="modeSaving"
+        (click)="setMode('enforce')">
+        {{
+          (protectModeActive
+            ? 'MICROSEGX.AUTO_POLICY.PROTECT_ENABLED'
+            : 'MICROSEGX.AUTO_POLICY.ENABLE_PROTECT'
+          ) | translate
+        }}
+      </button>
+      <span
+        class="auto-policy-badge auto-policy-badge--muted"
+        *ngIf="modeSaving">
+        {{ 'MICROSEGX.AUTO_POLICY.MODE_UPDATING' | translate }}
+      </span>
+    </div>
+  </section>
+
+  <section class="auto-policy-metrics" *ngIf="status as currentStatus">
+    <article class="auto-policy-metric-card">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.OBSERVED_EVENTS' | translate }}</span>
+      <strong>{{ currentStatus.observed_event_count }}</strong>
+    </article>
+    <article class="auto-policy-metric-card">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.CANDIDATE_FEATURES' | translate }}</span>
+      <strong>{{ currentStatus.feature_count }}</strong>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--path">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.ZERO_TRUST_FEATURES' | translate }}</span>
+      <strong>{{ currentStatus.zero_trust_feature_count || 0 }}</strong>
+      <small>
+        {{ 'MICROSEGX.AUTO_POLICY.ZERO_TRUST_RULES' | translate }}:
+        {{ currentStatus.zero_trust_rule_count || 0 }}
+      </small>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--path">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.INGRESS_FEATURES' | translate }}</span>
+      <strong>{{ currentStatus.ingress_feature_count || 0 }}</strong>
+      <small>
+        {{ 'MICROSEGX.AUTO_POLICY.INGRESS_RULES' | translate }}:
+        {{ currentStatus.ingress_rule_count || 0 }}
+      </small>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--path">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.DIRECT_FEATURES' | translate }}</span>
+      <strong>{{ currentStatus.direct_feature_count || 0 }}</strong>
+      <small>
+        {{ 'MICROSEGX.AUTO_POLICY.DIRECT_RULES' | translate }}:
+        {{ currentStatus.direct_rule_count || 0 }}
+      </small>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--baseline">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.BASELINE_RULES' | translate }}</span>
+      <strong>{{ currentStatus.baseline_rule_count }}</strong>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--periodic">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.PERIODIC_RULES' | translate }}</span>
+      <strong>{{ currentStatus.periodic_rule_count }}</strong>
+    </article>
+    <article class="auto-policy-metric-card auto-policy-metric-card--anomaly">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.ANOMALY_RULES' | translate }}</span>
+      <strong>{{ currentStatus.anomaly_rule_count }}</strong>
+    </article>
+    <article class="auto-policy-metric-card">
+      <span>{{ 'MICROSEGX.AUTO_POLICY.PENDING_PROMOTION' | translate }}</span>
+      <strong>{{ currentStatus.pending_promotion_count }}</strong>
+      <small>{{ latestChangeSummary }}</small>
+    </article>
+  </section>
+
+  <div class="auto-policy-state" *ngIf="loading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <div class="auto-policy-state auto-policy-state--error" *ngIf="error">
+    <em class="eos-icons icon-18">danger</em>
+    {{ error | translate }}
+  </div>
+
+  <section class="auto-policy-workspace">
+    <div class="auto-policy-main">
+      <div class="auto-policy-toolbar">
+        <mat-form-field appearance="outline" class="auto-policy-search">
+          <mat-label>{{ 'general.SEARCH' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchText"
+            (ngModelChange)="onSearchChanged()" />
+        </mat-form-field>
+      </div>
+
+      <mat-tab-group
+        [selectedIndex]="activeTabIndex"
+        (selectedIndexChange)="onTabChanged($event)">
+        <mat-tab
+          [label]="'MICROSEGX.AUTO_POLICY.EFFECTIVE_RULE_VIEW' | translate">
+          <div class="auto-policy-toolbar auto-policy-toolbar--tab">
+            <mat-button-toggle-group
+              [(ngModel)]="ruleClassFilter"
+              (ngModelChange)="onRuleFiltersChanged()">
+              <mat-button-toggle value="all">
+                {{ 'enum.ALL' | translate }}
+              </mat-button-toggle>
+              <mat-button-toggle value="baseline">{{
+                classLabel('baseline')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="periodic">{{
+                classLabel('periodic')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="anomaly">{{
+                classLabel('anomaly')
+              }}</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.NAMESPACE_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                multiple
+                [(ngModel)]="ruleNamespaceFilter"
+                (selectionChange)="onRuleNamespaceFilterChanged()">
+                <mat-select-trigger>
+                  {{ selectedNamespaceSummary(ruleNamespaceFilter) }}
+                </mat-select-trigger>
+                <mat-option
+                  *ngFor="
+                    let namespace of ruleNamespaceOptions;
+                    trackBy: trackByValue
+                  "
+                  [value]="namespace">
+                  {{ namespace }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>{{
+                'MICROSEGX.AUTO_POLICY.FILTER_EMPTY_ALL' | translate
+              }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.WORKLOAD_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                multiple
+                [(ngModel)]="ruleEndpointFilter"
+                (selectionChange)="onRuleFiltersChanged()">
+                <mat-select-trigger>
+                  {{
+                    selectedEndpointSummary(
+                      ruleEndpointFilter,
+                      ruleEndpointOptions
+                    )
+                  }}
+                </mat-select-trigger>
+                <mat-option
+                  *ngFor="
+                    let endpoint of ruleEndpointOptions;
+                    trackBy: trackByEndpoint
+                  "
+                  [value]="endpoint.key">
+                  <span class="auto-policy-option">
+                    <strong>{{ endpoint.workload }}</strong>
+                    <small>{{ endpoint.namespace }}</small>
+                  </span>
+                </mat-option>
+              </mat-select>
+              <mat-hint>{{
+                'MICROSEGX.AUTO_POLICY.WORKLOAD_FILTER_HINT' | translate
+              }}</mat-hint>
+            </mat-form-field>
+            <button
+              mat-stroked-button
+              class="auto-policy-filter-clear"
+              (click)="clearRuleObjectFilters()">
+              {{ 'MICROSEGX.AUTO_POLICY.CLEAR_OBJECT_FILTERS' | translate }}
+            </button>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.TRAFFIC_SOURCE_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                [(ngModel)]="ruleTrafficSourceFilter"
+                (selectionChange)="onRuleFiltersChanged()">
+                <mat-option value="all">{{
+                  'enum.ALL' | translate
+                }}</mat-option>
+                <mat-option
+                  *ngFor="
+                    let source of trafficSourceOptions;
+                    trackBy: trackByValue
+                  "
+                  [value]="source">
+                  {{ trafficSourceLabel(source) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.RUNTIME_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                [(ngModel)]="ruleRuntimeFilter"
+                (selectionChange)="onRuleFiltersChanged()">
+                <mat-option value="all">{{
+                  'enum.ALL' | translate
+                }}</mat-option>
+                <mat-option value="live">{{
+                  'MICROSEGX.AUTO_POLICY.LIVE_RULE' | translate
+                }}</mat-option>
+                <mat-option value="stale">{{
+                  'MICROSEGX.AUTO_POLICY.STALE_RULE' | translate
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div
+            class="auto-policy-toolbar auto-policy-toolbar--manage"
+            *ngIf="filteredRules.length > 0">
+            <mat-checkbox
+              [checked]="currentPageAllSelected"
+              (click)="toggleAllPagedRules($event)">
+              {{ 'MICROSEGX.AUTO_POLICY.SELECT_PAGE' | translate }}
+            </mat-checkbox>
+            <div class="auto-policy-rule-actions">
+              <span class="auto-policy-page-info">
+                {{ rulePageStart }}-{{ rulePageEnd }} /
+                {{ filteredRules.length }}
+              </span>
+              <button
+                mat-stroked-button
+                color="warn"
+                [disabled]="selectedRuleCount === 0 || deletingRules"
+                (click)="deleteSelectedRules()">
+                <em class="eos-icons icon-18 me-1">delete</em>
+                {{
+                  'MICROSEGX.AUTO_POLICY.DELETE_SELECTED'
+                    | translate
+                      : {
+                          count: selectedRuleCount,
+                        }
+                }}
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="auto-policy-list"
+            *ngIf="filteredRules.length > 0; else noRules">
+            <article
+              class="auto-policy-row auto-policy-row--rule"
+              *ngFor="let rule of pagedRules; trackBy: trackByRuleId"
+              [class.is-selected]="selectedRuleId === rule.id"
+              tabindex="0"
+              role="button"
+              (click)="selectRule(rule)"
+              (keydown.enter)="selectRule(rule)">
+              <mat-checkbox
+                class="auto-policy-row__select"
+                [checked]="isRuleSelected(rule)"
+                (click)="toggleRuleSelection(rule, $event)">
+              </mat-checkbox>
+              <div class="auto-policy-row__main">
+                <div class="auto-policy-row__title">
+                  <span class="auto-policy-chip" [attr.data-class]="rule.class">
+                    {{ classLabel(rule.class) }}
+                  </span>
+                  <span class="auto-policy-chip auto-policy-chip--muted">
+                    {{ ruleSourceLabel(rule) }}
+                  </span>
+                  <span
+                    class="auto-policy-chip auto-policy-chip--source"
+                    [attr.data-source]="trafficSourceValue(rule)">
+                    {{ trafficSourceLabel(rule.traffic_source) }}
+                  </span>
+                  <span
+                    class="auto-policy-chip auto-policy-chip--muted"
+                    *ngIf="rule.namespace">
+                    {{ rule.namespace }}
+                  </span>
+                  <span
+                    class="auto-policy-chip"
+                    [class.auto-policy-chip--warn]="rule.stale"
+                    [class.auto-policy-chip--muted]="!rule.stale">
+                    {{ ruleRuntimeLabel(rule) }}
+                  </span>
+                  <strong
+                    >{{ rule.rule?.from || '-' }} ->
+                    {{ rule.rule?.to || '-' }}</strong
+                  >
+                </div>
+                <div class="auto-policy-row__meta">
+                  <span>{{ actionLabel(rule.rule?.action) }}</span>
+                  <span *ngIf="rule.business">{{ rule.business }}</span>
+                  <span>{{ rulePortSummary(rule) }}</span>
+                  <span>{{ rule.confidence | number: '1.2-2' }}</span>
+                </div>
+              </div>
+              <div class="auto-policy-row__side">
+                <span class="auto-policy-row__state">{{
+                  compileStateLabel(rule.compile_state)
+                }}</span>
+                <small *ngIf="rule.last_observed_timestamp">
+                  {{
+                    rule.last_observed_timestamp * 1000
+                      | date: 'yyyy-MM-dd HH:mm'
+                  }}
+                </small>
+                <button
+                  mat-button
+                  color="primary"
+                  [disabled]="editSaving || !canEditRule(rule)"
+                  (click)="openEditRule(rule, $event)">
+                  {{ 'MICROSEGX.AUTO_POLICY.EDIT_RULE' | translate }}
+                </button>
+                <button
+                  mat-button
+                  color="warn"
+                  [disabled]="deletingRules"
+                  (click)="deleteRule(rule, $event)">
+                  {{ 'MICROSEGX.AUTO_POLICY.DELETE_RULE' | translate }}
+                </button>
+              </div>
+            </article>
+            <div class="auto-policy-pager" *ngIf="rulePageCount > 1">
+              <button
+                mat-stroked-button
+                [disabled]="rulePageIndex === 0"
+                (click)="previousRulePage()">
+                {{ 'MICROSEGX.AUTO_POLICY.PREVIOUS_PAGE' | translate }}
+              </button>
+              <span> {{ rulePageIndex + 1 }} / {{ rulePageCount }} </span>
+              <button
+                mat-stroked-button
+                [disabled]="rulePageIndex >= rulePageCount - 1"
+                (click)="nextRulePage()">
+                {{ 'MICROSEGX.AUTO_POLICY.NEXT_PAGE' | translate }}
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab [label]="'MICROSEGX.AUTO_POLICY.OBSERVE_VIEW' | translate">
+          <div class="auto-policy-toolbar auto-policy-toolbar--tab">
+            <mat-button-toggle-group
+              [(ngModel)]="featureStageFilter"
+              (ngModelChange)="onFeatureFiltersChanged()">
+              <mat-button-toggle value="all">{{
+                'enum.ALL' | translate
+              }}</mat-button-toggle>
+              <mat-button-toggle value="observing">{{
+                stageLabel('observing')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="candidate">{{
+                stageLabel('candidate')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="promoted">{{
+                stageLabel('promoted')
+              }}</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-button-toggle-group
+              [(ngModel)]="featureClassFilter"
+              (ngModelChange)="onFeatureFiltersChanged()">
+              <mat-button-toggle value="all">{{
+                'enum.ALL' | translate
+              }}</mat-button-toggle>
+              <mat-button-toggle value="baseline">{{
+                classLabel('baseline')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="periodic">{{
+                classLabel('periodic')
+              }}</mat-button-toggle>
+              <mat-button-toggle value="anomaly">{{
+                classLabel('anomaly')
+              }}</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.NAMESPACE_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                multiple
+                [(ngModel)]="featureNamespaceFilter"
+                (selectionChange)="onFeatureNamespaceFilterChanged()">
+                <mat-select-trigger>
+                  {{ selectedNamespaceSummary(featureNamespaceFilter) }}
+                </mat-select-trigger>
+                <mat-option
+                  *ngFor="
+                    let namespace of featureNamespaceOptions;
+                    trackBy: trackByValue
+                  "
+                  [value]="namespace">
+                  {{ namespace }}
+                </mat-option>
+              </mat-select>
+              <mat-hint>{{
+                'MICROSEGX.AUTO_POLICY.FILTER_EMPTY_ALL' | translate
+              }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.WORKLOAD_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                multiple
+                [(ngModel)]="featureEndpointFilter"
+                (selectionChange)="onFeatureFiltersChanged()">
+                <mat-select-trigger>
+                  {{
+                    selectedEndpointSummary(
+                      featureEndpointFilter,
+                      featureEndpointOptions
+                    )
+                  }}
+                </mat-select-trigger>
+                <mat-option
+                  *ngFor="
+                    let endpoint of featureEndpointOptions;
+                    trackBy: trackByEndpoint
+                  "
+                  [value]="endpoint.key">
+                  <span class="auto-policy-option">
+                    <strong>{{ endpoint.workload }}</strong>
+                    <small>{{ endpoint.namespace }}</small>
+                  </span>
+                </mat-option>
+              </mat-select>
+              <mat-hint>{{
+                'MICROSEGX.AUTO_POLICY.WORKLOAD_FILTER_HINT' | translate
+              }}</mat-hint>
+            </mat-form-field>
+            <button
+              mat-stroked-button
+              class="auto-policy-filter-clear"
+              (click)="clearFeatureObjectFilters()">
+              {{ 'MICROSEGX.AUTO_POLICY.CLEAR_OBJECT_FILTERS' | translate }}
+            </button>
+            <mat-form-field appearance="outline" class="auto-policy-filter">
+              <mat-label>{{
+                'MICROSEGX.AUTO_POLICY.TRAFFIC_SOURCE_FILTER' | translate
+              }}</mat-label>
+              <mat-select
+                [(ngModel)]="featureTrafficSourceFilter"
+                (selectionChange)="onFeatureFiltersChanged()">
+                <mat-option value="all">{{
+                  'enum.ALL' | translate
+                }}</mat-option>
+                <mat-option
+                  *ngFor="
+                    let source of trafficSourceOptions;
+                    trackBy: trackByValue
+                  "
+                  [value]="source">
+                  {{ trafficSourceLabel(source) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div
+            class="auto-policy-list"
+            *ngIf="filteredFeatures.length > 0; else noFeatures">
+            <div class="auto-policy-toolbar auto-policy-toolbar--manage">
+              <span class="auto-policy-page-info">
+                {{ featurePageStart }}-{{ featurePageEnd }} /
+                {{ filteredFeatures.length }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="auto-policy-row"
+              *ngFor="
+                let feature of visibleFeatures;
+                trackBy: trackByFeatureKey
+              "
+              [class.is-selected]="selectedFeatureKey === feature.feature_key"
+              (click)="selectFeature(feature)">
+              <div class="auto-policy-row__main">
+                <div class="auto-policy-row__title">
+                  <span
+                    class="auto-policy-chip"
+                    [attr.data-class]="feature.class_hint || 'observing'">
+                    {{ classLabel(feature.class_hint || feature.stage) }}
+                  </span>
+                  <span
+                    class="auto-policy-chip auto-policy-chip--source"
+                    [attr.data-source]="trafficSourceValue(feature)">
+                    {{ trafficSourceLabel(feature.traffic_source) }}
+                  </span>
+                  <span
+                    class="auto-policy-chip auto-policy-chip--muted"
+                    *ngIf="feature.namespace">
+                    {{ feature.namespace }}
+                  </span>
+                  <strong>{{ feature.from }} -> {{ feature.to }}</strong>
+                </div>
+                <div class="auto-policy-row__meta">
+                  <span>{{ stageLabel(feature.stage) }}</span>
+                  <span *ngIf="feature.business">{{ feature.business }}</span>
+                  <span>{{ featurePortSummary(feature) }}</span>
+                  <span
+                    >{{ scoreLabel('baseline') }}
+                    {{ feature.baseline_score | number: '1.2-2' }}</span
+                  >
+                  <span
+                    >{{ scoreLabel('periodic') }}
+                    {{ feature.periodic_score | number: '1.2-2' }}</span
+                  >
+                  <span
+                    >{{ scoreLabel('anomaly') }}
+                    {{ feature.anomaly_score | number: '1.2-2' }}</span
+                  >
+                </div>
+              </div>
+              <div class="auto-policy-row__side">
+                <span class="auto-policy-row__state">
+                  {{
+                    feature.related_rule_id
+                      ? '#' + feature.related_rule_id
+                      : actionLabel(feature.action_hint)
+                  }}
+                </span>
+                <small *ngIf="feature.last_seen_timestamp">
+                  {{
+                    feature.last_seen_timestamp * 1000
+                      | date: 'yyyy-MM-dd HH:mm'
+                  }}
+                </small>
+              </div>
+            </button>
+            <div class="auto-policy-pager" *ngIf="featurePageCount > 1">
+              <button
+                mat-stroked-button
+                [disabled]="featurePageIndex === 0"
+                (click)="previousFeaturePage()">
+                {{ 'MICROSEGX.AUTO_POLICY.PREVIOUS_PAGE' | translate }}
+              </button>
+              <span> {{ featurePageIndex + 1 }} / {{ featurePageCount }} </span>
+              <button
+                mat-stroked-button
+                [disabled]="featurePageIndex >= featurePageCount - 1"
+                (click)="nextFeaturePage()">
+                {{ 'MICROSEGX.AUTO_POLICY.NEXT_PAGE' | translate }}
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab [label]="'MICROSEGX.AUTO_POLICY.EVENT_STREAM' | translate">
+          <div
+            class="auto-policy-events"
+            *ngIf="visibleEvents.length > 0; else noEvents">
+            <article
+              class="auto-policy-event"
+              *ngFor="let event of visibleEvents; trackBy: trackByEvent">
+              <div class="auto-policy-event__time">
+                {{
+                  event.created_timestamp * 1000 | date: 'yyyy-MM-dd HH:mm:ss'
+                }}
+              </div>
+              <div class="auto-policy-event__body">
+                <div class="auto-policy-event__headline">
+                  <span
+                    class="auto-policy-chip"
+                    [attr.data-class]="event.event_class || event.event_type">
+                    {{ eventLabel(event) }}
+                  </span>
+                  <span
+                    class="auto-policy-chip auto-policy-chip--source"
+                    *ngIf="event.traffic_source"
+                    [attr.data-source]="event.traffic_source">
+                    {{ trafficSourceLabel(event.traffic_source) }}
+                  </span>
+                  <strong>{{ event.summary }}</strong>
+                </div>
+                <small *ngIf="event.target_key">{{
+                  event.display_key || event.target_key
+                }}</small>
+              </div>
+            </article>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+
+    <aside class="auto-policy-detail">
+      <ng-container *ngIf="detailMode === 'rule'; else featureDetail">
+        <ng-container *ngIf="selectedRuleDetail as detail; else emptyDetail">
+          <div class="auto-policy-detail__header">
+            <span class="auto-policy-chip" [attr.data-class]="detail.class">
+              {{ classLabel(detail.class) }}
+            </span>
+            <h2>
+              {{ detail.rule?.from || '-' }} -> {{ detail.rule?.to || '-' }}
+            </h2>
+            <p>
+              {{ actionLabel(detail.rule?.action) }} /
+              {{
+                detail.rule?.ports ||
+                  (detail.rule?.applications || []).join(', ')
+              }}
+            </p>
+            <div class="auto-policy-chip-list">
+              <span
+                class="auto-policy-chip auto-policy-chip--source"
+                [attr.data-source]="trafficSourceValue(detail)">
+                {{ trafficSourceLabel(detail.traffic_source) }}
+              </span>
+              <span class="auto-policy-chip auto-policy-chip--muted">
+                {{ detail.namespace || '-' }}
+              </span>
+              <span class="auto-policy-chip auto-policy-chip--muted">
+                {{ detail.business || '-' }}
+              </span>
+            </div>
+            <button
+              mat-stroked-button
+              color="primary"
+              class="auto-policy-detail__edit"
+              [disabled]="editSaving || !canEditRule(detail)"
+              (click)="openEditRule(detail, $event)">
+              {{ 'MICROSEGX.AUTO_POLICY.EDIT_RULE' | translate }}
+            </button>
+          </div>
+
+          <div class="auto-policy-detail__grid">
+            <div class="auto-policy-detail__metric">
+              <span>{{ 'MICROSEGX.AUTO_POLICY.CONFIDENCE' | translate }}</span>
+              <strong>{{ detail.confidence | number: '1.2-2' }}</strong>
+            </div>
+            <div class="auto-policy-detail__metric">
+              <span>{{
+                'MICROSEGX.AUTO_POLICY.COMPILE_STATE' | translate
+              }}</span>
+              <strong>{{ compileStateLabel(detail.compile_state) }}</strong>
+            </div>
+            <div class="auto-policy-detail__metric">
+              <span>{{
+                'MICROSEGX.AUTO_POLICY.LAST_OBSERVED' | translate
+              }}</span>
+              <strong *ngIf="detail.last_observed_timestamp; else noDetailTime">
+                {{
+                  detail.last_observed_timestamp * 1000
+                    | date: 'yyyy-MM-dd HH:mm:ss'
+                }}
+              </strong>
+            </div>
+            <div class="auto-policy-detail__metric">
+              <span>{{ 'MICROSEGX.AUTO_POLICY.EXPIRES_AT' | translate }}</span>
+              <strong *ngIf="detail.expires_timestamp; else noDetailTime">
+                {{
+                  detail.expires_timestamp * 1000 | date: 'yyyy-MM-dd HH:mm:ss'
+                }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="auto-policy-score-list">
+            <div class="auto-policy-score">
+              <header>{{ scoreLabel('baseline') }}</header>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="
+                  scorePercentage(detail.baseline_score)
+                "></mat-progress-bar>
+              <small>{{ detail.baseline_score | number: '1.2-2' }}</small>
+            </div>
+            <div class="auto-policy-score">
+              <header>{{ scoreLabel('periodic') }}</header>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="
+                  scorePercentage(detail.periodic_score)
+                "></mat-progress-bar>
+              <small>{{ detail.periodic_score | number: '1.2-2' }}</small>
+            </div>
+            <div class="auto-policy-score">
+              <header>{{ scoreLabel('anomaly') }}</header>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="
+                  scorePercentage(detail.anomaly_score)
+                "></mat-progress-bar>
+              <small>{{ detail.anomaly_score | number: '1.2-2' }}</small>
+            </div>
+          </div>
+
+          <div
+            class="auto-policy-detail__section"
+            *ngIf="detail.reason_codes?.length">
+            <h3>{{ 'MICROSEGX.AUTO_POLICY.REASON_CODES' | translate }}</h3>
+            <div class="auto-policy-chip-list">
+              <span
+                class="auto-policy-chip auto-policy-chip--muted"
+                *ngFor="let reason of detail.reason_codes">
+                {{ reason }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="auto-policy-detail__section"
+            *ngIf="detail.periodic_slots?.length">
+            <h3>{{ 'MICROSEGX.AUTO_POLICY.PERIODIC_SLOTS' | translate }}</h3>
+            <p>{{ slotSummary(detail.periodic_slots) }}</p>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #featureDetail>
+        <ng-container *ngIf="detailMode === 'feature'; else emptyDetail">
+          <ng-container *ngIf="selectedFeature as feature; else emptyDetail">
+            <div class="auto-policy-detail__header">
+              <span
+                class="auto-policy-chip"
+                [attr.data-class]="feature.class_hint || feature.stage">
+                {{ classLabel(feature.class_hint || feature.stage) }}
+              </span>
+              <h2>{{ feature.from }} -> {{ feature.to }}</h2>
+              <p>
+                {{ stageLabel(feature.stage) }} /
+                {{ actionLabel(feature.action_hint || 'observe') }}
+              </p>
+              <div class="auto-policy-chip-list">
+                <span
+                  class="auto-policy-chip auto-policy-chip--source"
+                  [attr.data-source]="trafficSourceValue(feature)">
+                  {{ trafficSourceLabel(feature.traffic_source) }}
+                </span>
+                <span class="auto-policy-chip auto-policy-chip--muted">
+                  {{ feature.namespace || '-' }}
+                </span>
+                <span class="auto-policy-chip auto-policy-chip--muted">
+                  {{ feature.business || '-' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="auto-policy-detail__grid">
+              <div class="auto-policy-detail__metric">
+                <span>{{
+                  'MICROSEGX.AUTO_POLICY.CONSECUTIVE_WINDOWS' | translate
+                }}</span>
+                <strong>{{ feature.consecutive_windows }}</strong>
+                <small>{{ windowUnitLabel() }}</small>
+              </div>
+              <div class="auto-policy-detail__metric">
+                <span>{{
+                  'MICROSEGX.AUTO_POLICY.HISTORICAL_WINDOWS' | translate
+                }}</span>
+                <strong>{{ feature.historical_windows }}</strong>
+                <small>{{ featureRetentionLabel() }}</small>
+              </div>
+              <div class="auto-policy-detail__metric">
+                <span>{{
+                  'MICROSEGX.AUTO_POLICY.DISTINCT_DAYS' | translate
+                }}</span>
+                <strong>{{ feature.distinct_days }}</strong>
+                <small>{{ distinctDayUnitLabel() }}</small>
+              </div>
+              <div class="auto-policy-detail__metric">
+                <span>{{
+                  'MICROSEGX.AUTO_POLICY.WORKLOAD_COVERAGE' | translate
+                }}</span>
+                <strong>{{ workloadCoverageLabel(feature) }}</strong>
+                <small>
+                  {{
+                    'MICROSEGX.AUTO_POLICY.WORKLOAD_COVERAGE_HINT' | translate
+                  }}
+                </small>
+                <small *ngIf="feature.source_group_size_estimated">
+                  {{ 'MICROSEGX.AUTO_POLICY.COVERAGE_ESTIMATED' | translate }}
+                </small>
+              </div>
+            </div>
+
+            <div class="auto-policy-score-list">
+              <div class="auto-policy-score">
+                <header>{{ scoreLabel('baseline') }}</header>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="
+                    scorePercentage(feature.baseline_score)
+                  "></mat-progress-bar>
+                <small>{{ feature.baseline_score | number: '1.2-2' }}</small>
+              </div>
+              <div class="auto-policy-score">
+                <header>{{ scoreLabel('periodic') }}</header>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="
+                    scorePercentage(feature.periodic_score)
+                  "></mat-progress-bar>
+                <small>{{ feature.periodic_score | number: '1.2-2' }}</small>
+              </div>
+              <div class="auto-policy-score">
+                <header>{{ scoreLabel('anomaly') }}</header>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="
+                    scorePercentage(feature.anomaly_score)
+                  "></mat-progress-bar>
+                <small>{{ feature.anomaly_score | number: '1.2-2' }}</small>
+              </div>
+            </div>
+
+            <div
+              class="auto-policy-detail__section"
+              *ngIf="feature.active_slots?.length">
+              <h3>{{ 'MICROSEGX.AUTO_POLICY.ACTIVE_SLOTS' | translate }}</h3>
+              <p>{{ slotSummary(feature.active_slots) }}</p>
+            </div>
+
+            <div
+              class="auto-policy-detail__section"
+              *ngIf="feature.reason_codes?.length">
+              <h3>{{ 'MICROSEGX.AUTO_POLICY.REASON_CODES' | translate }}</h3>
+              <div class="auto-policy-chip-list">
+                <span
+                  class="auto-policy-chip auto-policy-chip--muted"
+                  *ngFor="let reason of feature.reason_codes">
+                  {{ reason }}
+                </span>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-template>
+
+      <ng-template #emptyDetail>
+        <div class="auto-policy-empty">
+          <em class="eos-icons icon-24">insights</em>
+          <p>{{ 'MICROSEGX.AUTO_POLICY.SELECT_HINT' | translate }}</p>
+        </div>
+      </ng-template>
+    </aside>
+  </section>
+</div>
+
+<ng-template #noRules>
+  <div class="auto-policy-empty auto-policy-empty--actionable">
+    <em class="eos-icons icon-24">rule</em>
+    <h3>{{ 'MICROSEGX.AUTO_POLICY.NO_EFFECTIVE_RULES_TITLE' | translate }}</h3>
+    <p>
+      {{
+        (protectModeActive
+          ? 'MICROSEGX.AUTO_POLICY.NO_EFFECTIVE_RULES_PROTECT'
+          : 'MICROSEGX.AUTO_POLICY.NO_EFFECTIVE_RULES_SHADOW'
+        ) | translate
+      }}
+    </p>
+    <div class="auto-policy-empty__actions">
+      <button
+        mat-flat-button
+        color="primary"
+        *ngIf="!protectModeActive"
+        [disabled]="modeSaving"
+        (click)="setMode('enforce')">
+        {{ 'MICROSEGX.AUTO_POLICY.ENABLE_PROTECT' | translate }}
+      </button>
+      <button
+        mat-stroked-button
+        color="primary"
+        *ngIf="hasObservedCandidates"
+        (click)="openObservationView()">
+        {{ 'MICROSEGX.AUTO_POLICY.VIEW_CANDIDATES' | translate }}
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noFeatures>
+  <div class="auto-policy-empty">
+    <em class="eos-icons icon-24">lan</em>
+    <p>{{ 'general.NO_ROWS' | translate }}</p>
+  </div>
+</ng-template>
+
+<ng-template #noEvents>
+  <div class="auto-policy-empty">
+    <em class="eos-icons icon-24">schedule</em>
+    <p>{{ 'general.NO_ROWS' | translate }}</p>
+  </div>
+</ng-template>
+
+<ng-template #noDetailTime>
+  <strong>--</strong>
+</ng-template>
+
+<dialog
+  #autoPolicyEditDialog
+  class="auto-policy-modal-dialog"
+  *ngIf="editingRule || creatingRule"
+  (cancel)="onEditDialogCancel($event)"
+  (wheel)="blockModalBackdropWheel($event)"
+  (click)="closeEditRule()">
+  <section
+    class="auto-policy-modal"
+    (wheel)="$event.stopPropagation()"
+    (click)="$event.stopPropagation()">
+    <header class="auto-policy-modal__header">
+      <div>
+        <span class="auto-policy-chip" [attr.data-class]="editForm.class">
+          {{ classLabel(editForm.class) }}
+        </span>
+        <h2>
+          {{
+            (creatingRule
+              ? 'MICROSEGX.AUTO_POLICY.CREATE_RULE_TITLE'
+              : 'MICROSEGX.AUTO_POLICY.EDIT_RULE_TITLE'
+            ) | translate
+          }}
+        </h2>
+        <p *ngIf="editingRule as rule">
+          {{ rule.rule?.from || '-' }} -> {{ rule.rule?.to || '-' }}
+        </p>
+        <p *ngIf="creatingRule">
+          {{ 'MICROSEGX.AUTO_POLICY.CREATE_RULE_DESC' | translate }}
+        </p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        [disabled]="editSaving"
+        (click)="closeEditRule()">
+        <em class="eos-icons icon-18">close</em>
+      </button>
+    </header>
+
+    <div class="auto-policy-modal__body">
+      <div class="auto-policy-edit-sticky">
+        <div class="auto-policy-edit-help">
+          {{
+            (creatingRule
+              ? 'MICROSEGX.AUTO_POLICY.CREATE_RULE_HELP'
+              : 'MICROSEGX.AUTO_POLICY.EDIT_RULE_DESC'
+            ) | translate
+          }}
+        </div>
+
+        <mat-button-toggle-group
+          class="auto-policy-edit-class"
+          [(ngModel)]="editForm.class">
+          <mat-button-toggle value="baseline">
+            {{ classLabel('baseline') }}
+            <small>{{
+              'MICROSEGX.AUTO_POLICY.EDIT_BASELINE_DESC' | translate
+            }}</small>
+          </mat-button-toggle>
+          <mat-button-toggle value="periodic">
+            {{ classLabel('periodic') }}
+            <small>{{
+              'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_DESC' | translate
+            }}</small>
+          </mat-button-toggle>
+          <mat-button-toggle value="anomaly">
+            {{ classLabel('anomaly') }}
+            <small>{{
+              'MICROSEGX.AUTO_POLICY.EDIT_ANOMALY_DESC' | translate
+            }}</small>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <div
+          class="auto-policy-periodic-preview auto-policy-periodic-preview--sticky"
+          *ngIf="editForm.class === 'periodic'">
+          <strong>
+            {{ 'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_PREVIEW' | translate }}
+            <span>
+              {{
+                'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_PREVIEW_COUNT'
+                  | translate
+                    : {
+                        count: periodicSchedulePreviewCount(),
+                      }
+              }}
+            </span>
+          </strong>
+          <div class="auto-policy-periodic-preview__chips">
+            <span *ngFor="let item of periodicSchedulePreviewItems()">
+              {{ item }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auto-policy-edit-grid">
+        <ng-container *ngIf="creatingRule">
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'MICROSEGX.AUTO_POLICY.CREATE_FROM' | translate
+            }}</mat-label>
+            <input
+              matInput
+              [(ngModel)]="editForm.from"
+              [attr.list]="'autoPolicyCreateFromList'"
+              autocomplete="off"
+              spellcheck="false" />
+            <datalist id="autoPolicyCreateFromList">
+              <option
+                *ngFor="
+                  let endpoint of createEndpointOptions;
+                  trackBy: trackByEndpoint
+                "
+                [value]="endpoint.group"
+                [label]="endpoint.namespace + ' / ' + endpoint.workload">
+                {{ endpoint.namespace }} / {{ endpoint.workload }} /
+                {{ endpoint.group }}
+              </option>
+            </datalist>
+            <mat-hint *ngIf="createEndpointOptions.length === 0">{{
+              'MICROSEGX.AUTO_POLICY.CREATE_ENDPOINT_EMPTY' | translate
+            }}</mat-hint>
+            <mat-hint
+              *ngIf="
+                createEndpointOptions.length > 0 &&
+                createEndpointOptionLabel(editForm.from)
+              ">
+              {{ createEndpointOptionLabel(editForm.from) }}
+            </mat-hint>
+            <mat-hint
+              *ngIf="
+                createEndpointOptions.length > 0 &&
+                !createEndpointOptionLabel(editForm.from)
+              ">
+              {{ 'MICROSEGX.AUTO_POLICY.CREATE_ENDPOINT_HINT' | translate }}
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'MICROSEGX.AUTO_POLICY.CREATE_TO' | translate
+            }}</mat-label>
+            <input
+              matInput
+              [(ngModel)]="editForm.to"
+              [attr.list]="'autoPolicyCreateToList'"
+              autocomplete="off"
+              spellcheck="false" />
+            <datalist id="autoPolicyCreateToList">
+              <option
+                *ngFor="
+                  let endpoint of createEndpointOptions;
+                  trackBy: trackByEndpoint
+                "
+                [value]="endpoint.group"
+                [label]="endpoint.namespace + ' / ' + endpoint.workload">
+                {{ endpoint.namespace }} / {{ endpoint.workload }} /
+                {{ endpoint.group }}
+              </option>
+            </datalist>
+            <mat-hint *ngIf="createEndpointOptions.length === 0">{{
+              'MICROSEGX.AUTO_POLICY.CREATE_ENDPOINT_EMPTY' | translate
+            }}</mat-hint>
+            <mat-hint
+              *ngIf="
+                createEndpointOptions.length > 0 &&
+                createEndpointOptionLabel(editForm.to)
+              ">
+              {{ createEndpointOptionLabel(editForm.to) }}
+            </mat-hint>
+            <mat-hint
+              *ngIf="
+                createEndpointOptions.length > 0 &&
+                !createEndpointOptionLabel(editForm.to)
+              ">
+              {{ 'MICROSEGX.AUTO_POLICY.CREATE_ENDPOINT_HINT' | translate }}
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'MICROSEGX.AUTO_POLICY.CREATE_PORTS' | translate
+            }}</mat-label>
+            <input
+              matInput
+              [(ngModel)]="editForm.ports"
+              placeholder="tcp/443,udp/53,any" />
+            <mat-hint>{{
+              'MICROSEGX.AUTO_POLICY.CREATE_PORTS_HINT' | translate
+            }}</mat-hint>
+          </mat-form-field>
+        </ng-container>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{
+            'MICROSEGX.AUTO_POLICY.EDIT_CONFIDENCE' | translate
+          }}</mat-label>
+          <input
+            matInput
+            type="number"
+            min="0"
+            max="1"
+            step="0.01"
+            [(ngModel)]="editForm.confidence" />
+        </mat-form-field>
+
+        <div
+          class="auto-policy-periodic-editor"
+          *ngIf="editForm.class === 'periodic'">
+          <header>
+            <div>
+              <h3>
+                {{ 'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_SCHEDULE' | translate }}
+              </h3>
+              <p>{{ periodicScheduleHelp() }}</p>
+            </div>
+            <span class="auto-policy-badge auto-policy-badge--muted">
+              {{
+                'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_SLOT_SIZE'
+                  | translate: { duration: periodicSlotDurationLabel() }
+              }}
+            </span>
+          </header>
+
+          <div class="auto-policy-periodic-blocks">
+            <section
+              class="auto-policy-periodic-block"
+              *ngFor="
+                let block of periodicScheduleBlocks();
+                let blockIndex = index;
+                trackBy: trackByPeriodicScheduleBlock
+              ">
+              <div class="auto-policy-periodic-block__header">
+                <strong>
+                  {{
+                    'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_BLOCK_TITLE'
+                      | translate: { index: blockIndex + 1 }
+                  }}
+                </strong>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  color="warn"
+                  *ngIf="periodicScheduleBlocks().length > 1"
+                  (click)="removePeriodicScheduleBlock(blockIndex)">
+                  {{
+                    'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_REMOVE_BLOCK'
+                      | translate
+                  }}
+                </button>
+              </div>
+              <p class="auto-policy-periodic-block__help">
+                {{
+                  'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_BLOCK_HELP' | translate
+                }}
+              </p>
+
+              <div class="auto-policy-periodic-presets">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="setPeriodicDays('all', blockIndex)">
+                  {{ 'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_ALL' | translate }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  *ngIf="!isExperimentSchedule()"
+                  (click)="setPeriodicDays('workday', blockIndex)">
+                  {{
+                    'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_WORKDAY' | translate
+                  }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  *ngIf="!isExperimentSchedule()"
+                  (click)="setPeriodicDays('weekend', blockIndex)">
+                  {{
+                    'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_WEEKEND' | translate
+                  }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="setPeriodicDays('clear', blockIndex)">
+                  {{ 'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_CLEAR' | translate }}
+                </button>
+              </div>
+
+              <div class="auto-policy-periodic-days">
+                <button
+                  type="button"
+                  class="auto-policy-periodic-day"
+                  *ngFor="
+                    let day of periodicDayOptions();
+                    trackBy: trackByPeriodicOption
+                  "
+                  [class.auto-policy-periodic-day--active]="
+                    isPeriodicDaySelected(day.value, blockIndex)
+                  "
+                  (click)="togglePeriodicDay(day.value, $event, blockIndex)">
+                  {{ day.label }}
+                </button>
+              </div>
+
+              <div
+                class="auto-policy-periodic-ranges"
+                *ngIf="!isExperimentSchedule()">
+                <div
+                  class="auto-policy-periodic-range"
+                  *ngFor="
+                    let range of block.ranges;
+                    let index = index;
+                    trackBy: trackByPeriodicRange
+                  ">
+                  <div class="auto-policy-periodic-range__fields">
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{
+                        'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_START' | translate
+                      }}</mat-label>
+                      <input
+                        matInput
+                        type="time"
+                        [step]="periodicInputStepSeconds()"
+                        [(ngModel)]="range.startTime" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{
+                        'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_END' | translate
+                      }}</mat-label>
+                      <input
+                        matInput
+                        type="time"
+                        [step]="periodicInputStepSeconds()"
+                        [(ngModel)]="range.endTime" />
+                    </mat-form-field>
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      color="warn"
+                      *ngIf="block.ranges.length > 1"
+                      (click)="removePeriodicRange(blockIndex, index)">
+                      {{
+                        'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_REMOVE_RANGE'
+                          | translate
+                      }}
+                    </button>
+                  </div>
+                  <small
+                    class="auto-policy-periodic-range__error"
+                    *ngIf="periodicRangeError(range)">
+                    {{ periodicRangeError(range) }}
+                  </small>
+                </div>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="auto-policy-periodic-add-range"
+                  (click)="addPeriodicRange(blockIndex)">
+                  {{
+                    'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_ADD_RANGE' | translate
+                  }}
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <button
+            mat-stroked-button
+            type="button"
+            class="auto-policy-periodic-add-block"
+            (click)="addPeriodicScheduleBlock()">
+            {{ 'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_ADD_BLOCK' | translate }}
+          </button>
+
+          <div class="auto-policy-periodic-preview">
+            <strong>{{
+              'MICROSEGX.AUTO_POLICY.EDIT_PERIODIC_PREVIEW' | translate
+            }}</strong>
+            <div class="auto-policy-periodic-preview__chips">
+              <span *ngFor="let item of periodicSchedulePreviewItems()">
+                {{ item }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <mat-form-field
+          appearance="outline"
+          *ngIf="editForm.class === 'anomaly'">
+          <mat-label>{{
+            'MICROSEGX.AUTO_POLICY.EDIT_TTL_MINUTES' | translate
+          }}</mat-label>
+          <input
+            matInput
+            type="number"
+            min="1"
+            step="1"
+            [(ngModel)]="editForm.ttlMinutes" />
+          <mat-hint>{{
+            'MICROSEGX.AUTO_POLICY.EDIT_TTL_HINT' | translate
+          }}</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{
+            'MICROSEGX.AUTO_POLICY.EDIT_REASON' | translate
+          }}</mat-label>
+          <input matInput [(ngModel)]="editForm.reason" />
+        </mat-form-field>
+      </div>
+
+      <div class="auto-policy-state auto-policy-state--error" *ngIf="editError">
+        <em class="eos-icons icon-18">danger</em>
+        {{ editError | translate }}
+      </div>
+    </div>
+
+    <footer class="auto-policy-modal__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="editSaving"
+        (click)="closeEditRule()">
+        {{ 'MICROSEGX.AUTO_POLICY.EDIT_CANCEL' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="editSaving"
+        (click)="submitEditRule()">
+        {{
+          (creatingRule
+            ? 'MICROSEGX.AUTO_POLICY.CREATE_SAVE'
+            : 'MICROSEGX.AUTO_POLICY.EDIT_SAVE'
+          ) | translate
+        }}
+      </button>
+    </footer>
+  </section>
+</dialog>

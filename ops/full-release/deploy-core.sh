@@ -94,7 +94,7 @@ patch_runtime_controller_addresses() {
     api_ip=$(wait_for_service_ip "${namespace}" "microsegx-svc-controller-api" 180 || true)
   fi
   if [[ -z "${cluster_join_addr}" ]]; then
-    cluster_join_addr="microsegx-svc-controller.${namespace}.svc.cluster.local"
+    cluster_join_addr="microsegx-svc-controller.${namespace}.svc.cluster.local."
   fi
 
   if [[ -z "${api_ip}" && -z "${cluster_join_addr}" ]]; then
@@ -246,16 +246,12 @@ fi
 CONTROLLER_REPLICAS=${CONTROLLER_REPLICAS:-1}
 
 if [[ -z "${CONTROLLER_PVC_ENABLED:-}" ]]; then
-  if [[ "${DEPLOY_MODE}" == "local" && "${K3S_ENABLED}" == "true" ]]; then
-    CONTROLLER_PVC_ENABLED=true
-  else
-    CONTROLLER_PVC_ENABLED=false
-  fi
+  CONTROLLER_PVC_ENABLED=$([[ "${DEPLOY_MODE}" == "local" ]] && echo true || echo false)
 fi
 
 if [[ "${CONTROLLER_PVC_ENABLED}" == "true" ]]; then
   if [[ -z "${CONTROLLER_PVC_ACCESS_MODE:-}" ]]; then
-    if [[ "${DEPLOY_MODE}" == "local" && "${K3S_ENABLED}" == "true" && "${CONTROLLER_REPLICAS}" == "1" ]]; then
+    if [[ "${DEPLOY_MODE}" == "local" && "${CONTROLLER_REPLICAS}" == "1" ]]; then
       CONTROLLER_PVC_ACCESS_MODE=ReadWriteOnce
     else
       CONTROLLER_PVC_ACCESS_MODE=ReadWriteMany
@@ -334,10 +330,18 @@ if [[ "${MIRROR_UPDATER:-true}" != "true" ]]; then
   UPDATER_REGISTRY=docker.io
   UPDATER_REPOSITORY=microsegx/updater
 fi
+UPDATER_TAG_VALUE=${UPDATER_TAG:-0.0.9}
+LOCAL_UPDATER_IMAGE_MODE=${LOCAL_UPDATER_IMAGE_MODE:-}
 
 IMAGE_PULL_POLICY=IfNotPresent
 if [[ "${DEPLOY_MODE}" == "local" ]]; then
   IMAGE_PULL_POLICY=Never
+  LOCAL_UPDATER_IMAGE_MODE=${LOCAL_UPDATER_IMAGE_MODE:-controller}
+  if [[ "${LOCAL_UPDATER_IMAGE_MODE}" == "controller" ]]; then
+    UPDATER_REGISTRY=${REGISTRY}
+    UPDATER_REPOSITORY=${IMAGE_NAMESPACE}/controller
+    UPDATER_TAG_VALUE=${CORE_TAG}
+  fi
 fi
 
 if [[ -n "${KUBECONFIG:-}" ]]; then
@@ -443,7 +447,7 @@ cve:
       registry: ${UPDATER_REGISTRY}
       repository: ${UPDATER_REPOSITORY}
       imagePullPolicy: ${IMAGE_PULL_POLICY}
-      tag: ${UPDATER_TAG:-0.0.9}
+      tag: ${UPDATER_TAG_VALUE}
   scanner:
     replicas: ${SCANNER_REPLICAS:-1}
     image:

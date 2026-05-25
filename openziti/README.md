@@ -44,7 +44,7 @@
 9. Helm 安装 `ziti-router`
 
 这是一个推断，但证据很强，因为它和仓库里的旧脚本
-`k8s-node-surface/scripts/deploy-openziti-k3s.sh`
+`openziti/deploy-openziti-k8s.sh`
 在 release 名、chart 版本、NodePort、PVC 名、trust namespace、router enrollment secret 名这些关键点上全部一致。
 
 ## 2. 当前集群的关键资源

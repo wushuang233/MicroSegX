@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodically restore MicroSegX kubeadm Kubernetes VPN bypass routes
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Unit=microsegx-k8s-vpn-bypass.service
+
+[Install]
+WantedBy=timers.target

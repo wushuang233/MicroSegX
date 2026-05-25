@@ -1,0 +1,2 @@
+FROM be21fbc828e1
+COPY k8s-node-surface/k8s_port_audit/api/ziti_router_k8s.py /app/k8s_port_audit/api/ziti_router_k8s.py
